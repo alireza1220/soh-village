@@ -487,6 +487,66 @@ export const sections: Section[] = [
       ] },
     ],
   },
+  {
+    slug: "needs",
+    title: { fa: "نیازمندی‌ها", en: "Requests" },
+    intro: {
+      fa: "آنچه لازم دارید از مردم سُه بخواهید، و آنچه دارید پیشنهاد دهید.",
+      en: "Ask the village for what you need, and offer what you have.",
+    },
+    blocks: [
+      { t: "p", text: { fa: "این صفحه مثل تابلوی نیازمندی‌های روستاست. نیاز یا پیشنهاد خود را در فرم پایین بنویسید و متن آماده را بفرستید. آگهی‌ها پیش از انتشار بررسی می‌شوند و شماره‌ی تماس فقط با اجازه‌ی خودتان نوشته می‌شود.", en: "This page works like the village notice board. Write your need or offer in the form below and send the finished text. Posts are checked before they are published, and a phone number is shown only with your permission." } },
+      { t: "tags", label: { fa: "نمونه‌ی نیازمندی‌ها", en: "Examples of what people ask for" }, items: [
+        { fa: "اتاق یا خانه برای اقامت", en: "A room or house to stay" },
+        { fa: "راننده یا وسیله‌ی رفت‌وآمد", en: "A driver or a ride" },
+        { fa: "بنّا، نجار یا تعمیرکار", en: "A mason, carpenter or repairer" },
+        { fa: "کارگر برای باغ و برداشت", en: "Workers for the orchard or harvest" },
+        { fa: "سیب، گردو، لبنیات و فرآورده‌ی محلی", en: "Apples, walnuts, dairy and local products" },
+        { fa: "قالی و صنایع دستی", en: "Carpets and crafts" },
+        { fa: "راهنمای گردشگری", en: "A local guide" },
+        { fa: "کمک در کارهای اداری و ترجمه", en: "Help with paperwork and translation" },
+        { fa: "ابزار و وسایل دست‌دوم", en: "Tools and second-hand equipment" },
+      ] },
+      { t: "table",
+        head: [{ fa: "نوع", en: "Type" }, { fa: "نیاز یا پیشنهاد", en: "Request or offer" }, { fa: "منطقه", en: "Area" }, { fa: "تاریخ", en: "Date" }, { fa: "تماس", en: "Contact" }],
+        rows: [],
+        empty: { fa: "هنوز آگهی‌ای منتشر نشده است. اولین نفر باشید.", en: "No posts published yet. Be the first." } },
+      { t: "notice", title: { fa: "قواعد پیشنهادی (پیش‌نویس)", en: "Draft rules" }, items: [
+        { fa: "این سایت پرداخت را نگه نمی‌دارد و طرفین را تأیید نمی‌کند. پیش از پرداخت یا سفر، مطمئن شوید.", en: "This site holds no payments and does not verify the people. Make sure before you pay or travel." },
+        { fa: "شماره‌ی تماس و نشانی فقط با رضایت صاحبش نوشته می‌شود.", en: "Phone numbers and addresses are shown only with the owner's consent." },
+        { fa: "هر آگهی پس از ۳۰ روز برداشته می‌شود، مگر تمدید شود.", en: "Each post is removed after 30 days unless it is renewed." },
+        { fa: "آگهی‌های خلاف قانون، توهین‌آمیز یا فریبنده منتشر نمی‌شود.", en: "Posts that are illegal, abusive or misleading are not published." },
+      ] },
+    ],
+  },
+  {
+    slug: "careers",
+    title: { fa: "فرصت‌های شغلی", en: "Careers" },
+    intro: {
+      fa: "کار در سُه و اطراف آن، و کسانی که دنبال کارند.",
+      en: "Work in and around Soh, and people looking for work.",
+    },
+    blocks: [
+      { t: "p", text: { fa: "کشاورزی و دامداری پایه‌ی کار روستاست (بر پایه‌ی یک بررسی ۱۳۸۶، حدود ۸۶٪ اهالی در کشاورزی کار می‌کردند). گردشگری، مرمت بناهای تاریخی و صنایع دستی زمینه‌های رشدند. اگر دنبال کار هستید یا کارگر و همکار می‌خواهید، فرم پایین را پر کنید.", en: "Farming and livestock are the base of work in the village (in a 2007 to 2008 survey about 86% of residents worked in agriculture). Tourism, heritage restoration and crafts are the areas that could grow. If you are looking for work, or you need workers or partners, fill in the form below." } },
+      { t: "cards", items: [
+        { title: { fa: "باغ و کشاورزی", en: "Orchards and farming" }, text: { fa: "سیب، گردو، بادام و غلات. کار فصلی برای هرس، آبیاری و برداشت.", en: "Apples, walnuts, almonds and grain. Seasonal work for pruning, irrigation and harvest." }, status: "reported", source: "FA Wikipedia, Kojaro" },
+        { title: { fa: "قالی‌بافی و صنایع دستی", en: "Carpets and crafts" }, text: { fa: "قالی جوشقانی، گیوه، چادرشب، گلدوزی و سبد بید؛ فروش در بازار اصفهان و تهران.", en: "Joshaqani carpets, giveh, chadorshab, embroidery and willow baskets, sold in the Isfahan and Tehran bazaars." }, status: "reported", source: "Kojaro" },
+        { title: { fa: "گردشگری و راهنمایی", en: "Tourism and guiding" }, text: { fa: "سُه از روستاهای هدف گردشگری شهرستان نام برده شده و جایی برای اقامت ندارد؛ بوم‌گردی و راهنمای محلی فرصت‌اند.", en: "Soh is named a tourism target village of the county and has no lodging, so eco-lodges and local guides are an opening." }, status: "reported", source: "Kojaro news (Dec 2022)", href: "https://www.kojaro.com/news/194447-tourist-attractions-shahinshahr-revived/" },
+        { title: { fa: "مرمت و ساخت‌وساز", en: "Restoration and building" }, text: { fa: "کاروانسرا و حمام با کمک مردم مرمت شده‌اند. بنّا و نجار آشنا با معماری خشتی و سنگی لازم است.", en: "The caravanserai and bath were restored with local help. Masons and carpenters who know adobe and stone building are needed." }, status: "reported", source: "Kojaro" },
+        { title: { fa: "کار از راه دور", en: "Remote work" }, text: { fa: "کسانی که ریشه در سُه دارند و از راه دور کار می‌کنند می‌توانند دانش و مهارت خود را به روستا کمک کنند، برای مثال ترجمه، طراحی یا پشتیبانی همین سایت.", en: "People with roots in Soh who work remotely can offer their skills to the village, for example translation, design or running this site." }, status: "unverified" },
+      ] },
+      { t: "table",
+        head: [{ fa: "نوع", en: "Type" }, { fa: "کار یا مهارت", en: "Job or skill" }, { fa: "نوع همکاری", en: "Arrangement" }, { fa: "منطقه", en: "Area" }, { fa: "تماس", en: "Contact" }],
+        rows: [],
+        empty: { fa: "هنوز آگهی کاری منتشر نشده است.", en: "No job posts published yet." } },
+      { t: "notice", title: { fa: "برای ایمنی و انصاف", en: "For safety and fairness" }, items: [
+        { fa: "برای پیدا کردن کار هیچ پولی پرداخت نکنید. آگهی‌هایی که پول پیش‌پرداخت می‌خواهند منتشر نمی‌شوند.", en: "Never pay money to get a job. Posts that ask for money upfront are not published." },
+        { fa: "دستمزد، ساعت کار و مدت همکاری را پیش از شروع، مکتوب کنید.", en: "Put the pay, hours and length of work in writing before you start." },
+        { fa: "کار کودکان در آگهی‌ها پذیرفته نیست.", en: "Work for children is not accepted in posts." },
+        { fa: "این صفحه مشاوره‌ی حقوقی نیست؛ برای قرارداد رسمی با وکیل یا اداره‌ی کار مشورت کنید.", en: "This page is not legal advice; for a formal contract, ask a lawyer or the labour office." },
+      ] },
+    ],
+  },
 ];
 
 export const sectionBySlug = (slug: string) => sections.find((s) => s.slug === slug);
