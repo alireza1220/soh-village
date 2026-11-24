@@ -1,36 +1,60 @@
--- Village market listings. NOT APPLIED. Use when hosting is decided and tested from inside Iran.
--- Works on Supabase or any Postgres. The public site reads only approved, unexpired rows.
-create table if not exists listings (
-  id           uuid primary key default gen_random_uuid(),
-  type         text not null check (type in ('sell','need','service','seeking','hiring')),
-  category     text not null,
-  title        text not null check (char_length(title) <= 120),
-  quantity     text,
-  price        text,                       -- free text, e.g. '120,000 toman per kg'
-  area         text not null,
-  available    text,
-  details      text check (char_length(details) <= 800),
-  poster_name  text,                       -- never shown publicly
-  contact_kind text,                       -- phone | telegram | whatsapp | other
-  contact_value text,
-  contact_public boolean not null default false,  -- the poster's permission to publish contact
-  status       text not null default 'pending' check (status in ('pending','approved','rejected','removed')),
-  created_at   timestamptz not null default now(),
-  approved_at  timestamptz,
-  expires_at   timestamptz                 -- set to approved_at + 30 days on approval
+-- Village market listings for Supabase (free plan). Run once in Supabase > SQL Editor.
+-- Rows arrive as 'pending' from the site's server route. Approve them in Table Editor by setting status = 'approved';
+-- the trigger below then sets approved_at and a 30-day expiry. Only approved, unexpired rows are public,
+-- and a contact is shown only if the poster agreed (contact_public).
+
+create extension if not exists pgcrypto;
+
+create table if not exists public.listings (
+  id             uuid primary key default gen_random_uuid(),
+  type           text not null check (type in ('sell','need','service','seeking','hiring')),
+  category       text not null,
+  title          text not null check (char_length(title) between 1 and 120),
+  quantity       text check (char_length(quantity) <= 80),
+  price          text check (char_length(price) <= 80),
+  area           text not null check (char_length(area) <= 80),
+  available      text check (char_length(available) <= 80),
+  details        text check (char_length(details) <= 800),
+  poster_name    text check (char_length(poster_name) <= 60),   -- never public
+  contact_kind   text,
+  contact_value  text check (char_length(contact_value) <= 60),
+  contact_public boolean not null default false,                -- the poster's permission
+  ip_hash        text,                                          -- spam control only, never public
+  status         text not null default 'pending' check (status in ('pending','approved','rejected','removed')),
+  created_at     timestamptz not null default now(),
+  approved_at    timestamptz,
+  expires_at     timestamptz
 );
 
-alter table listings enable row level security;
+create index if not exists listings_status_idx on public.listings (status, expires_at);
+create index if not exists listings_ip_idx on public.listings (ip_hash, created_at);
 
--- Public: read approved, unexpired listings, and only show contact if the poster agreed.
-create view public_listings as
+-- When an admin approves a row, start the 30-day clock.
+create or replace function public.listing_on_approve() returns trigger language plpgsql as $$
+begin
+  if new.status = 'approved' and (old.status is distinct from 'approved') then
+    new.approved_at := now();
+    new.expires_at  := now() + interval '30 days';
+  end if;
+  return new;
+end $$;
+
+drop trigger if exists listing_on_approve on public.listings;
+create trigger listing_on_approve before update on public.listings
+  for each row execute function public.listing_on_approve();
+
+-- Lock the base table: nobody but the server (service role) and you in the dashboard can read or write it.
+alter table public.listings enable row level security;
+revoke all on public.listings from anon, authenticated;
+
+-- The public sees only this view: approved, unexpired, and contact only if allowed.
+create or replace view public.public_listings as
   select id, type, category, title, quantity, price, area, available, details,
-         case when contact_public then contact_kind end  as contact_kind,
+         case when contact_public then contact_kind  end as contact_kind,
          case when contact_public then contact_value end as contact_value,
          created_at, expires_at
-  from listings
+  from public.listings
   where status = 'approved' and (expires_at is null or expires_at > now());
 
-create policy "anyone can read approved" on listings for select using (status = 'approved' and (expires_at is null or expires_at > now()));
--- Inserts go through a server route that rate-limits and validates; no public insert policy.
--- Approval (status, approved_at, expires_at) is done by the admin with the service role.
+revoke all on public.public_listings from anon, authenticated;
+grant select on public.public_listings to anon, authenticated;

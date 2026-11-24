@@ -1,7 +1,8 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { Locale } from "@/lib/i18n";
 import { CONTACT_KINDS, LISTING_CATEGORIES, LISTING_TYPES } from "@/lib/market";
+import { publicSupabase } from "@/lib/supabase";
 
 const T = {
   intro: { fa: "فرم را پر کنید، متن آماده را کپی کنید و از راهی که در صفحه‌ی مشارکت آمده بفرستید. اگر عکس دارید، همراه متن بفرستید. سایت پولی نگه نمی‌دارد: قیمت و پرداخت را خودتان با خریدار توافق می‌کنید.", en: "Fill in the form, copy the finished text and send it by the way shown on the Contribute page. Send a photo with it if you have one. The site holds no money: you agree the price and payment with the other person yourself." },
@@ -24,6 +25,13 @@ const T = {
   failed: { fa: "کپی نشد؛ متن را انتخاب و کپی کنید.", en: "Copy failed; select the text and copy it." },
   required: { fa: "عنوان را بنویسید تا متن ساخته شود.", en: "Write a title and the message will appear." },
   head: { fa: "آگهی بازارچه‌ی سُه", en: "Soh village market listing" },
+  send: { fa: "ارسال آگهی", en: "Send listing" },
+  sending: { fa: "در حال ارسال...", en: "Sending..." },
+  sent: { fa: "دریافت شد. پس از بررسی در بازارچه می‌آید.", en: "Received. It will appear in the market after a check." },
+  err: { fa: "ارسال نشد. متن را کپی کنید و از راه صفحه‌ی مشارکت بفرستید.", en: "Could not send. Copy the text and send it through the Contribute page." },
+  needContact: { fa: "برای ارسال، راه تماس (شماره یا شناسه) لازم است. اگر نمی‌خواهید نوشته شود، تیک اجازه را نزنید؛ فقط ما می‌بینیم.", en: "To send, a way to reach you is required. If you do not want it shown, leave the permission box unticked; only we see it." },
+  slow: { fa: "چند ثانیه صبر کنید و دوباره بزنید.", en: "Wait a few seconds and try again." },
+  limit: { fa: "امروز آگهی‌های زیادی فرستاده‌اید؛ بعداً دوباره امتحان کنید.", en: "Too many listings sent; try again later." },
 };
 
 export function MarketForm({ lang }: { lang: Locale }) {
@@ -40,6 +48,11 @@ export function MarketForm({ lang }: { lang: Locale }) {
   const [cval, setCval] = useState("");
   const [consent, setConsent] = useState(false);
   const [note, setNote] = useState("");
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [msg, setMsg] = useState("");
+  const [website, setWebsite] = useState(""); // honeypot
+  const opened = useRef(Date.now());
+  const canSend = !!publicSupabase();
   const lab = (list: { v: string; fa: string; en: string }[], v: string) => list.find((o) => o.v === v)?.[lang] ?? v;
   const short = (s: string) => s.replace(/\s*[(（].*$/, "");
 
@@ -60,6 +73,20 @@ export function MarketForm({ lang }: { lang: Locale }) {
 
   const copy = async () => {
     try { await navigator.clipboard.writeText(text); setNote(T.copied[lang]); } catch { setNote(T.failed[lang]); }
+  };
+  const send = async () => {
+    if (!cval.trim()) { setStatus("error"); setMsg(T.needContact[lang]); return; }
+    setStatus("sending"); setMsg("");
+    try {
+      const res = await fetch("/api/listings", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type, category: cat, title, quantity: qty, price, area, available: avail, details, posterName: name, contactKind: ckind, contactValue: cval, contactPublic: consent, website, openedMs: Date.now() - opened.current }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.ok) { setStatus("sent"); setMsg(T.sent[lang]); return; }
+      setStatus("error");
+      setMsg(data.error === "too_fast" ? T.slow[lang] : data.error === "rate_limited" ? T.limit[lang] : data.error === "contact_required" ? T.needContact[lang] : T.err[lang]);
+    } catch { setStatus("error"); setMsg(T.err[lang]); }
   };
   const field = "w-full rounded-xl border px-3 py-2 bg-[var(--surface)]";
   const brd = { borderColor: "var(--line)" } as const;
@@ -106,6 +133,15 @@ export function MarketForm({ lang }: { lang: Locale }) {
         <input id="market-consent" type="checkbox" className="mt-1" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
         <span>{T.consent[lang]}{!consent && <span className="block muted">{T.consentNo[lang]}</span>}</span>
       </label>
+      <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" value={website} onChange={(e) => setWebsite(e.target.value)} style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }} />
+      {canSend && (
+        <div className="flex flex-col gap-2" aria-live="polite">
+          <button type="button" className="btn btn-primary self-start" disabled={!title.trim() || status === "sending" || status === "sent"} onClick={send}>
+            {status === "sending" ? T.sending[lang] : T.send[lang]}
+          </button>
+          {msg && <p className={`text-sm ${status === "sent" ? "" : "muted"}`} style={status === "sent" ? { color: "var(--accent)" } : undefined}>{msg}</p>}
+        </div>
+      )}
       <div className="flex flex-col gap-2" aria-live="polite">
         <b className="text-sm">{T.result[lang]}</b>
         {text ? (

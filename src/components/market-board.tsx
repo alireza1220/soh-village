@@ -1,7 +1,8 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Locale } from "@/lib/i18n";
-import { LISTING_CATEGORIES, LISTING_TYPES, listings, type ListingType } from "@/lib/market";
+import { LISTING_CATEGORIES, LISTING_TYPES, listings as localListings, type Listing, type ListingType } from "@/lib/market";
+import { publicSupabase } from "@/lib/supabase";
 
 const T = {
   all: { fa: "همه", en: "All" },
@@ -22,8 +23,31 @@ const T = {
 export function MarketBoard({ lang }: { lang: Locale }) {
   const [type, setType] = useState<ListingType | "all">("all");
   const [cat, setCat] = useState("all");
+  const [remote, setRemote] = useState<Listing[]>([]);
   const today = new Date().toISOString().slice(0, 10);
-  const live = useMemo(() => listings.filter((l) => l.expiresAt >= today), [today]);
+
+  // When Supabase is connected, approved listings come from the database (the public view); otherwise only the local file is used.
+  useEffect(() => {
+    const sb = publicSupabase();
+    if (!sb) return;
+    let cancelled = false;
+    fetch(`${sb.url}/rest/v1/public_listings?select=*&order=created_at.desc&limit=200`, { headers: { apikey: sb.anon, Authorization: `Bearer ${sb.anon}` } })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((rows: Record<string, string | null>[]) => {
+        if (cancelled) return;
+        setRemote(rows.map((r) => ({
+          id: String(r.id), type: r.type as ListingType, category: String(r.category), title: String(r.title),
+          quantity: r.quantity ?? undefined, price: r.price ?? undefined, area: String(r.area), available: r.available ?? undefined,
+          details: r.details ?? undefined,
+          contact: r.contact_value ? { kind: String(r.contact_kind), value: String(r.contact_value) } : undefined,
+          postedAt: String(r.created_at).slice(0, 10), expiresAt: r.expires_at ? String(r.expires_at).slice(0, 10) : "2099-12-31",
+        })));
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  const live = useMemo(() => [...remote, ...localListings].filter((l) => l.expiresAt >= today), [remote, today]);
   const shown = live.filter((l) => (type === "all" || l.type === type) && (cat === "all" || l.category === cat));
   const label = (list: { v: string; fa: string; en: string }[], v: string) => list.find((o) => o.v === v)?.[lang] ?? v;
   const chip = (active: boolean) => `btn ${active ? "btn-primary" : "btn-ghost"} !py-1.5 !px-3 !text-sm`;
