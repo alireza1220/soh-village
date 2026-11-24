@@ -3,14 +3,23 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Credit } from "@/components/credit";
 import { VillageMap } from "@/components/map";
+import { SectionMark } from "@/components/section-mark";
 import { hasLocale } from "@/lib/i18n";
 import { photos } from "@/lib/photos";
-import { population, sections, stats } from "@/lib/site";
+import { population, sections, siteName, stats } from "@/lib/site";
+
+const starts: { slug: string; title: { fa: string; en: string }; text: { fa: string; en: string }; image?: string }[] = [
+  { slug: "map", title: { fa: "کجاست", en: "Where" }, text: { fa: "نقشه‌ی روستا", en: "The village on the map" }, image: "soh-map.png" },
+  { slug: "tourism", title: { fa: "چطور بروید", en: "How to get there" }, text: { fa: "راه، همسایه‌ها و جاهای دیدنی", en: "The road, the neighbours and the sights" }, image: "karkas-mountain.jpg" },
+  { slug: "history", title: { fa: "چه می‌دانیم", en: "What we know" }, text: { fa: "تاریخ، با برچسب برای مطلب تأییدنشده", en: "History, with a label when a fact is not checked" }, image: "opening.jpg" },
+  { slug: "market", title: { fa: "بازارچه", en: "Market" }, text: { fa: "آگهی محلی؛ سایت پول نمی‌گیرد", en: "Local listings. The site takes no payment." } },
+  { slug: "references", title: { fa: "راهنما و منابع", en: "Guide and sources" }, text: { fa: "روش استفاده از سایت و همه‌ی پیوندها", en: "How to use the site, and every link we found" } },
+];
 
 const copy = {
   eyebrow: { fa: "مورچه‌خورت · شاهین‌شهر و میمه · اصفهان", en: "Murcheh Khvort · Shahin Shahr and Meymeh · Isfahan" },
-  h1: { fa: "روستایی در دامنه‌ی کوه‌های کرکس", en: "A mountain village in the Karkas range" },
-  lead: { fa: "سُه با کاروانسرایی قاجاری، دو امامزاده‌ی گنبدفیروزه‌ای، باغ‌های سیب و آیین نخل‌گردانی تاسوعا. تاریخ، جاهای دیدنی، اقامت، خرید و واژه‌های محلی در یک‌جا.", en: "Soh has a Qajar caravanserai, two turquoise-domed shrines, apple orchards and a Tasua palm-carrying ritual. History, sights, where to stay, what to buy and local words, in one place." },
+  lead: { fa: "راهنمای روستای سُه: کجاست، چه دارد، و چطور مطلب یا آگهی اضافه کنید. هر مطلب منبع دارد و اگر تأیید نشده باشد برچسب خورده است.", en: "A guide to Soh: where it is, what is there, and how to add a note or a listing. Every fact has a source, and anything not checked is labelled." },
+  place: { fa: "در دامنه‌ی کوه‌های کرکس، با کاروانسرایی قاجاری، دو امامزاده‌ی گنبدفیروزه‌ای و باغ‌های سیب.", en: "On the slopes of the Karkas mountains, with a Qajar caravanserai, two turquoise-domed shrines and apple orchards." },
   explore: { fa: "گشت در سُه", en: "Explore Soh" },
   exploreSub: { fa: "هر بخش از منابع نام‌برده ساخته شده و مطلب تأییدنشده برچسب دارد.", en: "Every section is built from named sources, and unverified items are labelled." },
   glance: { fa: "یک نگاه", en: "At a glance" },
@@ -34,15 +43,16 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
       <section className="wrap pt-10 pb-12 grid gap-10 items-center lg:grid-cols-2">
         <div className="flex flex-col gap-6">
           <span className="pill self-start">{copy.eyebrow[lang]}</span>
-          <h1 className="text-[clamp(38px,6vw,64px)]">{copy.h1[lang]}</h1>
-          <p className="text-lg muted max-w-xl">{copy.lead[lang]}</p>
+          <h1 className="text-[clamp(38px,6vw,64px)]">{siteName[lang]}</h1>
+          <p className="text-lg max-w-xl">{copy.lead[lang]}</p>
+          <p className="muted max-w-xl">{copy.place[lang]}</p>
           <div className="flex flex-wrap gap-3">
-            <Link href={`/${lang}/history`} className="btn btn-primary">{copy.explore[lang]} →</Link>
+            <a href="#explore" className="btn btn-primary">{copy.explore[lang]}</a>
             <Link href={`/${lang}/contribute`} className="btn btn-ghost">{copy.contribute[lang]}</Link>
           </div>
         </div>
         {hero && (
-          <figure className="card hero-photo relative m-0 overflow-hidden" style={{ aspectRatio: "4 / 3.4" }}>
+          <figure className="card hero-photo relative m-0 overflow-hidden" style={{ aspectRatio: `${hero.width} / ${hero.height}` }}>
             <Image src={`/photos/${hero.file}`} alt={hero.alt[lang]} fill priority sizes="(max-width: 1024px) 100vw, 540px" className="object-cover" />
             <p lang="fa" className="fa-display absolute top-3 z-10 text-[84px] font-bold leading-none text-white/95 drop-shadow-lg start-5">سُه</p>
             <figcaption className="absolute inset-x-0 bottom-0 z-10 p-4 flex flex-col gap-1 text-white">
@@ -51,6 +61,41 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
             </figcaption>
           </figure>
         )}
+      </section>
+
+      <section className="wrap pb-12" aria-labelledby="start">
+        <h2 id="start" className="section-title mb-4">{lang === "fa" ? "از اینجا شروع کنید" : "Start here"}</h2>
+        <ul className="grid gap-3 list-none p-0 m-0" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))" }}>
+          {starts.map((s) => {
+            const ph = s.image ? photos.find((p) => p.file === s.image) : undefined;
+            const mapShot = s.image === "soh-map.png";
+            return (
+              <li key={s.slug}>
+                <Link href={`/${lang}/${s.slug}`} className="card lift flex h-full flex-col overflow-hidden">
+                  <div className="relative" style={{ aspectRatio: "16 / 10", background: "linear-gradient(135deg, var(--accent-soft), var(--chip))" }}>
+                    {mapShot ? (
+                      <>
+                        <Image src="/photos/soh-map.png" alt={lang === "fa" ? "نقشه‌ی محدوده‌ی سُه" : "Map of the Soh area"} fill sizes="240px" className="object-cover" />
+                        <span className="region-badge">© OpenStreetMap</span>
+                      </>
+                    ) : ph ? (
+                      <>
+                        <Image src={`/photos/${ph.file}`} alt={ph.alt[lang]} fill sizes="240px" className="object-cover" />
+                        {ph.scope === "region" && <span className="region-badge">{lang === "fa" ? "عکس منطقه، نه سُه" : "Region photo, not Soh"}</span>}
+                      </>
+                    ) : (
+                      <SectionMark slug={s.slug} />
+                    )}
+                  </div>
+                  <div className="p-4 flex flex-col gap-1">
+                    <b>{s.title[lang]}</b>
+                    <span className="text-sm muted">{s.text[lang]}</span>
+                  </div>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </section>
 
       <section className="wrap pb-12">
@@ -79,10 +124,10 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
                     {ph ? (
                       <>
                         <Image src={`/photos/${ph.file}`} alt={ph.alt[lang]} fill sizes="(max-width: 640px) 100vw, 300px" className="object-cover" />
-                        {ph.scope === "region" && <span className="absolute bottom-2 start-2 rounded-full bg-black/60 px-2.5 py-0.5 text-[11px] font-semibold text-white">{lang === "fa" ? "عکس منطقه، نه سُه" : "Region photo, not Soh"}</span>}
+                        {ph.scope === "region" && <span className="region-badge">{lang === "fa" ? "عکس منطقه، نه سُه" : "Region photo, not Soh"}</span>}
                       </>
                     ) : (
-                      <span lang="fa" className="fa-display absolute inset-0 grid place-items-center text-6xl font-bold" style={{ color: "var(--accent)", opacity: 0.22 }}>سُه</span>
+                      <SectionMark slug={s.slug} />
                     )}
                   </div>
                   <div className="p-4 flex flex-col gap-1">

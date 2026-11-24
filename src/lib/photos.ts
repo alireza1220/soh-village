@@ -18,11 +18,18 @@ export type Photo = {
   year?: number;
 };
 const CC3 = "https://creativecommons.org/licenses/by/3.0/";
+const CCSA3 = "https://creativecommons.org/licenses/by-sa/3.0/";
 const CCSA4 = "https://creativecommons.org/licenses/by-sa/4.0/";
 const commons = (name: string) => `https://commons.wikimedia.org/wiki/File:${name.replace(/ /g, "_")}`;
 
-// Free-licence photos from Wikimedia Commons (credit and licence are shown with each photo). None shows Soh itself.
+// The opening photo was supplied for this site. The rest are free-licence photos from Wikimedia Commons. Those are the area around Soh, not the village, and stay labelled.
 export const photos: Photo[] = [
+  {
+    file: "opening.jpg", width: 1024, height: 601, section: "village", scope: "soh",
+    alt: { fa: "بنای آجری با طاق‌های تیزه‌دار و یک برج گوشه", en: "A brick building with pointed arches and a corner tower" },
+    caption: { fa: "بنای آجری با طاق‌های تیزه‌دار و یک برج گوشه. این عکس برای صفحه‌ی اول فرستاده شده است.", en: "A brick building with pointed arches and a corner tower. This photo was supplied for the opening page." },
+    credit: "Supplied for this site", license: "Used with permission",
+  },
   {
     file: "karkas-mountain.jpg", width: 1920, height: 1251, section: "village", scope: "region",
     alt: { fa: "قله‌های برفی کوه‌های کرکس بالای دشتی زردرنگ", en: "Snow-capped peaks of the Karkas mountains above a golden plain" },
@@ -30,28 +37,16 @@ export const photos: Photo[] = [
     credit: "Alireza Javaheri", license: "CC BY 3.0", licenseUrl: CC3, sourceUrl: commons("Karkas Kooh.jpg"),
   },
   {
-    file: "madar-shah-caravanserai.jpg", width: 1920, height: 1439, section: "history", scope: "region",
-    alt: { fa: "سردر آجری کاروانسرای مادر شاه با حوضی در جلو", en: "The brick portal of the Madar Shah Caravanserai with a pool in front" },
-    caption: { fa: "کاروانسرای مادر شاه در مورچه‌خورت، در همان دهستان سُه. کاروانسرای سُه نیست.", en: "The Madar Shah Caravanserai in Murcheh Khvort, in the same rural district as Soh. This is not Soh's caravanserai." },
-    credit: "EbrahimFaryabi", license: "CC BY-SA 4.0", licenseUrl: CCSA4, sourceUrl: commons("Madar Shah Caravanserai- Murchehkhort Iran (cropped).jpg"),
+    file: "opening.jpg", width: 1024, height: 601, section: "history", scope: "soh",
+    alt: { fa: "بنای آجری با طاق‌های تیزه‌دار و یک برج گوشه", en: "A brick building with pointed arches and a corner tower" },
+    caption: { fa: "بنای آجری با طاق‌های تیزه‌دار و یک برج گوشه. این عکس برای سایت فرستاده شده است.", en: "A brick building with pointed arches and a corner tower. This photo was supplied for the site." },
+    credit: "Supplied for this site", license: "Used with permission",
   },
   {
-    file: "abyaneh.jpg", width: 1920, height: 1280, section: "tourism", scope: "region",
-    alt: { fa: "خانه‌های خشتی سرخ‌رنگ ابیانه در دامنه‌ی کوه", en: "Red adobe houses of Abyaneh on a mountainside" },
-    caption: { fa: "ابیانه، روستای همسایه‌ی شمالی سُه. عکس از سُه نیست.", en: "Abyaneh, the village on Soh's northern border. Not a photo of Soh." },
-    credit: "Bernard Gagnon", license: "CC BY-SA 4.0", licenseUrl: CCSA4, sourceUrl: commons("Village of Abyaneh, Iran.jpg"),
-  },
-  {
-    file: "meymeh-jame-mosque.jpg", width: 1920, height: 1440, section: "tourism", scope: "region",
-    alt: { fa: "مسجد جامع میمه", en: "The Jame Mosque of Meymeh" },
-    caption: { fa: "مسجد جامع میمه، شهر نزدیک سُه. عکس از سُه نیست.", en: "The Jame Mosque of Meymeh, the town near Soh. Not a photo of Soh." },
-    credit: "Wikicommuni", license: "CC BY-SA 4.0", licenseUrl: CCSA4, sourceUrl: commons("Masjed meymeh.jpg"),
-  },
-  {
-    file: "nakhl-gardani-mehriz.jpg", width: 1920, height: 1080, section: "traditions", scope: "region",
-    alt: { fa: "نخل‌گردانی در روز عاشورا", en: "Nakhl-gardani on Ashura day" },
-    caption: { fa: "نخل‌گردانی عاشورا در مهریز یزد (۲۰۱۴). آیینی مانند نخل‌گردانی سُه ولی در جای دیگر.", en: "Ashura nakhl-gardani in Mehriz, Yazd (2014). A ritual like Soh's palm carrying, but elsewhere." },
-    credit: "amir mohammad zare zadeh", license: "CC BY-SA 4.0", licenseUrl: CCSA4, sourceUrl: commons("Nakhl Gardani - Mehriz - Ashura Muharram.jpg"),
+    file: "karkas-peak.jpg", width: 1920, height: 1440, section: "traditions", scope: "region",
+    alt: { fa: "قله‌ی کوه کرکس در آسمانی آبی", en: "The Karkas peak against a blue sky" },
+    caption: { fa: "قله‌ی کرکس", en: "The Karkas peak" },
+    credit: "Orijentolog", license: "CC BY-SA 3.0", licenseUrl: CCSA3, sourceUrl: commons("Kuh-e Karkas 2.JPG"),
   },
 ];
 
@@ -68,7 +63,7 @@ export const shots: Shot[] = [
   { id: "golileh", section: "tourism", priority: 1, title: { fa: "امامزاده گلیله", en: "Imamzadeh Golileh" }, detail: { fa: "بقعه در مرکز روستا.", en: "The shrine at the centre of the village." } },
   { id: "bath", section: "tourism", priority: 2, title: { fa: "حمام قدیمی", en: "The old bath" }, detail: { fa: "سردر و داخل حمام مرمت‌شده.", en: "The entrance and the inside of the restored bath." } },
   { id: "mills", section: "tourism", priority: 3, title: { fa: "آسیاب‌ها، پل نواب و برج کبوتر", en: "Mills, Nav Bridge and the dovecote" }, detail: { fa: "هر کدام یک عکس با توضیح جای آن.", en: "One photo of each, with its location." } },
-  { id: "nature", section: "tourism", priority: 2, title: { fa: "رودخانه و مرغزار", en: "River and meadow" }, detail: { fa: "لب‌چار، مرغزار سرمرغ یا آبشار، با نام جا در توضیح.", en: "The Lab Char river, Sar-Marq meadow or the waterfall, with the place named in the caption." } },
+  { id: "nature", section: "tourism", priority: 2, title: { fa: "رودخانه و مرغزار", en: "River and meadow" }, detail: { fa: "لب‌چر، مزرعه‌ی سرمرق یا آبشار، با نام جا در توضیح.", en: "The Lab Char river, the Sar-Marq meadow or the waterfall, with the place named in the caption." } },
   { id: "tasua", section: "traditions", priority: 1, title: { fa: "نخل‌گردانی تاسوعا", en: "Tasua palm carrying" }, detail: { fa: "نخل آراسته در امامزاده یوسف یا در مسیر. اگر افراد پیداست، اجازه‌ی آن‌ها لازم است.", en: "The decorated palm at Imamzadeh Yusuf or on its route. Consent is needed if people are recognisable." } },
   { id: "carpet", section: "traditions", priority: 2, title: { fa: "قالی‌بافی", en: "Carpet weaving" }, detail: { fa: "دار قالی و نقش جوشقانی؛ با اجازه‌ی بافنده.", en: "The loom and a Joshaqani design, with the weaver's permission." } },
   { id: "houses", section: "traditions", priority: 2, title: { fa: "خانه‌های خشتی و بام‌های خاکی", en: "Adobe houses and earth roofs" }, detail: { fa: "کوچه‌ها و در و دیوار قدیمی.", en: "Old lanes, doors and walls." } },

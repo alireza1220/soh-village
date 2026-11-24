@@ -112,7 +112,7 @@ footer{font-size:13px;color:var(--muted)}
   <h2>Places to see</h2>
   ${c.landmarks.map((l) => `<div class="item"><h3>${esc(l.name)} ${fa(l.fa)}</h3><p>${esc(l.text)}</p><span class="src">${chip(l.status)}${esc(l.source)}</span></div>`).join("")}
   <p class="muted">Nature and walks (${esc(c.nature.source)}):</p>
-  <ul class="tags">${c.nature.places.map((p) => `<li>${esc(p)}</li>`).join("")}</ul>
+  <ul class="tags">${c.nature.places.map((p) => `<li>${esc(typeof p === "string" ? p : `${p.name}: ${p.text}`)}</li>`).join("")}</ul>
 </section>
 
 <section>

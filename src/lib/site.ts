@@ -166,7 +166,7 @@ export const sections: Section[] = [
           { k: { fa: "هوا", en: "Climate" }, v: { fa: "تابستان معتدل، زمستان سرد", en: "Temperate summers, cold winters" } },
           { k: { fa: "دهستان", en: "Rural district" }, v: { fa: "مورچه‌خورت: ۳۹ روستا و ۲٬۱۹۸ نفر در سرشماری ۱۳۹۵ (خود روستای مورچه‌خورت ۱٬۳۶۹ نفر)", en: "Murcheh Khvort: 39 villages and 2,198 people in the 2016 census (Murcheh Khvort village itself 1,369)" } },
           { k: { fa: "همسایه‌ها", en: "Neighbours" }, v: { fa: "ابیانه (شمال)، بیدشک (جنوب)، کله‌رود (شرق)، رباط آقا کمال و میمه (غرب)", en: "Abyaneh (north), Bidshak (south), Kalahrud (east), Rebat Aqa Kamal and Meymeh (west)" } },
-          { k: { fa: "راه", en: "Getting there" }, v: { fa: "از جاده‌ی شاهین‌شهر به میمه، حدود ۵۰ کیلومتر بعد از شاهین‌شهر وارد جاده‌ی دهلر و بیدشک شوید؛ سُه در انتهای مسیر است. پایانه‌ی اتوبوس یا ایستگاه قطار در روستا نیست.", en: "From the Shahin Shahr to Meymeh road, turn off about 50 km north of Shahin Shahr at Dehlor and pass Bidshak; Soh is at the end of the road. There is no bus terminal or railway station in the village." } },
+          { k: { fa: "راه", en: "Getting there" }, v: { fa: "کجارو: از جاده‌ی شاهین‌شهر به میمه، حدود ۵۰ کیلومتر بعد از شاهین‌شهر، از خروجی دهلر و بیدشک و سُه خارج شوید. سُه آخر این راه است. ویکی‌پدیای فارسی همان رسیدن را از جاده‌ی تهران به اصفهان (۶۵ شمالی) می‌نویسد: حدود ۶۰ کیلومتر مانده به اصفهان، بین میمه و مورچه‌خورت، راهی حدود ۳۰ کیلومتری از رباط شاه‌عباسی و دهلر و بیدشک می‌گذرد. این دو شرح یکی نیستند. پایانه یا ایستگاه قطار در خود روستا نیست. شرح هر دو سو، از اصفهان و از تهران، در صفحه‌ی نقشه است.", en: "Kojaro: on the Shahin Shahr to Meymeh road, about 50 km north of Shahin Shahr, take the exit for Dehlor, Bidshak and Soh. Soh is at the end of that road. Persian Wikipedia describes the same arrival from the Tehran–Isfahan road (65 north): about 60 km short of Isfahan, between Meymeh and Murcheh Khvort, a road of about 30 km passes the Shah Abbasi caravanserai, Dehlor and Bidshak. The two accounts do not match. There is no bus terminal or railway station in the village. Both approaches, from Isfahan and from Tehran, are set out on the map page." } },
         ],
       },
       {
@@ -177,17 +177,43 @@ export const sections: Section[] = [
           { title: { fa: "امامزاده گلیله", en: "Imamzadeh Golileh" }, text: { fa: "بقعه‌ی گنبد فیروزه‌ای در پایین روستا و در مرکز آن.", en: "A turquoise-domed shrine in the lower village, at its centre." }, status: "reported", source: "Kojaro" },
           { title: { fa: "حمام قدیمی", en: "The old bath" }, text: { fa: "حمام قاجاری با حدود ۲۰۰ سال قدمت. از دو حمام بالا و پایین، یکی مانده و با کمک مردم مرمت شده است.", en: "A Qajar-era bath about 200 years old. Of the upper and lower baths one survives, restored with local help." }, status: "reported", source: "Kojaro" },
           { title: { fa: "خانه‌ی کدخدا", en: "Kadkhoda house" }, text: { fa: "خانه‌ی تاریخی کدخدای روستا، میرزا بهرام صفوی.", en: "The historic home of the village headman, Mirza Bahram Safavi." }, status: "reported", source: "Kojaro" },
-          { title: { fa: "جاهای دیگر", en: "Other historic places" }, text: { fa: "پل نواب، سه آسیاب (امامزاده، میرزا ابوالحسن و میرزا محمد)، خانه‌ی تلگراف («تلگراف‌خانه‌ی انگلیسی»)، برج کبوتر، خانه‌ی میرزا جعفر، کوره‌ی آجرپزی، یک زورخانه‌ی کوچک، مسجدی حدود ۲۰۰ ساله کنار حمام، کاروانسرای عباسی در آقاکمال پایین (سر راه روستا)، «عمارت فرنگی»، ساباط کوچه‌ی قلعه‌ی بالا و کنده‌ی باغستان.", en: "Nav Bridge, three mills (Imamzadeh, Mirza Abolhasan and Mirza Mohammad), the old telegraph house (called the “English telegraph house”), a dovecote tower, Mirza Jafar's house, a brick kiln, a small zurkhaneh (traditional gym), a mosque about 200 years old beside the bath, the Abbasi caravanserai at Aqa Kamal Pain (on the access road), a “Farangi” mansion, the covered passage (sabat) in the upper-castle alley and Kandeh Baghestan." }, status: "reported", source: "Kojaro" },
+          { title: { fa: "پل نواب", en: "Nav Bridge" }, text: { fa: "کجارو آن را در فهرست آثار روستا آورده است. از قدمت، مصالح یا این‌که پل هنوز سرپاست چیزی ننوشته.", en: "Kojaro includes it in the village's list of sights. It says nothing about the age, the material, or whether the bridge still stands." }, status: "reported", source: "Kojaro" },
+          { title: { fa: "آسیاب امامزاده", en: "Imamzadeh mill" }, text: { fa: "یکی از سه آسیاب آبی است که کجارو نام می‌برد. خبر صدا و سیما (۱۳۹۷) از هفت آسیاب می‌گوید. حماسه‌سازان هم هفت آسیاب را نام می‌برد و می‌گوید اکنون مخروبه‌اند، ولی مختصات همان صفحه با مختصات این سایت نمی‌خواند، پس ویرانی قطعی گرفته نشده. توضیح جداگانه‌ای برای خود این آسیاب پیدا نشد و از روی نامش نباید جای آن را حدس زد.", en: "One of the three water mills Kojaro names. IRIB News (2018) says seven mills. Hamaseh Sazan also says seven, and that they are now ruined, but that page's coordinates do not match the ones used here, so the ruin is not treated as settled. No separate description of this mill was found, and its place should not be guessed from the name." }, status: "unverified", source: "Kojaro; IRIB News, 14 Shahrivar 1397; Hamaseh Sazan" },
+          { title: { fa: "آسیاب میرزا ابوالحسن", en: "Mirza Abolhasan mill" }, text: { fa: "دومین آسیاب در فهرست کجارو. مانند دو آسیاب دیگر، فقط نامش آمده است. این‌که میرزا ابوالحسن که بوده و آسیاب چه وضعی دارد نوشته نشده.", en: "The second mill on Kojaro's list. Like the other two, only the name is given. Who Mirza Abolhasan was, and what state the mill is in, is not written." }, status: "reported", source: "Kojaro" },
+          { title: { fa: "آسیاب میرزا محمد", en: "Mirza Mohammad mill" }, text: { fa: "سومین آسیاب در فهرست کجارو. باز هم فقط نام است. سه نام کجارو و «هفت آسیاب» صدا و سیما را با هم یکی نگرفته‌ایم.", en: "The third mill on Kojaro's list. Again, only a name. Kojaro's three names and IRIB's “seven mills” have not been reconciled." }, status: "unverified", source: "Kojaro; IRIB News, 14 Shahrivar 1397" },
+          { title: { fa: "خانه‌ی تلگراف", en: "The telegraph house" }, text: { fa: "کجارو از «عمارت قدیمی معروف به خانه‌ی تلگراف» نام می‌برد و آن را کنار حمام، امامزاده و آسیاب‌های آبی، از آثار صفوی و قاجاری می‌شمارد. در نوشته‌های بعدی «تلگراف‌خانه‌ی انگلیسی» هم آمده است. حماسه‌سازان می‌گوید عمارت فرنگی همان تلگراف‌خانه بوده، و یک خلاصه‌ی انگلیسی سال ۲۰۲۶ این دو را جدا فهرست کرده. پس معلوم نیست یک ساختمان است یا دو تا.", en: "Kojaro names an old mansion known as the telegraph house and counts it, with the bath, the shrine and the water mills, among the Safavid and Qajar remains. Later writing also says “English telegraph house”. Hamaseh Sazan says the Farangi mansion was the telegraph office, while a 2026 English summary lists the two separately. It is not known whether this is one building or two." }, status: "unverified", source: "Kojaro; Hamaseh Sazan; Saed News, Feb 2026" },
+          { title: { fa: "برج کبوتر", en: "Dovecote tower" }, text: { fa: "کجارو یک برج کبوتر را در همان فهرست آثار آورده است. تعداد برج، جای آن در روستا و این‌که آباد است یا ویران، نوشته نشده.", en: "Kojaro puts one dovecote tower on the same list of sights. It does not say how many towers, where in the village it stands, or whether it is intact." }, status: "reported", source: "Kojaro" },
+          { title: { fa: "خانه‌ی میرزا جعفر", en: "Mirza Jafar's house" }, text: { fa: "کجارو فقط «منزل میرزا جعفر» را نام برده است. نسبت این میرزا جعفر با کدخدا (میرزا بهرام صفوی) یا با صاحب آسیاب‌ها معلوم نیست.", en: "Kojaro only names “Mirza Jafar's house”. It is not known how this Mirza Jafar is related to the kadkhoda (Mirza Bahram Safavi) or to the men the mills are named after." }, status: "reported", source: "Kojaro" },
+          { title: { fa: "کوره‌ی آجرپزی", en: "Brick kiln" }, text: { fa: "کجارو «کوره آجرپزی» را در فهرست آثار آورده و توضیح دیگری نداده است. معلوم نیست کوره هنوز دیده می‌شود یا فقط نامی از آن مانده.", en: "Kojaro lists a brick kiln and gives no other detail. It is not known whether the kiln can still be seen or only the name remains." }, status: "reported", source: "Kojaro" },
+          { title: { fa: "زورخانه‌ی کوچک", en: "The small zurkhaneh" }, text: { fa: "کجارو می‌نویسد ورزش باستانی در سُه محبوب است و برای آن زورخانه‌ی کوچکی در روستا هست. این یکی از معدود بناهای این فهرست است که منبع، کاربری امروزش را هم گفته. در بخش آیین‌ها هم آمده است.", en: "Kojaro says traditional gym sports are popular in Soh and that the village has a small zurkhaneh for them. This is one of the few places on this list whose present use the source also states. It is mentioned again under Traditions." }, status: "reported", source: "Kojaro" },
+          { title: { fa: "مسجد کنار حمام", en: "The mosque beside the bath" }, text: { fa: "در یادداشت‌های قبلی سایت، مسجدی حدود ۲۰۰ ساله کنار حمام آمده بود. فهرست خود کجارو چنین مسجدی را شرح نمی‌دهد. قدمت حدود ۲۰۰ سال را کجارو برای حمام نوشته، نه برای مسجد، پس ممکن است آن عدد از حمام به مسجد سرایت کرده باشد. صدا و سیما مسجد جامعی با سه امامزاده نام می‌برد و معلوم نیست همان بنا باشد.", en: "Earlier notes on this site mentioned a mosque about 200 years old beside the bath. Kojaro's own list does not describe that mosque. The “about 200 years” is what Kojaro says of the bath, not of a mosque, so the number may have been copied across by mistake. IRIB names a Friday mosque with three shrines, and it is not known whether that is the same building." }, status: "unverified", source: "Site notes checked against Kojaro and IRIB News" },
+          { title: { fa: "کاروانسرای عباسی", en: "The Abbasi caravanserai" }, text: { fa: "کجارو می‌گوید کاروانسرای عباسی روی جاده‌ی اصلی ورودی روستا است و همراه با کاروانسرای قاجاری داخل روستا نشان می‌دهد سُه زمانی بر سر راه بازرگانی بوده. خلاصه‌ی انگلیسی ۲۰۲۶، به نقل از ایرنا، همان را «کاروانسرای آقاکمال پایین» می‌نامد و در انگلیسی Abbasid ترجمه کرده، که با واژه‌ی «عباسی» کجارو یکی نیست. این بنای داخل روستا نیست.", en: "Kojaro says an Abbasi caravanserai stands on the main road into the village and, with the Qajar caravanserai inside Soh, shows the village was once on a trade route. A 2026 English summary, quoting IRNA, calls it the Agha Kamal Payin caravanserai and translates the name “Abbasid”, which is not the same word as Kojaro's “Abbasi”. It is not the caravanserai inside the village." }, status: "unverified", source: "Kojaro; Saed News, Feb 2026" },
+          { title: { fa: "عمارت فرنگی", en: "The Farangi mansion" }, text: { fa: "کجارو این نام را جدا نیاورده است. حماسه‌سازان می‌گوید عمارت فرنگی پیش‌تر تلگراف‌خانه بوده. خلاصه‌ی انگلیسی ۲۰۲۶، به نقل از ایرنا، «خانه‌ی تلگراف انگلیسی» و «عمارت فرنگی» را دو تا می‌شمارد. تا متن ایرنا خوانده نشود، یکی بودن یا دو تا بودن این‌ها باز می‌ماند.", en: "Kojaro does not list this name on its own. Hamaseh Sazan says the Farangi mansion used to be the telegraph office. A 2026 English summary, quoting IRNA, counts the “English telegraph house” and the “Farangi mansion” as two. Until the IRNA text is read, whether they are one building or two stays open." }, status: "unverified", source: "Hamaseh Sazan; Saed News, Feb 2026" },
+          { title: { fa: "ساباط کوچه‌ی قلعه‌ی بالا", en: "The covered passage in the upper-castle alley" }, text: { fa: "ساباط، کوچه‌ی سرپوشیده است. این یکی را کجارو شرح نداده. خلاصه‌ی انگلیسی ۲۰۲۶ آن را در محله‌ی قدیمی قلعه‌ی بالا می‌گذارد. متن اصلی ایرنا را نخوانده‌ایم و عکسی از آن روی سایت نیست.", en: "A sabat is a covered lane. Kojaro does not describe this one. A 2026 English summary places it in the old upper-castle neighbourhood. We have not read the original IRNA text, and there is no photo of it on the site." }, status: "unverified", source: "Saed News, Feb 2026, quoting IRNA" },
+          { title: { fa: "کنده‌ی باغستان", en: "Kandeh Baghestan" }, text: { fa: "در خلاصه‌ی انگلیسی ۲۰۲۶ «باغ کنده» آمده است. کجارو آن را در فهرست آثار نیاورده و معنی نام، جای دقیق و این‌که باغ است یا نشان دیگری، نوشته نشده.", en: "A 2026 English summary mentions a “Kandeh garden”. Kojaro does not put it on the list of sights, and the meaning of the name, the exact place, and whether it is a garden or some other mark are not written down." }, status: "unverified", source: "Saed News, Feb 2026, quoting IRNA" },
+          { title: { fa: "مسجد جامع و شمار آسیاب‌ها", en: "The Friday mosque and how many mills" }, text: { fa: "خبر صدا و سیما (۱۴ شهریور ۱۳۹۷) از مسجد جامعی نام می‌برد که مقبره‌ی شاهزاده سعید، شاهزاده اسدالله و شاهزاده سلیمان در آن است، و از هفت آسیاب. کجارو سه آسیاب را نام می‌برد. این دو عدد با هم نمی‌خوانند، پس هیچ‌کدام را قطعی نگرفته‌ایم. همان خبر، سُه را روستای هدف گردشگری می‌نامد و فاصله تا اصفهان را ۹۴ کیلومتر می‌نویسد، که با ویکی‌پدیا یکی است.", en: "IRIB News (5 September 2018) names a Friday mosque holding the tombs of Shahzadeh Saeed, Shahzadeh Asadollah and Shahzadeh Soleiman, and speaks of seven mills. Kojaro names three mills. The two counts disagree, so neither is treated as settled. The same report calls Soh a tourism target village and puts it 94 km from Isfahan, which matches Persian Wikipedia." }, status: "unverified", source: "IRIB News, 14 Shahrivar 1397", href: "https://www.irib-news.ir/fa/news/2220982/%D8%B1%D9%88%D8%B3%D8%AA%D8%A7%DB%8C-%D9%87%D8%AF%D9%81-%DA%AF%D8%B1%D8%AF%D8%B4%DA%AF%D8%B1%DB%8C-%D8%B3%D9%8F%D9%87-%D8%AF%D8%B1-%D8%B4%D8%A7%D9%87%DB%8C%D9%86-%D8%B4%D9%87%D8%B1" },
         ],
       },
       { t: "p", text: { fa: "آیین‌های سُه، مانند نخل‌گردانی تاسوعا، در بخش «آیین‌ها و سنت‌ها» آمده است.", en: "Soh's traditions, such as the Tasua palm carrying, are in the Traditions section." } },
+      { t: "p", text: { fa: "طبیعت و گردش. کجارو این نام‌ها را جاذبه‌ی طبیعی می‌شمارد و از گردشگر می‌خواهد حریم باغ و کشتزار مردم را نگه دارد. برای بیشترشان فقط همان نام مانده است.", en: "Nature and walks. Kojaro counts these names as natural sights and asks visitors to keep clear of people's gardens and fields. For most of them only the name remains." } },
       {
-        t: "tags",
-        label: { fa: "طبیعت و گردش", en: "Nature and walks" },
+        t: "cards",
         items: [
-          { fa: "کوه چار", en: "Kuh-e Char" }, { fa: "کوه بغل سیاه", en: "Kuh-e Baghal Siyah" }, { fa: "رودخانه‌ی لب‌چار", en: "Lab Char river" },
-          { fa: "قاش سرخه", en: "Qash Sorkheh" }, { fa: "مارگله", en: "Margaleh" }, { fa: "مرغزار سرمرغ", en: "Sar-Marq meadow" },
-          { fa: "مرغزار گزی", en: "Gazi meadow" }, { fa: "چشمه‌ی هاز", en: "Haz spring" }, { fa: "دشت پایمیل", en: "Paymil plain" }, { fa: "آبشار", en: "A waterfall" },
+          { title: { fa: "کوه چر", en: "Kuh-e Char" }, text: { fa: "کجارو آن را «کوه چر» نوشته، کنار کوه بغل سیاه. روی سایت پیش‌تر «چار» آمده بود؛ املای منبع «چر» است. بلندی، مسیر و این‌که قله است یا دامنه نیامده. ویکی‌پدیا فقط می‌گوید سُه بر دامنه‌ی کرکس است، و کجارو ارتفاع خود روستا را ۲٬۳۵۰ متر می‌نویسد. این عدد مال قله نیست.", en: "Kojaro writes it کوه چر, beside Baghal Siyah. The site had been spelling it Char (چار). Height, path, and whether it is a summit or a slope are not given. Persian Wikipedia only says Soh sits on the slopes of the Karkas, and Kojaro puts the village itself at 2,350 m. That figure is not the peak." }, status: "reported", source: "Kojaro" },
+          { title: { fa: "کوه بغل سیاه", en: "Kuh-e Baghal Siyah" }, text: { fa: "کجارو آن را کنار کوه چر، از کوه‌های روستا نام برده و شرح دیگری نداده است.", en: "Kojaro names it next to Kuh-e Char as one of the village mountains and gives no other description." }, status: "reported", source: "Kojaro" },
+          { title: { fa: "رودخانه‌ی لب‌چر", en: "Lab Char river" }, text: { fa: "کجارو «رودخانه‌ی لب چر» را در جاذبه‌های طبیعی آورده است. جدا از آن می‌نویسد رودخانه‌ای فصلی در غرب روستا شکل محله‌ها را ساخته. این دو را یکی ندانسته‌ایم. ویکی‌پدیا می‌گوید آب کشاورزی بیشتر از آب‌های جاری روی زمین می‌آید و فقط در دو سه مزرعه، جایی به نام «بند»، آب را برای آبیاری جمع می‌کنند.", en: "Kojaro lists the Lab Char river among the natural sights. Separately, it says a seasonal river on the west side of the village shaped the neighbourhoods. These two are not treated as the same river. Persian Wikipedia says farm water comes mostly from surface streams, and that only two or three fields, at a place called Band, collect water for irrigation." }, status: "reported", source: "Kojaro; Persian Wikipedia" },
+          { title: { fa: "قاش سرخه", en: "Qash Sorkheh" }, text: { fa: "کجارو «قاش سرخه» را نام برده است. نگفته قاش در این‌جا به چه چیزی گفته می‌شود، کجاست و چه چیزی در آن سرخ است.", en: "Kojaro names Qash Sorkheh. It does not say what a qash is here, where it is, or what about it is red." }, status: "reported", source: "Kojaro" },
+          { title: { fa: "مارگله", en: "Margaleh" }, text: { fa: "هم کجارو و هم ویکی‌پدیای فارسی مارگله را در فهرست گردش آورده‌اند. هیچ‌کدام نگفته‌اند مرغزار است، دره است یا جای دیگری.", en: "Both Kojaro and Persian Wikipedia put Margaleh on the list of places to walk. Neither says whether it is a meadow, a valley or something else." }, status: "reported", source: "Kojaro; Persian Wikipedia" },
+          { title: { fa: "مزرعه‌ی سرمرق", en: "Sar-Marq meadow" }, text: { fa: "کجارو «مزرعه‌ی سرمرق» را نوشته و در پرانتز «مرغه‌زار» آورده، یعنی مرغزار. روی سایت پیش‌تر «سرمرغ» نوشته شده بود؛ املای منبع «سرمرق» است. وسعت و جایش نیامده.", en: "Kojaro writes the Sar-Marq farm and adds «مرغه‌زار» in parentheses, meaning a meadow. The site had been spelling it سرمرغ; the source spelling is سرمرق. Size and place are not given." }, status: "reported", source: "Kojaro" },
+          { title: { fa: "مرغزار گزی", en: "Gazi meadow" }, text: { fa: "فقط ویکی‌پدیای فارسی «مرغزار گزی» را در جاذبه‌های گردشگری آورده و منبعی برایش نگذاشته. کجارو این نام را ندارد. با گویش گزی، که مال گز و برخوار است، یکی گرفته نشده.", en: "Only Persian Wikipedia lists the Gazi meadow among tourist spots, and it gives no source. Kojaro does not have this name. It is not treated as the same thing as the Gazi dialect of Gaz and Borkhar." }, status: "unverified", source: "Persian Wikipedia" },
+          { title: { fa: "چشمه‌ی هاز", en: "Haz spring" }, text: { fa: "کجارو «چشمه‌ی هاز» را نام می‌برد. ویکی‌پدیا جایی به نام «گل پرده هاز» را جداگانه در فهرست گردش دارد و نمی‌گوید همان چشمه است. آب‌دهی و جای چشمه نوشته نشده.", en: "Kojaro names the Haz spring. Persian Wikipedia separately lists a place called Gol Pardeh Haz and does not say it is the same spring. Flow and location are not written." }, status: "reported", source: "Kojaro; Persian Wikipedia" },
+          { title: { fa: "دشت پایمیل", en: "Paymil plain" }, text: { fa: "کجارو «دشت پایمیل» را در همان فهرست آورده است. بزرگی دشت و راه رسیدنش نیامده. جدا می‌گوید گشت در دشت‌های روستا در بهار و اوایل تابستان مناسب‌تر است، چون تابستان معتدل و زمستان سرد است.", en: "Kojaro includes the Paymil plain on the same list. The size of the plain and the way to it are not given. Separately, it says walking the village plains is better in spring and early summer, because summers are temperate and winters are cold." }, status: "reported", source: "Kojaro" },
+          { title: { fa: "آبشار", en: "The waterfall" }, text: { fa: "ویکی‌پدیای فارسی در سطر جاذبه‌های گردشگری فقط کلمه‌ی «آبشار» را آورده، بی‌بلندی، فصل و مسیر، و بی‌منبع. کجارو آبشاری را نام نبرده. پنج نام دیگر همان سطر پایین‌تر آمده‌اند.", en: "Persian Wikipedia's tourism line includes only the word “waterfall”, with no height, season or path, and no citation. Kojaro does not name a waterfall. Five other names from that same line are below." }, status: "unverified", source: "Persian Wikipedia" },
+          { title: { fa: "سرکریز", en: "Sarkarriz" }, text: { fa: "ویکی‌پدیای فارسی آن را در همان سطر جاذبه‌های گردشگری آورده و هیچ توضیحی نداده: نه جا، نه این‌که چشمه است یا کاریز یا زمین. کجارو این نام را ندارد.", en: "Persian Wikipedia puts it on the same tourism line and gives no description: not the place, and not whether it is a spring, a qanat or a field. Kojaro does not have this name." }, status: "unverified", source: "Persian Wikipedia" },
+          { title: { fa: "گل پرده هاز", en: "Gol Pardeh Haz" }, text: { fa: "ویکی‌پدیا این نام را جدا از «چشمه‌ی هاز» کجارو آورده و نگفته این دو یکی هستند. جای آن و معنی بخش‌های نام شرح نشده است.", en: "Persian Wikipedia lists this name apart from Kojaro's Haz spring and does not say the two are one place. Where it is, and what the parts of the name mean, is not explained." }, status: "unverified", source: "Persian Wikipedia" },
+          { title: { fa: "هل حرامزاده", en: "Hol Haramzadeh" }, text: { fa: "فقط همین نام در سطر گردشگری ویکی‌پدیاست. معنی «هل» در این‌جا، و این‌که شخص است یا مکان، نوشته نشده. کجارو آن را ندارد.", en: "Only this name appears on Persian Wikipedia's tourism line. What هل means here, and whether it is a person or a place, is not written. Kojaro does not have it." }, status: "unverified", source: "Persian Wikipedia" },
+          { title: { fa: "نچفت", en: "Nachaft" }, text: { fa: "ویکی‌پدیا «نچفت» را میان جاهای گردشگری نام می‌برد و شرحی نمی‌دهد. در بخش تاریخ، کجارو و ویکی‌پدیا از «قلعه‌ی نچفت» به‌عنوان ویرانه‌ای نام می‌برند که برای قدمت روستا شاهد آورده شده، و همان‌جا می‌نویسند سندی برای آن قدمت نیست. یکی بودن این نام با آن قلعه گفته نشده است. روی سایت پیش‌تر «ناچفت» هم نوشته شده بود؛ املای این دو منبع «نچفت» است.", en: "Persian Wikipedia names Nachaft among places to visit and does not describe it. Under History, Kojaro and Persian Wikipedia name a Nachaft castle as a ruin cited for the village's age, and say there is no document for that age. Nobody says this name and that castle are the same place. The site had also spelled it ناچفت; these two sources write نچفت." }, status: "unverified", source: "Persian Wikipedia; Kojaro" },
+          { title: { fa: "زیرپل", en: "Zir-Pol" }, text: { fa: "ویکی‌پدیا «زیرپل» را در همان سطر آورده و نگفته کدام پل، و نگفته همان پایین پل نواب است. کجارو این نام را ندارد.", en: "Persian Wikipedia lists Zir-Pol on the same line and does not say which bridge, or whether it is the ground below Nav Bridge. Kojaro does not have this name." }, status: "unverified", source: "Persian Wikipedia" },
         ],
       },
     ],
@@ -420,6 +446,60 @@ export const sections: Section[] = [
     ],
   },
   {
+    slug: "stores",
+    title: { fa: "فروشگاه‌ها", en: "Stores" },
+    intro: {
+      fa: "مغازه‌های سُه برای خرید روزمره.",
+      en: "Shops in Soh for everyday buying.",
+    },
+    blocks: [
+      { t: "p", text: { fa: "این صفحه برای بقالی، نانوایی و مغازه‌های خود روستاست. صفحه‌ی «خرید» درباره‌ی محصولاتی است که سُه به آن معروف است، نه فهرست مغازه‌ها.", en: "This page is for the grocery, the bakery and the other shops in the village itself. The Where to buy page is about what Soh is known for growing and making, not a list of shops." } },
+      {
+        t: "cards",
+        items: [
+          { title: { fa: "در خود روستا", en: "In the village" }, text: { fa: "در منابعی که خوانده‌ایم هیچ بقالی، نانوایی یا مغازه‌ای در سُه با نام و نشانی نیامده است (جستجو تا ۳ آذر ۱۴۰۵). کجارو فقط می‌نویسد بعضی باغدارها میوه‌ی خود را مستقیم می‌فروشند. این یک مغازه با ساعت کار نیست.", en: "None of the sources we read names a grocery, a bakery or any other shop in Soh, with an address (search up to 24 Nov 2026). Kojaro only says some gardeners sell their own fruit directly. That is not a shop with opening hours." }, status: "reported", source: "Kojaro; site search, 24 Nov 2026" },
+          { title: { fa: "شهرهای نزدیک", en: "Nearby towns" }, text: { fa: "میمه و شاهین‌شهر مغازه دارند. نام و نشانی‌شان را این‌جا ننوشته‌ایم، چون هنوز یکی‌یکی بررسی نشده‌اند.", en: "Meymeh and Shahin Shahr have shops. Their names and addresses are not written here, because they have not been checked one by one." }, status: "unverified" },
+        ],
+      },
+      {
+        t: "notice",
+        title: { fa: "برای افزودن مغازه بفرستید", en: "To add a shop, send" },
+        items: [
+          { fa: "نام مغازه و این‌که چه می‌فروشد", en: "The shop's name and what it sells" },
+          { fa: "جای تقریبی در روستا و ساعت کار، اگر می‌دانید", en: "Roughly where it is in the village, and the opening hours if you know them" },
+          { fa: "اجازه‌ی نوشتن شماره‌ی تماس در سایت", en: "Permission to publish a phone number" },
+        ],
+      },
+    ],
+  },
+  {
+    slug: "hospital",
+    title: { fa: "بیمارستان", en: "Hospital" },
+    intro: {
+      fa: "درمان و بیمارستان برای مردم سُه.",
+      en: "Care and hospitals for people in Soh.",
+    },
+    blocks: [
+      { t: "p", text: { fa: "برای کار فوری با اورژانس ۱۱۵ تماس بگیرید. این صفحه جای توصیه‌ی پزشکی نیست.", en: "For an emergency, call 115. This page is not medical advice." } },
+      {
+        t: "cards",
+        items: [
+          { title: { fa: "در خود روستا", en: "In the village" }, text: { fa: "در جستجوی منابع عمومی، بیمارستان، درمانگاه یا خانه‌ی بهداشت در خود سُه پیدا نشد (تا ۳ آذر ۱۴۰۵). اگر یکی هست، نامش این‌جا نوشته نشده است.", en: "A search of public sources found no hospital, clinic or health house in Soh itself (up to 24 Nov 2026). If one exists, its name is not written here." }, status: "unverified", source: "Site search, 24 Nov 2026" },
+          { title: { fa: "بیمارستان شهرهای نزدیک", en: "Hospitals in nearby towns" }, text: { fa: "بیمارستانی که مردم سُه معمولاً به آن می‌روند هنوز ثبت نشده است. تا وقتی خانواده یا درمانگاه روستا نام و نشانی را تأیید نکرده باشد، نام بیمارستانی را این‌جا نمی‌نویسیم.", en: "The hospital people in Soh usually go to is not recorded yet. No hospital is named here until the family or the village clinic confirms the name and the address." }, status: "unverified" },
+        ],
+      },
+      {
+        t: "notice",
+        title: { fa: "برای تکمیل این صفحه بفرستید", en: "To fill in this page, send" },
+        items: [
+          { fa: "نام خانه‌ی بهداشت یا درمانگاه روستا، اگر هست، و روزهایی که پزشک می‌آید", en: "The name of the village health house or clinic, if there is one, and the days a doctor comes" },
+          { fa: "بیمارستانی که مردم سُه برای کار جدی به آن می‌روند، با شهر و نشانی", en: "The hospital people in Soh use for serious care, with the town and the address" },
+          { fa: "اجازه‌ی نوشتن شماره‌ی تماس در سایت", en: "Permission to publish a phone number" },
+        ],
+      },
+    ],
+  },
+  {
     slug: "words",
     title: { fa: "واژه‌ها و گویش", en: "Words and dialect" },
     intro: {
@@ -479,6 +559,10 @@ export const sections: Section[] = [
         { name: { fa: "ویکی‌پدیا: مناطق نمونه‌ی گردشگری استان اصفهان", en: "Persian Wikipedia: model tourism areas of Isfahan province" }, url: "https://fa.wikipedia.org/wiki/%D9%81%D9%87%D8%B1%D8%B3%D8%AA_%D9%85%D9%86%D8%A7%D8%B7%D9%82_%D9%86%D9%85%D9%88%D9%86%D9%87_%DA%AF%D8%B1%D8%AF%D8%B4%DA%AF%D8%B1%DB%8C_%D8%A7%D8%B3%D8%AA%D8%A7%D9%86_%D8%A7%D8%B5%D9%81%D9%87%D8%A7%D9%86", note: { fa: "سُه و کله‌رود از روستاهای نمونه‌ی گردشگری شاهین‌شهر و میمه", en: "Soh and Kalahrud listed as model tourism villages of the county" } },
         { name: { fa: "ماکسیم سیرو (ویکی‌پدیا)", en: "Maxime Siroux (Wikipedia)" }, url: "https://en.wikipedia.org/wiki/Maxime_Siroux", note: { fa: "ایران‌شناس فرانسوی که کاروانسراهای ایران را برداشت کرد؛ کتاب ۱۹۴۹ و مقاله‌ی ۱۹۷۴ درباره‌ی کاروانسراهای صفوی", en: "The French scholar who surveyed Iran's caravanserais; his 1949 book and a 1974 article on Safavid caravanserais" } },
         { name: { fa: "جاذبه‌های شاهین‌شهر: کجارو (خبر)", en: "Kojaro news: Shahin Shahr attractions" }, url: "https://www.kojaro.com/news/194447-tourist-attractions-shahinshahr-revived/", note: { fa: "سُه و کله‌رود روستاهای هدف گردشگری", en: "Soh and Kalahrud as tourism target villages" } },
+        { name: { fa: "صدا و سیما: روستای هدف گردشگری سُه (۱۳۹۷)", en: "IRIB News: Soh as a tourism target village (2018)" }, url: "https://www.irib-news.ir/fa/news/2220982/%D8%B1%D9%88%D8%B3%D8%AA%D8%A7%DB%8C-%D9%87%D8%AF%D9%81-%DA%AF%D8%B1%D8%AF%D8%B4%DA%AF%D8%B1%DB%8C-%D8%B3%D9%8F%D9%87-%D8%AF%D8%B1-%D8%B4%D8%A7%D9%87%DB%8C%D9%86-%D8%B4%D9%87%D8%B1", note: { fa: "۱۴ شهریور ۱۳۹۷. مسجد جامع، سه امامزاده و هفت آسیاب را نام می‌برد؛ شمار آسیاب با کجارو یکی نیست.", en: "5 September 2018. Names the Friday mosque, three shrines and seven mills; the mill count does not match Kojaro." } },
+        { name: { fa: "حماسه سازان: سه", en: "Hamaseh Sazan: Soh" }, url: "https://www.hamasesazan.ir/electorate/%d8%b3%d9%87", note: { fa: "فهرست جاها. مختصاتی که نوشته (۳۳ درجه و ۱ دقیقه) با مختصات پذیرفته‌شده نمی‌خواند، پس جزئیاتش را جداگانه قطعی نگرفته‌ایم.", en: "A place list. The coordinates it gives (33°1') do not match the coordinates used here, so its details are not treated as settled on their own." } },
+        { name: { fa: "Saed News، به نقل از ایرنا (فوریه ۲۰۲۶)", en: "Saed News, quoting IRNA (February 2026)" }, url: "https://en.saednews.com/cn/7/15875", note: { fa: "گزارش انگلیسی. متن اصلی ایرنا را جداگانه نخوانده‌ایم.", en: "An English report. We have not read the original IRNA story on its own." } },
+        { name: { fa: "اتنوپدیا: Soi", en: "Etnopedia: Soi" }, url: "https://en.etnopedia.org/Soi", note: { fa: "روستا را با گویش سویی یکی می‌گیرد. واژه‌نامه نیست.", en: "Identifies the village with the Soi dialect. It is not a word list." } },
       ] },
       { t: "notice", title: verifyTitle, items: [
         { fa: "تفاوت مختصات ویکی‌پدیای انگلیسی (۳۱٫۷۸ شمالی) با همه‌ی منابع دیگر (۳۳٫۴۴ شمالی)؛ این‌جا ۳۳٫۴۴ استفاده شده.", en: "English Wikipedia's coordinates (31.78 N) differ from every other source (33.44 N); 33.44 is used here." },
@@ -634,7 +718,7 @@ export const contribute: { title: L; send: L[]; tip?: L }[] = [
     ],
   },
   {
-    title: { fa: "اقامت، فروشگاه و بانک", en: "Stay, shops and banks" },
+    title: { fa: "اقامت، فروشگاه، درمان و بانک", en: "Stay, shops, care and banks" },
     send: [
       { fa: "نام، نشانی، شماره‌ی تماس و ساعت کار", en: "Name, address, phone number and opening hours" },
       { fa: "قیمت تقریبی و تاریخ اطلاع از آن", en: "An approximate price and the date you learned it" },
@@ -657,6 +741,98 @@ export const contribute: { title: L; send: L[]; tip?: L }[] = [
     ],
   },
 ];
+
+export const mapRoad = {
+  title: { fa: "راهی که قبلاً نوشته بودیم", en: "The road already written here" },
+  lead: {
+    fa: "همان راه ورود است، با شرح بلندتر. دو منبع آن را یک‌جور ننوشته‌اند، پس هر دو این‌جا آمده و هیچ‌کدام به‌تنهایی قطعی گرفته نشده است.",
+    en: "This is the same way in, written out further. Two sources do not describe it the same way, so both are here and neither is treated as settled on its own.",
+  },
+  steps: [
+    {
+      fa: "کجارو می‌گوید بهترین وسیله خودروی شخصی است. راه اصلی ورود در شرق جاده‌ی شاهین‌شهر به میمه است. حدود ۵۰ کیلومتر شمال شاهین‌شهر، از خروجی روستاهای دهلر، بیدشک و سُه خارج شوید. سُه در انتهای مسیر و بعد از آن دو روستا است.",
+      en: "Kojaro says a private car is the practical way. The main way in is east of the Shahin Shahr to Meymeh road. About 50 km north of Shahin Shahr, leave at the exit for Dehlor, Bidshak and Soh. Soh is at the end of that road, after the other two villages.",
+    },
+    {
+      fa: "ویکی‌پدیای فارسی راه اصلی را جاده‌ی تهران به اصفهان (۶۵ شمالی) می‌نامد. حدود ۶۰ کیلومتر مانده به شهر اصفهان، بین میمه و مورچه‌خورت، مسیری حدود ۳۰ کیلومتر به سُه می‌رسد. در همین مسیر رباط شاه‌عباسی و روستاهای دهلر و بیدشک هم هستند. راه‌های فرعی به نطنز، میمه و ابیانه هم نوشته شده، بدون شرح پیچ‌به‌پیچ.",
+      en: "Persian Wikipedia calls the main road the Tehran–Isfahan road (65 north). About 60 km short of Isfahan city, between Meymeh and Murcheh Khvort, a stretch of about 30 km reaches Soh. The Shah Abbasi caravanserai and the villages of Dehlor and Bidshak are on that stretch. Side roads toward Natanz, Meymeh and Abyaneh are also mentioned, without a turn-by-turn account.",
+    },
+    {
+      fa: "در خود روستا پایانه، ایستگاه قطار یا راه‌آهن نیست. کجارو برای اتوبوس، پایانه‌ی مسافربری شاهین‌شهر و بعد تاکسی را نوشته و فاصله‌ی آن پایانه تا روستا را حدود ۷۵ کیلومتر گفته است.",
+      en: "The village itself has no bus terminal and no railway station. For a bus, Kojaro names the Shahin Shahr terminal and then a taxi, and puts that terminal about 75 km from the village.",
+    },
+  ],
+  distances: {
+    fa: "فاصله تا اصفهان در ویکی‌پدیا و خبر صدا و سیما ۹۴ کیلومتر است و در کجارو حدود ۱۰۰ کیلومتر. کجارو هم «۱۵ کیلومتر شرق میمه» نوشته و هم فاصله تا میمه را حدود ۷۵ کیلومتر. این عددها را یکی نکرده‌ایم. شماره‌ی خروجی، ساعت رانندگی و پیچ دقیق جاده در این منابع نیست.",
+    en: "The distance to Isfahan is 94 km in Wikipedia and the IRIB report, and about 100 km in Kojaro. Kojaro also says both “15 km east of Meymeh” and about 75 km from Meymeh. Those figures are left as they stand. An exit number, a driving time and the exact bend in the road are not in these sources.",
+  },
+} satisfies { title: L; lead: L; steps: L[]; distances: L };
+
+export const mapApproaches = [
+  {
+    id: "isfahan",
+    title: { fa: "از اصفهان", en: "From Isfahan" },
+    text: {
+      fa: "اصفهان در جنوب سُه است. هر دو منبع می‌گویند از سمت شمال اصفهان می‌آیید و نزدیک میمه و مورچه‌خورت به راهِ دهلر و بیدشک می‌پیچید. سُه ته آن راه است. این نقشه همان محدوده را نشان می‌دهد: از شهر اصفهان تا نشانگر روستا. خط رانندگی کشیده نشده، چون جای دقیق خروجی با مختصات در منابع نیامده.",
+      en: "Isfahan is south of Soh. Both sources say you come up from the north of Isfahan and turn, near Meymeh and Murcheh Khvort, onto the Dehlor and Bidshak road. Soh is at the end of it. This map shows that stretch of country, from Isfahan city to the village marker. No driving line is drawn, because the sources do not give coordinates for the exact exit.",
+    },
+    embed: "https://www.openstreetmap.org/export/embed.html?bbox=51.10%2C32.50%2C51.85%2C33.55&layer=mapnik&marker=33.439%2C51.452",
+    href: "https://www.openstreetmap.org/?mlat=33.439&mlon=51.452#map=9/33.05/51.48",
+  },
+  {
+    id: "tehran",
+    title: { fa: "از تهران", en: "From Tehran" },
+    text: {
+      fa: "کیلومتر تهران تا سُه در این منابع نیست. ویکی‌پدیا می‌گوید راه اصلی همان جاده‌ی تهران به اصفهان است و روستا جنوب کاشان قرار دارد. از تهران همان جاده را به سمت اصفهان می‌آیید و همان پیچ بین میمه و مورچه‌خورت را می‌گیرید، بعد دهلر و بیدشک و خود سُه. این نقشه آن کریدور شمالی را تا نشانگر روستا نشان می‌دهد، نه یک مسیر اندازه‌گیری‌شده.",
+      en: "A kilometre figure from Tehran to Soh is not in these sources. Wikipedia says the main road is the Tehran–Isfahan road and that the village lies south of Kashan. From Tehran you stay on that road toward Isfahan, take the same turn between Meymeh and Murcheh Khvort, then Dehlor, Bidshak and Soh. This map shows that northern corridor down to the village marker. It is not a measured route.",
+    },
+    embed: "https://www.openstreetmap.org/export/embed.html?bbox=50.55%2C33.20%2C51.95%2C35.90&layer=mapnik&marker=33.439%2C51.452",
+    href: "https://www.openstreetmap.org/?mlat=33.439&mlon=51.452#map=7/34.55/51.25",
+  },
+] as const;
+
+export const mapServices = [
+  {
+    slug: "stores",
+    title: { fa: "فروشگاه‌ها", en: "Stores" },
+    text: {
+      fa: "برای خرید روزمره در خود روستاست. در منابعی که خوانده‌ایم هیچ بقالی یا نانوایی با نام و نشانی نیامده. کجارو فقط می‌نویسد بعضی باغدارها میوه‌ی خود را مستقیم می‌فروشند. میمه و شاهین‌شهر مغازه دارند، ولی هنوز یکی‌یکی بررسی نشده‌اند.",
+      en: "Everyday shops in the village itself. None of the sources we read names a grocery or a bakery with an address. Kojaro only says some gardeners sell their own fruit directly. Meymeh and Shahin Shahr have shops, and those have not been checked one by one.",
+    },
+  },
+  {
+    slug: "hospital",
+    title: { fa: "بیمارستان", en: "Hospital" },
+    text: {
+      fa: "برای کار فوری با ۱۱۵ تماس بگیرید. این توضیح توصیه‌ی پزشکی نیست. در جستجوی منابع عمومی، بیمارستان، درمانگاه یا خانه‌ی بهداشت در خود سُه پیدا نشد. بیمارستانی که مردم روستا برای کار جدی به آن می‌روند هنوز ثبت نشده و نامی این‌جا نوشته نشده است.",
+      en: "For an emergency, call 115. This note is not medical advice. A search of public sources found no hospital, clinic or health house in Soh itself. The hospital people use for serious care is not recorded yet, so none is named here.",
+    },
+  },
+  {
+    slug: "banks",
+    title: { fa: "بانک‌ها", en: "Banks" },
+    text: {
+      fa: "شعبه یا خودپردازی در خود سُه پیدا نشد. پیش از سفر مقداری پول نقد همراه داشته باشید. یک نشانی بررسی‌نشده برای بانک صادرات در شهرک صنعتی مورچه‌خورت در نقشه‌ی بلد آمده است. شهرهای نزدیک شعبه‌ی بیشتری دارند و هنوز فهرست نشده‌اند.",
+      en: "No branch or ATM was found in Soh itself. Carry some cash before you travel. An unchecked address for Bank Saderat in the Murcheh Khvort industrial town appears on the Balad map. The nearby towns have more branches, and they are not listed yet.",
+    },
+  },
+  {
+    slug: "stay",
+    title: { fa: "اقامت", en: "Where to stay" },
+    text: {
+      fa: "کجارو می‌نویسد در سُه بوم‌گردی یا مهمان‌پذیر نیست و چادر در دامنه‌ی کوه، یا ماندن در شهرها و روستاهای نزدیک را پیشنهاد می‌کند. میمه، شاهین‌شهر و اصفهان اقامتگاه بیشتری دارند. فهرست بررسی‌شده‌ای از آن‌ها این‌جا نیست.",
+      en: "Kojaro says Soh has no eco-lodge or guest house, and suggests camping in the foothills or staying in nearby towns and villages. Meymeh, Shahin Shahr and Isfahan have more places to stay. There is no checked list of them here.",
+    },
+  },
+  {
+    slug: "shop",
+    title: { fa: "خرید", en: "Where to buy" },
+    text: {
+      fa: "این یکی فهرست مغازه نیست. درباره‌ی چیزی است که سُه به آن معروف است: سیب، گردو، لبنیات و قالی جوشقانی. فروشگاه یا فروشنده‌ی آنلاین مشخصی برای محصولات سُه پیدا نشده و راه مطمئن امروز پرسیدن از اهالی است.",
+      en: "This one is not a shop list. It is what Soh is known for: apples, walnuts, dairy and Joshaqani carpets. No specific shop or online seller for those products was found, and asking residents is the reliable way today.",
+    },
+  },
+] as const;
 
 export const mapInfo = {
   lat: 33.439,

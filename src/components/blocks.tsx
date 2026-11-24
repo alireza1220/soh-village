@@ -1,5 +1,19 @@
 import type { Block, Status } from "@/lib/site";
-import type { Locale } from "@/lib/i18n";
+import type { L, Locale } from "@/lib/i18n";
+
+function slug(en: string) {
+  return en.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "item";
+}
+
+/** Stable ids for the card titles, shared by the "on this page" links. */
+export function cardAnchors(blocks: Block[]): { id: string; title: L }[] {
+  const anchors: { id: string; title: L }[] = [];
+  for (const b of blocks) {
+    if (b.t !== "cards") continue;
+    for (const c of b.items) anchors.push({ id: `card-${anchors.length}-${slug(c.title.en)}`, title: c.title });
+  }
+  return anchors;
+}
 
 const statusText: Record<Status, { fa: string; en: string }> = {
   reported: { fa: "گزارش‌شده", en: "reported" },
@@ -8,6 +22,8 @@ const statusText: Record<Status, { fa: string; en: string }> = {
 };
 
 export function Blocks({ blocks, lang }: { blocks: Block[]; lang: Locale }) {
+  const anchors = cardAnchors(blocks);
+  let card = 0;
   return (
     <div className="flex flex-col gap-6">
       {blocks.map((b, i) => {
@@ -17,11 +33,13 @@ export function Blocks({ blocks, lang }: { blocks: Block[]; lang: Locale }) {
           case "cards":
             return (
               <div key={i} className="flex flex-col gap-3">
-                {b.items.map((c) => (
-                  <article key={c.title.en} className="item flex flex-col gap-1">
+                {b.items.map((c) => {
+                  const id = anchors[card++]?.id ?? `card-${i}-${slug(c.title.en)}`;
+                  return (
+                  <article key={id} id={id} className="item flex flex-col gap-1">
                     <h3 className="text-lg font-semibold">
                       {c.title[lang]}
-                      {c.fa && lang === "en" && <span lang="fa" dir="rtl" className="fa-display ms-3 text-base" style={{ color: "var(--dome)" }}>{c.fa}</span>}
+                      {c.fa && lang === "en" && <span lang="fa" dir="rtl" className="fa-display ms-3 text-base" style={{ color: "var(--accent)" }}>{c.fa}</span>}
                     </h3>
                     <p>{c.text[lang]}</p>
                     <p className="text-sm muted">
@@ -29,7 +47,8 @@ export function Blocks({ blocks, lang }: { blocks: Block[]; lang: Locale }) {
                       {c.href ? <a className="link" href={c.href} target="_blank" rel="noopener noreferrer">{c.source ?? c.href}</a> : c.source}
                     </p>
                   </article>
-                ))}
+                  );
+                })}
               </div>
             );
           case "tags":

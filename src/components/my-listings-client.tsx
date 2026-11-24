@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import type { Locale } from "@/lib/i18n";
 import { useSession } from "@/components/use-session";
+import { signOut } from "@/lib/auth";
 import { ListingManager, type RunAction } from "@/components/listing-manager";
 import { errorText, postJson, type ManagedListing } from "@/components/listing-api";
 
@@ -11,6 +12,7 @@ const T = {
   login: { fa: "رفتن به صفحه‌ی ورود", en: "Go to login" },
   loading: { fa: "در حال بارگذاری...", en: "Loading..." },
   empty: { fa: "هنوز آگهی‌ای با این حساب ندارید.", en: "You have no listings on this account yet." },
+  out: { fa: "خروج", en: "Sign out" },
   deleted: { fa: "آگهی حذف شد.", en: "The listing was deleted." },
   retry: { fa: "تلاش دوباره", en: "Try again" },
 };
@@ -49,7 +51,10 @@ export function MyListingsClient({ lang }: { lang: Locale }) {
   }
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-sm muted" dir="ltr" style={{ textAlign: lang === "fa" ? "right" : "left" }}>{session.user.email}</p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm muted" dir="ltr">{session.user.email}</p>
+        <button type="button" className="btn btn-ghost" onClick={() => void signOut()}>{T.out[lang]}</button>
+      </div>
       <div aria-live="polite" role="status">
         {note && <p className="text-sm" style={{ color: "var(--accent)" }}>{note}</p>}
         {err && (

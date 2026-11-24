@@ -6,6 +6,8 @@ import "../globals.css";
 import { dirOf, hasLocale, locales } from "@/lib/i18n";
 import { sections, siteName } from "@/lib/site";
 import { AuthLink } from "@/components/auth-link";
+import { LangSwitch } from "@/components/lang-switch";
+import { NavLink } from "@/components/nav-link";
 
 const inter = Inter({ variable: "--font-body", subsets: ["latin"] });
 const fraunces = Fraunces({ variable: "--font-serif", subsets: ["latin"] });
@@ -27,12 +29,12 @@ export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Prom
 export default async function LangLayout({ children, params }: LayoutProps<"/[lang]">) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
-  const other = lang === "fa" ? "en" : "fa";
   const main = sections.slice(0, 5);
   const more = [
     ...sections.slice(5).map((s) => ({ href: `/${lang}/${s.slug}`, label: s.title[lang] })),
     { href: `/${lang}/map`, label: lang === "fa" ? "نقشه" : "Map" },
     { href: `/${lang}/photos`, label: lang === "fa" ? "عکس‌ها" : "Photos" },
+    { href: `/${lang}/references`, label: lang === "fa" ? "راهنما و منابع" : "Guide and sources" },
   ];
   const all = [...main.map((s) => ({ href: `/${lang}/${s.slug}`, label: s.title[lang] })), ...more];
   const contributeLabel = lang === "fa" ? "مشارکت" : "Contribute";
@@ -46,23 +48,23 @@ export default async function LangLayout({ children, params }: LayoutProps<"/[la
               <span className="font-semibold hidden sm:inline">{siteName[lang]}</span>
             </Link>
             <nav className="nav hidden lg:flex items-center gap-1" aria-label={lang === "fa" ? "بخش‌ها" : "Sections"}>
-              {main.map((s) => <Link key={s.slug} href={`/${lang}/${s.slug}`}>{s.title[lang]}</Link>)}
+              {main.map((s) => <NavLink key={s.slug} href={`/${lang}/${s.slug}`}>{s.title[lang]}</NavLink>)}
               <details className="relative">
                 <summary className="cursor-pointer list-none px-3 py-1.5 rounded-lg text-[15px] muted hover:bg-[var(--chip)]">{lang === "fa" ? "بیشتر" : "More"} ▾</summary>
                 <div className="menu card absolute end-0 mt-2 flex flex-col p-2 min-w-48 z-30">
-                  {more.map((m) => <Link key={m.href} href={m.href}>{m.label}</Link>)}
+                  {more.map((m) => <NavLink key={m.href} href={m.href}>{m.label}</NavLink>)}
                 </div>
               </details>
             </nav>
             <div className="flex items-center gap-2">
-              <Link href={`/${other}`} className="btn btn-ghost" hrefLang={other} lang={other}>{other === "fa" ? "فارسی" : "English"}</Link>
+              <LangSwitch lang={lang} />
               <AuthLink lang={lang} className="btn btn-ghost hidden sm:inline-flex" />
               <Link href={`/${lang}/contribute`} className="btn btn-primary hidden sm:inline-flex">{contributeLabel}</Link>
               <details className="relative lg:hidden">
                 <summary className="btn btn-ghost cursor-pointer list-none" aria-label={lang === "fa" ? "منو" : "Menu"}>☰</summary>
                 <div className="menu card absolute end-0 mt-2 flex flex-col p-2 min-w-56 z-30 max-h-[70vh] overflow-auto">
-                  {all.map((m) => <Link key={m.href} href={m.href}>{m.label}</Link>)}
-                  <Link href={`/${lang}/contribute`}>{contributeLabel}</Link>
+                  {all.map((m) => <NavLink key={m.href} href={m.href}>{m.label}</NavLink>)}
+                  <NavLink href={`/${lang}/contribute`}>{contributeLabel}</NavLink>
                   <AuthLink lang={lang} className="" />
                 </div>
               </details>
@@ -76,7 +78,7 @@ export default async function LangLayout({ children, params }: LayoutProps<"/[la
               <span lang="fa" className="fa-display text-4xl font-bold leading-none" style={{ color: "var(--apple)" }}>سُه</span>
               <p className="text-sm muted max-w-xs">{lang === "fa" ? "پیش‌نویس ساخته‌شده از منابع عمومی اینترنت. برچسب‌ها نشان می‌دهند هر مطلب چقدر پشتوانه دارد." : "A draft built from public web sources. Labels show how well each fact is backed."}</p>
             </div>
-            <ul className="list-none p-0 m-0 flex flex-col gap-1 text-sm">
+            <ul className="footer-links list-none p-0 m-0 text-sm">
               {all.map((m) => <li key={m.href}><Link className="muted hover:underline" href={m.href}>{m.label}</Link></li>)}
             </ul>
             <ul className="list-none p-0 m-0 flex flex-col gap-1 text-sm">

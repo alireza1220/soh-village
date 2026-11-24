@@ -19,16 +19,13 @@ export default async function Photos({ params }: PageProps<"/[lang]/photos">) {
   return (
     <article className="wrap pt-10 flex flex-col gap-8">
       <h1 className="text-[clamp(34px,5vw,52px)]">{lang === "fa" ? "عکس‌ها" : "Photos"}</h1>
-      {photos.length === 0 ? (
-        <p className="muted">{lang === "fa" ? "هنوز عکسی از خود سُه نداریم. این عکس‌ها از منطقه‌ی اطراف است و مجوز آزاد دارند؛ هر کدام برچسب «نه سُه» دارد. عکس‌های لازم از خود روستا در پایین آمده است." : "We do not have a photo of Soh itself yet. These are freely licensed photos of the surrounding area, each labelled “not Soh”. The photos we need from the village are listed below."}</p>
-      ) : (
-        groups.map((g) => (
+      <p className="muted max-w-3xl">{lang === "fa" ? "عکس صفحه‌ی اول را برای همین سایت فرستاده‌اند. بقیه‌ی عکس‌ها از منطقه‌ی اطراف است، مجوز آزاد دارند و برچسب «نه سُه» دارند. عکس‌هایی که هنوز از خود روستا لازم داریم پایین صفحه آمده است." : "The opening photo was supplied for this site. The other pictures are freely licensed photos of the surrounding area, and each one is labelled “not Soh”. The photos we still need from the village are listed at the bottom."}</p>
+      {groups.map((g) => (
           <section key={g} className="flex flex-col gap-3">
             <h2 className="text-2xl">{name(g)}</h2>
             <Gallery photos={photos.filter((p) => p.section === g)} lang={lang} />
           </section>
-        ))
-      )}
+        ))}
       <section className="flex flex-col gap-3">
         <h2 className="text-2xl">{lang === "fa" ? "عکس‌های دیگرِ سُه در اینترنت" : "More photos of Soh online"}</h2>
         <p className="text-sm muted">{lang === "fa" ? "این عکس‌ها مال صاحبانشان است و این‌جا کپی نشده‌اند؛ فقط پیوند آمده. برای استفاده، از عکاس اجازه بگیرید." : "These photos belong to their owners and are not copied here, only linked. Ask the photographer before using one."}</p>

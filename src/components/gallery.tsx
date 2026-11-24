@@ -14,8 +14,9 @@ export function Gallery({ photos, lang }: { photos: Photo[]; lang: Locale }) {
       <ul className="grid gap-3 list-none p-0 m-0" style={{ gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))" }}>
         {photos.map((p) => (
           <li key={p.file} className="item p-2">
-            <button type="button" onClick={() => show(p)} className="block w-full text-start cursor-zoom-in" aria-label={(lang === "fa" ? "بزرگ‌نمایی: " : "Enlarge: ") + p.alt[lang]}>
+            <button type="button" onClick={() => show(p)} className="relative block w-full text-start cursor-zoom-in" aria-label={(lang === "fa" ? "بزرگ‌نمایی: " : "Enlarge: ") + p.alt[lang]}>
               <Image src={`/photos/${p.file}`} alt={p.alt[lang]} width={p.width} height={p.height} className="w-full h-auto rounded" sizes="(max-width: 760px) 50vw, 240px" />
+              {p.scope === "region" && <span className="region-badge">{lang === "fa" ? "عکس منطقه، نه سُه" : "Region photo, not Soh"}</span>}
             </button>
             <p className="mt-2 text-sm">{p.caption[lang]}</p>
             <Credit p={p} lang={lang} />

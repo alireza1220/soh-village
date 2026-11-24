@@ -12,8 +12,9 @@ export function PhotoStrip({ section, lang }: { section: string; lang: Locale })
   return (
     <div className="flex flex-col gap-4">
       {first && (
-        <figure className="card hero-photo relative m-0 overflow-hidden" style={{ aspectRatio: "16 / 8" }}>
+        <figure className="card hero-photo relative m-0 overflow-hidden" style={{ aspectRatio: `${first.width} / ${first.height}` }}>
           <Image src={`/photos/${first.file}`} alt={first.alt[lang]} fill sizes="(max-width: 1120px) 100vw, 1120px" className="object-cover" priority />
+          {first.scope === "region" && <span className="region-badge region-badge-top">{lang === "fa" ? "عکس منطقه، نه سُه" : "Region photo, not Soh"}</span>}
           <figcaption className="absolute inset-x-0 bottom-0 z-10 flex flex-col gap-1 p-4 text-white">
             <span className="text-sm md:text-base">{first.caption[lang]}</span>
             <Credit p={first} lang={lang} light />

@@ -157,3 +157,12 @@ See `photo-links.md` for all 43 photo links (5 on the site, 20 free-licence area
 - https://fa.wikipedia.org/wiki/%D8%AA%D9%BE%D9%87_%DA%A9%D9%87%D9%86%D9%87_%D8%AF%D9%87_%D8%B3%D9%87_%DA%A9%D8%A7%D9%86%DB%8C (Tepe Kohneh Deh Sehkani, a different "Seh")
 - https://faradeed.ir/ old-photo pages (120-year-old village photo; not Soh)
 - Vercel pricing pages (https://vercel.com/pricing , https://vercel.com/docs/accounts/plans/hobby-plan) from the hosting question
+
+## 11. Second pass, 24 Nov 2026
+| Status | URL | Note |
+|---|---|---|
+| snippet read | https://www.irib-news.ir/fa/news/2220982/%D8%B1%D9%88%D8%B3%D8%AA%D8%A7%DB%8C-%D9%87%D8%AF%D9%81-%DA%AF%D8%B1%D8%AF%D8%B4%DA%AF%D8%B1%DB%8C-%D8%B3%D9%8F%D9%87-%D8%AF%D8%B1-%D8%B4%D8%A7%D9%87%DB%8C%D9%86-%D8%B4%D9%87%D8%B1 | IRIB, 14 Shahrivar 1397: tourism target village, Friday mosque with three shrines, seven mills, 94 km from Isfahan. Mill count conflicts with Kojaro's three. |
+| snippet read | https://www.hamasesazan.ir/electorate/%d8%b3%d9%87 | Place list. Coordinates given as 33°1' N, 51°21' E, which do not match 33.44 N, 51.45 E. |
+| snippet read | https://en.saednews.com/cn/7/15875 | Saed News, 2 Feb 2026, quoting IRNA. English summary of sights. Original IRNA text not opened. |
+| snippet read | https://en.etnopedia.org/Soi | Etnopedia "Soi": identifies Soh village with the Soi people. Not a word list. |
+| not used | https://ur.wikipedia.org/wiki/%D8%B3%D9%88%DB%81%D8%8C_%D8%B4%D8%A7%DB%81%DB%8C%D9%86_%D8%B4%DB%81%D8%B1 | Urdu Wikipedia. Copies the English Wikipedia coordinates (31.78 N), which this site does not use. |

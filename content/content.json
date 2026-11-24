@@ -154,33 +154,123 @@
       "source": "Kojaro"
     },
     {
-      "name": "Other historic places",
-      "fa": "",
-      "text": "Nav Bridge (پل نواب), the Imamzadeh mill and two other mills, the old telegraph house, a dovecote tower, Mirza Jafar's house, a brick kiln and a small zurkhaneh (traditional gym).",
+      "name": "Nav Bridge",
+      "fa": "پل نواب",
+      "text": "Kojaro names it and gives no age, material or condition.",
       "status": "reported",
       "source": "Kojaro"
     },
     {
-      "name": "More historic places",
-      "fa": "",
-      "text": "Abbasi caravanserai at Aqa Kamal Pain (on the access road), a mosque about 200 years old beside the bath, four forts (Bala, Pain, Miyan, Chal), a Farangi mansion, the covered passage (sabat) in the upper-castle alley and Kandeh Baghestan.",
+      "name": "Imamzadeh mill",
+      "fa": "آسیاب امامزاده",
+      "text": "One of three water mills named by Kojaro. IRIB (2018) and Hamaseh Sazan say seven mills; Hamaseh Sazan says they are ruined, but that page's coordinates do not match, so the ruin is not settled. Do not guess the location from the name.",
+      "status": "unverified",
+      "source": "Kojaro; IRIB News, 14 Shahrivar 1397; Hamaseh Sazan"
+    },
+    {
+      "name": "Mirza Abolhasan mill",
+      "fa": "آسیاب میرزا ابوالحسن",
+      "text": "Named by Kojaro. Who he was, and the mill's condition, are not written.",
       "status": "reported",
-      "source": "Kojaro, a 2021 blog"
+      "source": "Kojaro"
+    },
+    {
+      "name": "Mirza Mohammad mill",
+      "fa": "آسیاب میرزا محمد",
+      "text": "Named by Kojaro. The three names and IRIB's seven mills are not reconciled.",
+      "status": "unverified",
+      "source": "Kojaro; IRIB News, 14 Shahrivar 1397"
+    },
+    {
+      "name": "The telegraph house",
+      "fa": "خانه تلگراف",
+      "text": "Kojaro: an old mansion known as the telegraph house, counted among Safavid and Qajar remains. Later called the English telegraph house. May be the same building as the Farangi mansion.",
+      "status": "unverified",
+      "source": "Kojaro; Hamaseh Sazan; Saed News, Feb 2026"
+    },
+    {
+      "name": "Dovecote tower",
+      "fa": "برج کبوتر",
+      "text": "Kojaro lists one tower and does not say where it is or whether it is intact.",
+      "status": "reported",
+      "source": "Kojaro"
+    },
+    {
+      "name": "Mirza Jafar's house",
+      "fa": "منزل میرزا جعفر",
+      "text": "Named by Kojaro. No link is given to the kadkhoda or to the mill names.",
+      "status": "reported",
+      "source": "Kojaro"
+    },
+    {
+      "name": "Brick kiln",
+      "fa": "کوره آجرپزی",
+      "text": "Named by Kojaro, with no other detail.",
+      "status": "reported",
+      "source": "Kojaro"
+    },
+    {
+      "name": "The small zurkhaneh",
+      "fa": "زورخانه",
+      "text": "Kojaro says traditional gym sports are popular and that a small zurkhaneh is used for them.",
+      "status": "reported",
+      "source": "Kojaro"
+    },
+    {
+      "name": "The mosque beside the bath",
+      "fa": "مسجد کنار حمام",
+      "text": "Earlier notes said a mosque about 200 years old beside the bath. Kojaro does not describe it. The 200 years belongs to the bath, so the number may have been copied by mistake. IRIB's Friday mosque may or may not be the same building.",
+      "status": "unverified",
+      "source": "Site notes checked against Kojaro and IRIB News"
+    },
+    {
+      "name": "The Abbasi caravanserai",
+      "fa": "کاروانسرای عباسی",
+      "text": "Kojaro: an Abbasi caravanserai on the main road into the village, evidence of a trade route. A 2026 IRNA summary calls it Agha Kamal Payin and translates it Abbasid, which is not the same word. Not the caravanserai inside the village.",
+      "status": "unverified",
+      "source": "Kojaro; Saed News, Feb 2026"
+    },
+    {
+      "name": "The Farangi mansion",
+      "fa": "عمارت فرنگی",
+      "text": "Not a separate Kojaro entry. Hamaseh Sazan says it was the telegraph office. A 2026 summary quoting IRNA lists it apart from the English telegraph house.",
+      "status": "unverified",
+      "source": "Hamaseh Sazan; Saed News, Feb 2026"
+    },
+    {
+      "name": "The covered passage in the upper-castle alley",
+      "fa": "ساباط کوچه قلعه بالا",
+      "text": "A sabat (covered lane) placed by a 2026 IRNA summary in the old upper-castle neighbourhood. Kojaro does not describe it. Original IRNA text not read.",
+      "status": "unverified",
+      "source": "Saed News, Feb 2026, quoting IRNA"
+    },
+    {
+      "name": "Kandeh Baghestan",
+      "fa": "کنده باغستان",
+      "text": "A 2026 summary says “Kandeh garden”. Kojaro does not list it. Meaning, place and whether it is a garden are not recorded.",
+      "status": "unverified",
+      "source": "Saed News, Feb 2026, quoting IRNA"
     }
   ],
   "nature": {
     "places": [
-      "Kuh-e Char and Kuh-e Baghal Siyah mountains",
-      "Lab Char river",
-      "Qash Sorkheh",
-      "Margaleh",
-      "Sar-Marq (Morghzar) meadow",
-      "Gazi meadow",
-      "Haz spring",
-      "Paymil plain",
-      "A waterfall, Sarkarriz, Gol Parde Haz, Nachaft, Zir-Pol"
+      { "name": "Kuh-e Char", "text": "Kojaro spells it کوه چر, beside Baghal Siyah. No height or path. The village, not the peak, is given as 2,350 m.", "status": "reported", "source": "Kojaro" },
+      { "name": "Kuh-e Baghal Siyah", "text": "Named by Kojaro next to Kuh-e Char, with no other description.", "status": "reported", "source": "Kojaro" },
+      { "name": "Lab Char river", "text": "Named by Kojaro. A seasonal river on the west side is described separately and is not treated as the same river. Farm water is mostly surface streams; a place called Band collects water for two or three fields.", "status": "reported", "source": "Kojaro; Persian Wikipedia" },
+      { "name": "Qash Sorkheh", "text": "Named by Kojaro. What a qash is here, and where it is, are not said.", "status": "reported", "source": "Kojaro" },
+      { "name": "Margaleh", "text": "Named by Kojaro and Persian Wikipedia. Neither says what kind of place it is.", "status": "reported", "source": "Kojaro; Persian Wikipedia" },
+      { "name": "Sar-Marq meadow", "text": "Kojaro: مزرعه سرمرق (مرغه‌زار). Earlier site spelling سرمرغ was the source's سرمرق. Size and place not given.", "status": "reported", "source": "Kojaro" },
+      { "name": "Gazi meadow", "text": "Persian Wikipedia lists it with no citation. Kojaro does not. Not the Gazi dialect of Gaz.", "status": "unverified", "source": "Persian Wikipedia" },
+      { "name": "Haz spring", "text": "Named by Kojaro. Persian Wikipedia's Gol Pardeh Haz is a separate list entry and is not identified as this spring.", "status": "reported", "source": "Kojaro; Persian Wikipedia" },
+      { "name": "Paymil plain", "text": "Named by Kojaro. Size and access not given. Spring and early summer are the better time to walk the plains.", "status": "reported", "source": "Kojaro" },
+      { "name": "The waterfall", "text": "Persian Wikipedia lists the word only, with no height, season, path or citation. Kojaro does not name it.", "status": "unverified", "source": "Persian Wikipedia" },
+      { "name": "Sarkarriz", "text": "Named on Persian Wikipedia's tourism line with no description. Kojaro does not list it.", "status": "unverified", "source": "Persian Wikipedia" },
+      { "name": "Gol Pardeh Haz", "text": "Listed by Persian Wikipedia apart from Kojaro's Haz spring. The two are not identified as one place.", "status": "unverified", "source": "Persian Wikipedia" },
+      { "name": "Hol Haramzadeh", "text": "Name only on Persian Wikipedia's tourism line. Not said whether it is a person or a place. Kojaro does not list it.", "status": "unverified", "source": "Persian Wikipedia" },
+      { "name": "Nachaft", "text": "Named as a tourist spot with no description. History notes also cite a Nachaft castle ruin for the village's age and say that age has no document. The two are not identified. Sources spell it نچفت; the site had also written ناچفت.", "status": "unverified", "source": "Persian Wikipedia; Kojaro" },
+      { "name": "Zir-Pol", "text": "Named by Persian Wikipedia. Which bridge, and whether it is below Nav Bridge, is not said. Kojaro does not list it.", "status": "unverified", "source": "Persian Wikipedia" }
     ],
-    "source": "Kojaro, FA Wikipedia"
+    "source": "Kojaro, Persian Wikipedia"
   },
   "livelihood": {
     "summary": "About 86% of residents worked in agriculture in a survey from 2007 to 2008: crops 56%, livestock 27%, beekeeping 2.4%, poultry 0.8%. Homes are spread out, far from the fields and orchards. Water comes mainly from surface streams. In wetter years lentils, chickpeas, beans and saffron are also mentioned (FA Wikipedia).",
