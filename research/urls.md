@@ -60,8 +60,8 @@ Status = what an HTTP request returned from this Mac on 24 Nov 2026 (200 = loads
 | 200 | https://www.iranicaonline.org/articles/meyma-ii-dialect/ | Iranica: Meyma dialect, closest documented neighbour |
 | 403 | https://www.qdl.qa/archive/81055/vdc_100024054422.0x0000c4 | Qatar Digital Library: Routes in Persia (may mention Soh; unconfirmed) |
 
-## Removed
-- beinabein.com "Soh Caravanserai" travel report (Feb 2022): returns 404 and nothing confirms it exists. The site no longer links it.
+## Corrected
+- The Beinabein travel report does exist. My first address used «کاروانسرا» without the ی; the real one is below (200 OK). It is back on the site.
 
 ## Added 24 Nov 2026: found through Facebook (signed in, read-only)
 | URL | What it is |
@@ -73,3 +73,32 @@ Status = what an HTTP request returned from this Mac on 24 Nov 2026 (200 = loads
 | Facebook group post, 29 Sep 2014 | Plan of the Soh caravanserai drawn by Maxime Siroux, Nov 1962 |
 | Facebook group post (about 12 years old) | Thanks to two village men (named in the comments); 88 reactions. People's names are not published on the site. |
 | not found | Facebook videos of Soh: the public search shows only the page and group posts; videos and "Media" tabs were not opened. |
+
+## Added 24 Nov 2026: wider web search (not on the known sites)
+| Status | URL | What it is |
+|---|---|---|
+| 200 | https://beinabein.com/%DA%A9%D8%A7%D8%B1%D9%88%D8%A7%D9%86%D8%B3%D8%B1%D8%A7%DB%8C-%D8%B3%D9%87-%D8%A7%D8%B5%D9%81%D9%87%D8%A7%D9%86/ | Beinabein, Mohammad Gaeeni, 21 Feb 2022: Safavid caravanserai in mid-village, Reza Shah-era bath, name from «سهی» (tall, straight), village fabric changing; says Isfahanis and Natanzis know "Soh" as a dialect |
+| 200 | https://fa.wikipedia.org/wiki/%D9%81%D9%87%D8%B1%D8%B3%D8%AA_%D9%85%D9%86%D8%A7%D8%B7%D9%82_%D9%86%D9%85%D9%88%D9%86%D9%87_%DA%AF%D8%B1%D8%AF%D8%B4%DA%AF%D8%B1%DB%8C_%D8%A7%D8%B3%D8%AA%D8%A7%D9%86_%D8%A7%D8%B5%D9%81%D9%87%D8%A7%D9%86 | Persian Wikipedia list of model tourism areas; Soh and Kalahrud |
+| 200 | https://fa.wikipedia.org/wiki/%D9%81%D9%87%D8%B1%D8%B3%D8%AA_%DA%A9%D8%A7%D8%B1%D9%88%D8%A7%D9%86%D8%B3%D8%B1%D8%A7%D9%87%D8%A7%DB%8C_%D8%A7%DB%8C%D8%B1%D8%A7%D9%86 | Persian Wikipedia caravanserai list: row 7641 "کاروانسرای سه", Qajar, under "Ardabil province" (conflicts with Kojaro) |
+| 200 | https://en.wikipedia.org/wiki/Maxime_Siroux | Maxime Siroux, French scholar; the 1962 plan of Soh caravanserai on Facebook is attributed to him |
+| 200 | https://doi.org/10.1080/00210867408701470 | Siroux 1974, "Les caravansérails routiers safavides", Iranian Studies 7 (may cover Soh; paywalled) |
+| 403 | https://www.academia.edu/38057105/Investigation_and_Analysis_of_the_Experience_of_Isfahan_in_the_Re_Functionalization_of_Caravanserais_as_Tourist_Facilities | Paper on Isfahan caravanserais as tourist facilities (open in a browser) |
+| n/a | Andaroodi et al., "Advanced Classification of Architectural Heritage: A Corpus of Desert-on-Route Caravanserais" (ResearchGate) | Reportedly places Soh about 15 km from the current Kashan-Isfahan highway, subclass 4.6 |
+| 200 | https://www.iranicaonline.org/articles/isfahan-xx-geography-of-the-median-dialects-of-isfahan/ | Iranica, geography of the Median dialects of Isfahan |
+| n/a | Mann and Hadank, Kurdisch-Persische Forschungen III/1, Leipzig 1926, "Die Mundarten von Khunsâr, Mahallât, Natänz, Nâyin, Sämnân, Sîvänd und Sô-Kohrûd" | The original Soh dialect data (fieldwork 1901 to 1907). No online copy found; try archive.org, Staatsbibliothek Berlin |
+| 200 | https://www.shahrekhabar.com/analysis/148837020005114 | Three Isfahan dialects approved for national intangible registration (Gazi, Meymeh and one more); Soh not named |
+| 200 | http://vatankhah.blogfa.com/post/261 | Blog list of Meymeh dialect words (not Soh) |
+| 200 | https://bashgahfarhangian.com/%D9%85%D9%86%D8%A7%D8%B7%D9%82-%DA%AF%D8%B1%D8%AF%D8%B4%DA%AF%D8%B1%DB%8C-%D9%85%DB%8C%D9%85%D9%87%D8%B4%D8%A7%D9%87%DB%8C%D9%86-%D8%B4%D9%87%D8%B1/ | Tourist areas of Meymeh, Borkhar and Shahin Shahr |
+| 200 | https://www.otaghak.com/blog/attractions-of-shahin-shahr/ | Otaghak blog: attractions of Shahin Shahr |
+| 200 | https://commons.wikimedia.org/wiki/Category:Murcheh_Khvort | Commons category for Murcheh Khvort (Madar Shah caravanserai etc.; no Soh files seen) |
+| 404 | https://ourflight.ir/2024/09/13/%D8%B1%D9%88%D8%B3%D8%AA%D8%A7%DB%8C-%D8%B3%D9%87/ | "Soh village" post, Sep 2024 (page gone) |
+| 404 | https://aseman33pol.blogfa.com/post/37 | Blog "Soh, a 2000-year-old village in the heart of Karkas" (page gone) |
+| 000 | http://isfahan.irib.ir/-/%D8%B1%D9%88%D8%B3%D8%AA%D8%A7%DB%8C-%D8%B3%D9%87 | IRIB Isfahan production page "Soh village" (not reachable from here) |
+| 404 | https://www.ion.ir/news/638734/ | ION news on the Murcheh Khvort caravanserai ownership (page gone) |
+
+### New facts from this sweep
+- Another source puts the changing population at about 790 in Muharram and Nowruz (in addition to 1,000 and 5,000); the three figures disagree.
+- The village is on a list of model tourism areas of Isfahan province (Soh and Kalahrud, first round of the presidential trip).
+- Isfahanis and Natanzis know "Soh" as a dialect name (Beinabein).
+- No YouTube or Aparat video of Soh turned up; search results did not index them.
+- No Soh-specific news in 1404 or 1405 (2025 to 2026) apart from a road crash on the Kalahrud road (10 Mehr 1404), unrelated to tourism.
