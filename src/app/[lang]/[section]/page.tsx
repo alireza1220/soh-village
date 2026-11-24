@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { Blocks } from "@/components/blocks";
+import { PhotoStrip } from "@/components/photo-strip";
 import { hasLocale, locales } from "@/lib/i18n";
 import { sectionBySlug, sections } from "@/lib/site";
 
@@ -17,6 +18,7 @@ async function Content({ params }: { params: PageProps<"/[lang]/[section]">["par
     <article className="flex flex-col gap-5 pt-6">
       <h1 className="text-3xl font-bold">{s.title[lang]}</h1>
       <p className="text-lg muted">{s.intro[lang]}</p>
+      <PhotoStrip section={s.slug} lang={lang} />
       <Blocks blocks={s.blocks} lang={lang} />
     </article>
   );

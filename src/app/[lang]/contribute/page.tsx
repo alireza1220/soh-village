@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { hasLocale, locales } from "@/lib/i18n";
 import { contact, contribute } from "@/lib/site";
@@ -29,6 +30,9 @@ export default async function Contribute({ params }: PageProps<"/[lang]/contribu
             <ul className="ps-5 list-disc flex flex-col gap-1 mt-1">
               {c.send.map((x) => <li key={x.en}>{x[lang]}</li>)}
             </ul>
+            {c.title.en === "Photos" && (
+              <p className="text-sm mt-2"><Link className="link" href={`/${lang}/photos`}>{lang === "fa" ? "فهرست عکس‌هایی که لازم داریم" : "See the list of photos we need"}</Link></p>
+            )}
           </section>
         ))}
       </div>
