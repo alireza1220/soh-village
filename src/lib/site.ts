@@ -111,6 +111,26 @@ export const sections: Section[] = [
             source: "A 2021 blog and a 2022 travel report (its link could not be verified)",
           },
           {
+            title: { fa: "محوطه‌های باستانی (ادعای تازه)", en: "Ancient sites (a recent claim)" },
+            text: {
+              fa: "در پست بهمن ۱۴۰۳ (فوریه ۲۰۲۵) در گروه فیسبوکی روستا آمده است که یک باستان‌شناس اداره‌ی کل میراث فرهنگی اصفهان همراه با مسئول میراث فرهنگی شهرستان از چند محوطه‌ی تاریخی سُه بازدید کرده و قدمت سکونت در آن‌ها را دست‌کم پنج هزار سال دانسته است. دیدگاهی در همان گروه آن را هم‌زمان با تپه‌های سیلک کاشان می‌داند. هیچ گزارش رسمی یا خبری پیدا نشد؛ ادعا فقط از گفته‌ی یک اهل روستا است.",
+              en: "A February 2025 post in the village's Facebook group says an archaeologist from the Isfahan Cultural Heritage office, with the county heritage head, visited several historic sites at Soh and put human settlement there at no less than five thousand years. A comment in the same group says this is contemporary with the Sialk hills of Kashan. We found no official report or news story; the claim rests on one villager's post.",
+            },
+            status: "unverified",
+            source: "Facebook group post (Feb 2025)",
+            href: "https://www.facebook.com/groups/250924961607462/",
+          },
+          {
+            title: { fa: "نقشه‌ی کاروانسرا از سال ۱۳۴۱", en: "A 1962 plan of the caravanserai" },
+            text: {
+              fa: "در گروه فیسبوکی روستا نقشه‌ی کاروانسرای سُه، ترسیم ماکسیم سیرو (ایران‌شناس فرانسوی)، نوامبر ۱۹۶۲ گذاشته شده است. سیرو کاروانسراهای ایران را برداشت کرده است. اصل نقشه و منبع انتشار آن را هنوز پیدا نکرده‌ایم.",
+              en: "The village's Facebook group shows a plan of the Soh caravanserai drawn by Maxime Siroux, a French Iranologist, in November 1962. Siroux surveyed Iran's caravanserais. We have not found the original plan or where it was published.",
+            },
+            status: "unverified",
+            source: "Facebook group post (Sep 2014)",
+            href: "https://www.facebook.com/groups/250924961607462/",
+          },
+          {
             title: { fa: "جدایی از نطنز", en: "Separation from Natanz" },
             text: {
               fa: "تا سال ۱۳۷۵ (۱۹۹۶) سُه جزو شهرستان نطنز بوده و پس از آن جدا شده است. ویکی‌پدیای فارسی برای این جمله «نیازمند منبع» گذاشته است.",
@@ -420,7 +440,7 @@ export const sections: Section[] = [
       en: "What exists online about Soh that we have found so far.",
     },
     blocks: [
-      { t: "p", text: { fa: "وب‌سایت رسمی برای سُه پیدا نشد (۲ آذر ۱۴۰۵). روستاها معمولاً دهیاری دارند و سایت مستقل ندارند.", en: "No official website for Soh was found (23 Nov 2026). Villages usually have a dehyari (village council) rather than a site of their own." } },
+      { t: "p", text: { fa: "صفحه‌ی فیسبوک روستا نشانی «soh.ir» را به‌عنوان وب‌سایت خود نوشته است، ولی این نشانی در ۴ آذر ۱۴۰۵ باز نشد (رکورد دی‌ان‌اس پیدا نشد). وب‌سایت رسمی دیگری پیدا نشد.", en: "The village\u2019s Facebook page lists “soh.ir” as its website, but that address did not load on 24 Nov 2026 (no DNS record found). We found no other official website." } },
       { t: "links", items: [
         { name: { fa: "ویکی‌پدیای فارسی: سه (شاهین‌شهر)", en: "Persian Wikipedia: Soh" }, url: "https://fa.wikipedia.org/wiki/%D8%B3%D9%87_(%D8%B4%D8%A7%D9%87%DB%8C%D9%86%E2%80%8C%D8%B4%D9%87%D8%B1_%D9%88_%D9%85%DB%8C%D9%85%D9%87)", note: { fa: "تاریخ، اقتصاد، چهره‌ها", en: "History, economy, people" } },
         { name: { fa: "ویکی‌پدیای انگلیسی: Soh, Shahinshahr", en: "English Wikipedia: Soh, Shahinshahr" }, url: "https://en.wikipedia.org/wiki/Soh,_Shahinshahr", note: { fa: "جمعیت (سرشماری)", en: "Census population" } },
@@ -428,6 +448,8 @@ export const sections: Section[] = [
         { name: { fa: "کجارو: روستای سه اصفهان", en: "Kojaro: Soh village" }, url: "https://www.kojaro.com/attraction/64660-isfahan-soh-village/", note: { fa: "راهنمای گردشگری، منبع بیشتر جاذبه‌ها", en: "Travel guide, the source for most sights" } },
         { name: { fa: "نقشه‌ی گوگل (از کجارو)", en: "Google Maps (via Kojaro)" }, url: "https://goo.gl/maps/wDRqsHQ2uwYaXufJ9", note: { fa: "موقعیت روستا", en: "Village location" } },
         { name: { fa: "اینستاگرام: soh_village", en: "Instagram: soh_village" }, url: "https://www.instagram.com/soh_village/", note: { fa: "صفحه‌ی «روستای تاریخی سه». در آبان ۱۴۰۵ فعال بود و هر روز مطلب می‌گذاشت. گرداننده‌اش معلوم نیست.", en: "“The historic village of Soh”. Active in November 2026, posting daily. Who runs it is not stated." } },
+        { name: { fa: "فیسبوک: صفحه‌ی روستای تاریخی سُه", en: "Facebook: the historic village of Soh (page)" }, url: "https://www.facebook.com/sohiran", note: { fa: "حدود ۹۳۰ دنبال‌کننده؛ نشانی soh.ir را به‌عنوان وب‌سایت نوشته است", en: "About 930 followers; lists soh.ir as its website" } },
+        { name: { fa: "فیسبوک: گروه عمومی روستای تاریخی سه (soh)", en: "Facebook: public group “the historic village of Soh”" }, url: "https://www.facebook.com/groups/250924961607462/", note: { fa: "حدود ۱٫۱ هزار عضو؛ عکس قدیمی، تاریخ، یادبود و گفت‌وگو. پس از ثبت‌نام قابل‌دیدن‌تر است.", en: "About 1.1K members; old photos, history, memories and discussion. More is visible once you are a member." } },
         { name: { fa: "تلگرام: esfahansohi", en: "Telegram: esfahansohi" }, url: "https://t.me/esfahansohi", note: { fa: "کانال اهالی: اطلاعیه، خاطره و عکس. حدود ۸۵۰ عضو.", en: "A channel for villagers: announcements, memories and photos. About 850 subscribers." } },
         { name: { fa: "مهر: آیین‌های محرم در سه", en: "Mehr News: Muharram rites in Soh" }, url: "https://www.mehrnews.com/news/5842144/", note: { fa: "گزارش تیر ۱۴۰۲ درباره‌ی عماری‌گردانی و نخل‌گردانی", en: "July 2023 report on the amari and nakhl carrying" } },
         { name: { fa: "خبر صدا و سیما: روستای سُه، تماشایی اما ناشناخته", en: "IRIB News: Soh, beautiful but unknown" }, url: "https://www.irib-news.ir/fa/news/3114741/", note: { fa: "خرداد ۱۴۰۰؛ ویدیو و ۹ عکس دارد. متن را نخوانده‌ایم.", en: "May 2021; has a video and 9 photos. We have not read it." } },

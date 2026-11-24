@@ -62,3 +62,14 @@ Status = what an HTTP request returned from this Mac on 24 Nov 2026 (200 = loads
 
 ## Removed
 - beinabein.com "Soh Caravanserai" travel report (Feb 2022): returns 404 and nothing confirms it exists. The site no longer links it.
+
+## Added 24 Nov 2026: found through Facebook (signed in, read-only)
+| URL | What it is |
+|---|---|
+| https://www.facebook.com/sohiran | Page "روستای تاریخی سُه" (Historical Village of SOH), about 930 followers, lists the website **soh.ir** |
+| https://www.facebook.com/groups/250924961607462/ | Public group "روستای تاریخی سه (soh)", about 1.1K members, posts since at least 2012 |
+| soh.ir | Listed as the village's website on the Facebook page. No DNS record found on 24 Nov 2026 (dig returned nothing; Chrome showed an error page). It may be expired, or not reachable from outside Iran. |
+| Facebook group post, 22 Feb 2025 | A villager reports an archaeologist from the Isfahan heritage office and the county heritage head visiting Soh's ancient sites; settlement "at least five thousand years" (rest of the post truncated); a comment says contemporary with the Sialk hills. Unverified, no official source. |
+| Facebook group post, 29 Sep 2014 | Plan of the Soh caravanserai drawn by Maxime Siroux, Nov 1962 |
+| Facebook group post (about 12 years old) | Thanks to two village men (named in the comments); 88 reactions. People's names are not published on the site. |
+| not found | Facebook videos of Soh: the public search shows only the page and group posts; videos and "Media" tabs were not opened. |
