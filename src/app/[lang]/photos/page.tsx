@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Gallery } from "@/components/gallery";
 import { hasLocale, locales } from "@/lib/i18n";
 import { photos, shots } from "@/lib/photos";
+import { freeAreaPhotoLinks, ownedPhotoLinks, possiblySohLinks } from "@/lib/photo-links";
 import { sectionBySlug } from "@/lib/site";
 
 export function generateStaticParams() {
@@ -28,6 +29,43 @@ export default async function Photos({ params }: PageProps<"/[lang]/photos">) {
           </section>
         ))
       )}
+      <section className="flex flex-col gap-3">
+        <h2 className="text-2xl">{lang === "fa" ? "عکس‌های دیگرِ سُه در اینترنت" : "More photos of Soh online"}</h2>
+        <p className="text-sm muted">{lang === "fa" ? "این عکس‌ها مال صاحبانشان است و این‌جا کپی نشده‌اند؛ فقط پیوند آمده. برای استفاده، از عکاس اجازه بگیرید." : "These photos belong to their owners and are not copied here, only linked. Ask the photographer before using one."}</p>
+        <ul className="flex flex-col gap-2 list-none p-0 m-0">
+          {ownedPhotoLinks.map((l) => (
+            <li key={l.url + l.label.en} className="item">
+              <a className="link" href={l.url} target="_blank" rel="noopener noreferrer">{l.label[lang]}</a>
+            </li>
+          ))}
+        </ul>
+      </section>
+      <section className="flex flex-col gap-3">
+        <h2 className="text-2xl">{lang === "fa" ? "شاید از سُه باشد" : "Possibly Soh"}</h2>
+        <ul className="flex flex-col gap-2 list-none p-0 m-0">
+          {possiblySohLinks.map((l) => (
+            <li key={l.url} className="item">
+              <a className="link" href={l.url} target="_blank" rel="noopener noreferrer">{l.label[lang]}</a>
+              {l.note && <p className="text-sm muted">{l.note[lang]}</p>}
+            </li>
+          ))}
+        </ul>
+      </section>
+      <section className="flex flex-col gap-3">
+        <h2 className="text-2xl">{lang === "fa" ? "عکس‌های آزاد از منطقه (در سایت نیست)" : "Free-licence photos of the area (not on the site)"}</h2>
+        <p className="text-sm muted">{lang === "fa" ? "همه در ویکی‌مدیا کامنز با مجوز آزاد؛ هیچ‌کدام سُه نیست." : "All on Wikimedia Commons under free licences; none shows Soh."}</p>
+        <details className="item">
+          <summary className="cursor-pointer font-semibold">{lang === "fa" ? `نمایش ${freeAreaPhotoLinks.length} پیوند` : `Show ${freeAreaPhotoLinks.length} links`}</summary>
+          <ul className="mt-3 flex flex-col gap-2 list-none p-0 m-0 text-sm">
+            {freeAreaPhotoLinks.map((l) => (
+              <li key={l.url}>
+                <a className="link" href={l.url} target="_blank" rel="noopener noreferrer">{l.title}</a>
+                <span className="muted"> · {l.author} · {l.license}</span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      </section>
       <section className="flex flex-col gap-3">
         <h2 className="text-2xl">{lang === "fa" ? "عکس‌هایی که لازم داریم" : "Photos we need"}</h2>
         <ul className="flex flex-col gap-2 list-none p-0 m-0">
