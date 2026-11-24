@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk, Vazirmatn } from "next/font/google";
+import { Fraunces, Inter, Vazirmatn } from "next/font/google";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import "../globals.css";
@@ -7,7 +7,7 @@ import { dirOf, hasLocale, locales } from "@/lib/i18n";
 import { sections, siteName } from "@/lib/site";
 
 const inter = Inter({ variable: "--font-body", subsets: ["latin"] });
-const grotesk = Space_Grotesk({ variable: "--font-head", subsets: ["latin"] });
+const fraunces = Fraunces({ variable: "--font-serif", subsets: ["latin"] });
 const vazir = Vazirmatn({ variable: "--font-fa", subsets: ["arabic", "latin"] });
 
 export function generateStaticParams() {
@@ -27,30 +27,60 @@ export default async function LangLayout({ children, params }: LayoutProps<"/[la
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
   const other = lang === "fa" ? "en" : "fa";
+  const main = sections.slice(0, 5);
+  const more = [
+    ...sections.slice(5).map((s) => ({ href: `/${lang}/${s.slug}`, label: s.title[lang] })),
+    { href: `/${lang}/map`, label: lang === "fa" ? "نقشه" : "Map" },
+    { href: `/${lang}/photos`, label: lang === "fa" ? "عکس‌ها" : "Photos" },
+  ];
+  const all = [...main.map((s) => ({ href: `/${lang}/${s.slug}`, label: s.title[lang] })), ...more];
+  const contributeLabel = lang === "fa" ? "مشارکت" : "Contribute";
   return (
-    <html lang={lang} dir={dirOf(lang)} className={`${inter.variable} ${grotesk.variable} ${vazir.variable}`}>
+    <html lang={lang} dir={dirOf(lang)} className={`${inter.variable} ${fraunces.variable} ${vazir.variable}`}>
       <body lang={lang} className="min-h-screen flex flex-col">
-        <header className="wrap w-full py-4 flex flex-wrap items-center gap-x-4 gap-y-2 justify-between">
-          <Link href={`/${lang}`} className="font-bold text-lg" style={{ fontFamily: "var(--font-head), var(--font-fa)" }}>
-            {siteName[lang]}
-          </Link>
-          <Link href={`/${other}`} className="link text-sm" hrefLang={other} lang={other}>
-            {other === "fa" ? "فارسی" : "English"}
-          </Link>
-          <nav className="nav w-full flex flex-wrap gap-1" aria-label={lang === "fa" ? "بخش‌ها" : "Sections"}>
-            {sections.map((s) => (
-              <Link key={s.slug} href={`/${lang}/${s.slug}`}>{s.title[lang]}</Link>
-            ))}
-            <Link href={`/${lang}/photos`}>{lang === "fa" ? "عکس‌ها" : "Photos"}</Link>
-            <Link href={`/${lang}/map`}>{lang === "fa" ? "نقشه" : "Map"}</Link>
-            <Link href={`/${lang}/contribute`}>{lang === "fa" ? "مشارکت" : "Contribute"}</Link>
-          </nav>
+        <header className="site-header">
+          <div className="wrap flex items-center justify-between gap-3 py-3">
+            <Link href={`/${lang}`} className="flex items-center gap-2.5">
+              <span lang="fa" className="fa-display text-3xl font-bold leading-none" style={{ color: "var(--apple)" }}>سُه</span>
+              <span className="font-semibold hidden sm:inline">{siteName[lang]}</span>
+            </Link>
+            <nav className="nav hidden lg:flex items-center gap-1" aria-label={lang === "fa" ? "بخش‌ها" : "Sections"}>
+              {main.map((s) => <Link key={s.slug} href={`/${lang}/${s.slug}`}>{s.title[lang]}</Link>)}
+              <details className="relative">
+                <summary className="cursor-pointer list-none px-3 py-1.5 rounded-lg text-[15px] muted hover:bg-[var(--chip)]">{lang === "fa" ? "بیشتر" : "More"} ▾</summary>
+                <div className="menu card absolute end-0 mt-2 flex flex-col p-2 min-w-48 z-30">
+                  {more.map((m) => <Link key={m.href} href={m.href}>{m.label}</Link>)}
+                </div>
+              </details>
+            </nav>
+            <div className="flex items-center gap-2">
+              <Link href={`/${other}`} className="btn btn-ghost" hrefLang={other} lang={other}>{other === "fa" ? "فارسی" : "English"}</Link>
+              <Link href={`/${lang}/contribute`} className="btn btn-primary hidden sm:inline-flex">{contributeLabel}</Link>
+              <details className="relative lg:hidden">
+                <summary className="btn btn-ghost cursor-pointer list-none" aria-label={lang === "fa" ? "منو" : "Menu"}>☰</summary>
+                <div className="menu card absolute end-0 mt-2 flex flex-col p-2 min-w-56 z-30 max-h-[70vh] overflow-auto">
+                  {all.map((m) => <Link key={m.href} href={m.href}>{m.label}</Link>)}
+                  <Link href={`/${lang}/contribute`}>{contributeLabel}</Link>
+                </div>
+              </details>
+            </div>
+          </div>
         </header>
-        <main className="wrap w-full flex-1 pb-14">{children}</main>
-        <footer className="wrap w-full pb-10 text-sm muted">
-          {lang === "fa"
-            ? "پیش‌نویس ساخته‌شده از منابع عمومی اینترنت. برچسب‌ها نشان می‌دهند هر مطلب چقدر پشتوانه دارد."
-            : "A draft built from public web sources. Labels show how well each fact is backed."}
+        <main className="flex-1">{children}</main>
+        <footer className="mt-16 border-t" style={{ borderColor: "var(--line)", background: "var(--surface)" }}>
+          <div className="wrap py-10 grid gap-8" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))" }}>
+            <div className="flex flex-col gap-2">
+              <span lang="fa" className="fa-display text-4xl font-bold leading-none" style={{ color: "var(--apple)" }}>سُه</span>
+              <p className="text-sm muted max-w-xs">{lang === "fa" ? "پیش‌نویس ساخته‌شده از منابع عمومی اینترنت. برچسب‌ها نشان می‌دهند هر مطلب چقدر پشتوانه دارد." : "A draft built from public web sources. Labels show how well each fact is backed."}</p>
+            </div>
+            <ul className="list-none p-0 m-0 flex flex-col gap-1 text-sm">
+              {all.map((m) => <li key={m.href}><Link className="muted hover:underline" href={m.href}>{m.label}</Link></li>)}
+            </ul>
+            <ul className="list-none p-0 m-0 flex flex-col gap-1 text-sm">
+              <li><Link className="muted hover:underline" href={`/${lang}/contribute`}>{contributeLabel}</Link></li>
+              <li><Link className="muted hover:underline" href={`/${lang}/credits`}>{lang === "fa" ? "منبع عکس‌ها و مجوزها" : "Photo credits and licences"}</Link></li>
+            </ul>
+          </div>
         </footer>
       </body>
     </html>

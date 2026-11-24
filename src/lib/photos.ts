@@ -8,13 +8,52 @@ export type Photo = {
   width: number;
   height: number;
   section: string;
+  scope: "soh" | "region"; // "region" = the area around Soh, NOT the village itself; always shown with a label
   alt: L;
   caption: L;
   credit: string; // photographer's name
-  license: string; // e.g. "Used with permission", "CC BY 4.0", "© family"
+  license: string; // e.g. "CC BY 3.0", "Used with permission"
+  licenseUrl?: string;
+  sourceUrl?: string; // page the photo came from (Wikimedia Commons file page)
   year?: number;
 };
-export const photos: Photo[] = [];
+const CC3 = "https://creativecommons.org/licenses/by/3.0/";
+const CCSA4 = "https://creativecommons.org/licenses/by-sa/4.0/";
+const commons = (name: string) => `https://commons.wikimedia.org/wiki/File:${name.replace(/ /g, "_")}`;
+
+// Free-licence photos from Wikimedia Commons (credit and licence are shown with each photo). None shows Soh itself.
+export const photos: Photo[] = [
+  {
+    file: "karkas-mountain.jpg", width: 1920, height: 1251, section: "village", scope: "region",
+    alt: { fa: "قله‌های برفی کوه‌های کرکس بالای دشتی زردرنگ", en: "Snow-capped peaks of the Karkas mountains above a golden plain" },
+    caption: { fa: "کوه‌های کرکس در استان اصفهان؛ سُه در دامنه‌ی این رشته‌کوه است. عکس از خود سُه نیست.", en: "The Karkas mountains in Isfahan province; Soh sits on the slopes of this range. Not a photo of Soh." },
+    credit: "Alireza Javaheri", license: "CC BY 3.0", licenseUrl: CC3, sourceUrl: commons("Karkas Kooh.jpg"),
+  },
+  {
+    file: "madar-shah-caravanserai.jpg", width: 1920, height: 1439, section: "history", scope: "region",
+    alt: { fa: "سردر آجری کاروانسرای مادر شاه با حوضی در جلو", en: "The brick portal of the Madar Shah Caravanserai with a pool in front" },
+    caption: { fa: "کاروانسرای مادر شاه در مورچه‌خورت، در همان دهستان سُه. کاروانسرای سُه نیست.", en: "The Madar Shah Caravanserai in Murcheh Khvort, in the same rural district as Soh. This is not Soh's caravanserai." },
+    credit: "EbrahimFaryabi", license: "CC BY-SA 4.0", licenseUrl: CCSA4, sourceUrl: commons("Madar Shah Caravanserai- Murchehkhort Iran (cropped).jpg"),
+  },
+  {
+    file: "abyaneh.jpg", width: 1920, height: 1280, section: "tourism", scope: "region",
+    alt: { fa: "خانه‌های خشتی سرخ‌رنگ ابیانه در دامنه‌ی کوه", en: "Red adobe houses of Abyaneh on a mountainside" },
+    caption: { fa: "ابیانه، روستای همسایه‌ی شمالی سُه. عکس از سُه نیست.", en: "Abyaneh, the village on Soh's northern border. Not a photo of Soh." },
+    credit: "Bernard Gagnon", license: "CC BY-SA 4.0", licenseUrl: CCSA4, sourceUrl: commons("Village of Abyaneh, Iran.jpg"),
+  },
+  {
+    file: "meymeh-jame-mosque.jpg", width: 1920, height: 1440, section: "tourism", scope: "region",
+    alt: { fa: "مسجد جامع میمه", en: "The Jame Mosque of Meymeh" },
+    caption: { fa: "مسجد جامع میمه، شهر نزدیک سُه. عکس از سُه نیست.", en: "The Jame Mosque of Meymeh, the town near Soh. Not a photo of Soh." },
+    credit: "Wikicommuni", license: "CC BY-SA 4.0", licenseUrl: CCSA4, sourceUrl: commons("Masjed meymeh.jpg"),
+  },
+  {
+    file: "nakhl-gardani-mehriz.jpg", width: 1920, height: 1080, section: "traditions", scope: "region",
+    alt: { fa: "نخل‌گردانی در روز عاشورا", en: "Nakhl-gardani on Ashura day" },
+    caption: { fa: "نخل‌گردانی عاشورا در مهریز یزد (۲۰۱۴). آیینی مانند نخل‌گردانی سُه ولی در جای دیگر.", en: "Ashura nakhl-gardani in Mehriz, Yazd (2014). A ritual like Soh's palm carrying, but elsewhere." },
+    credit: "amir mohammad zare zadeh", license: "CC BY-SA 4.0", licenseUrl: CCSA4, sourceUrl: commons("Nakhl Gardani - Mehriz - Ashura Muharram.jpg"),
+  },
+];
 
 // While true, sections without photos show a dashed "photo needed" box. Set to false before the public launch.
 export const showShotPlaceholders = true;

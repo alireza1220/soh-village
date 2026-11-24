@@ -15,18 +15,21 @@ async function Content({ params }: { params: PageProps<"/[lang]/[section]">["par
   const s = sectionBySlug(section);
   if (!s) notFound();
   return (
-    <article className="flex flex-col gap-5 pt-6">
-      <h1 className="text-3xl font-bold">{s.title[lang]}</h1>
-      <p className="text-lg muted">{s.intro[lang]}</p>
+    <article className="wrap pt-10 flex flex-col gap-8">
+      <header className="flex flex-col gap-3 max-w-3xl">
+        <span className="pill self-start">{lang === "fa" ? "روستای سُه" : "Soh village"}</span>
+        <h1 className="text-[clamp(34px,5vw,52px)]">{s.title[lang]}</h1>
+        <p className="text-lg muted">{s.intro[lang]}</p>
+      </header>
       <PhotoStrip section={s.slug} lang={lang} />
-      <Blocks blocks={s.blocks} lang={lang} />
+      <div className="narrow w-full"><Blocks blocks={s.blocks} lang={lang} /></div>
     </article>
   );
 }
 
 export default function SectionPage({ params }: PageProps<"/[lang]/[section]">) {
   return (
-    <Suspense fallback={<div className="pt-6 muted">…</div>}>
+    <Suspense fallback={<div className="wrap pt-10 muted">…</div>}>
       <Content params={params} />
     </Suspense>
   );

@@ -12,8 +12,8 @@ export default async function Contribute({ params }: PageProps<"/[lang]/contribu
   if (!hasLocale(lang)) notFound();
   const ch = contact.channel;
   return (
-    <article className="flex flex-col gap-5 pt-6">
-      <h1 className="text-3xl font-bold">{lang === "fa" ? "مشارکت" : "Contribute"}</h1>
+    <article className="wrap narrow pt-10 flex flex-col gap-6">
+      <h1 className="text-[clamp(34px,5vw,52px)]">{lang === "fa" ? "مشارکت" : "Contribute"}</h1>
       <p className="text-lg muted">{contact.note[lang]}</p>
       <div className="todo">
         {ch.url ? (

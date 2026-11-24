@@ -16,20 +16,20 @@ export default async function Photos({ params }: PageProps<"/[lang]/photos">) {
   const name = (slug: string) => (slug === "village" ? (lang === "fa" ? "روستا" : "The village") : sectionBySlug(slug)?.title[lang] ?? slug);
   const missing = shots.filter((s) => !photos.some((p) => p.section === s.section && p.file.startsWith(s.id))).sort((a, b) => a.priority - b.priority);
   return (
-    <article className="flex flex-col gap-8 pt-6">
-      <h1 className="text-3xl font-bold">{lang === "fa" ? "عکس‌ها" : "Photos"}</h1>
+    <article className="wrap pt-10 flex flex-col gap-8">
+      <h1 className="text-[clamp(34px,5vw,52px)]">{lang === "fa" ? "عکس‌ها" : "Photos"}</h1>
       {photos.length === 0 ? (
-        <p className="muted">{lang === "fa" ? "هنوز عکسی اضافه نشده است. فهرست عکس‌های لازم در پایین آمده است." : "No photos yet. The list of photos we need is below."}</p>
+        <p className="muted">{lang === "fa" ? "هنوز عکسی از خود سُه نداریم. این عکس‌ها از منطقه‌ی اطراف است و مجوز آزاد دارند؛ هر کدام برچسب «نه سُه» دارد. عکس‌های لازم از خود روستا در پایین آمده است." : "We do not have a photo of Soh itself yet. These are freely licensed photos of the surrounding area, each labelled “not Soh”. The photos we need from the village are listed below."}</p>
       ) : (
         groups.map((g) => (
           <section key={g} className="flex flex-col gap-3">
-            <h2 className="text-xl font-semibold">{name(g)}</h2>
+            <h2 className="text-2xl">{name(g)}</h2>
             <Gallery photos={photos.filter((p) => p.section === g)} lang={lang} />
           </section>
         ))
       )}
       <section className="flex flex-col gap-3">
-        <h2 className="text-xl font-semibold">{lang === "fa" ? "عکس‌هایی که لازم داریم" : "Photos we need"}</h2>
+        <h2 className="text-2xl">{lang === "fa" ? "عکس‌هایی که لازم داریم" : "Photos we need"}</h2>
         <ul className="flex flex-col gap-2 list-none p-0 m-0">
           {missing.map((s) => (
             <li key={s.id} className="item">
