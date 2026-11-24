@@ -11,3 +11,5 @@ Village of Soh (سه), Murcheh Khvort Rural District, Shahin Shahr and Meymeh Co
 Rules: every fact has a source or a status label (reported / unverified / family); no listings, prices, names, phone numbers or photos of people unless the owner sent them; nothing deployed without Al's go.
 
 `needs` (نیازمندی‌ها) and `careers` (فرصت‌های شغلی) have a message-builder form (`src/components/post-form.tsx`): the site has no server yet, so people copy the finished text and send it via the Contribute channel. Add approved posts to the empty tables in `site.ts` by hand until a database exists.
+
+Research: `research/all-links.md` is the master list of every URL found (relevant or not); `research/urls.md` has statuses and notes; `research/photo-links.md` has every photo link; `research/2026-11-23-deep-search.md` is the findings log.
