@@ -1,0 +1,140 @@
+<title>Soh Village</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&family=Vazirmatn:wght@400;700&display=swap">
+<style>
+/* Layout: one reading column, a stone-and-orchard palette (slate ground, apple red, shrine-dome turquoise). */
+:root{
+  --bg:#eef0f1; --surface:#ffffff; --fg:#1d2428; --muted:#5b6770; --line:#d4d9dc;
+  --apple:#a8322b; --dome:#12706f; --amber:#8a5a00;
+  --chip-bg:#e3e7e9;
+  --font-head:"Space Grotesk","Inter",system-ui,sans-serif;
+  --font-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-fa:"Vazirmatn","Tahoma",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12181b; --surface:#1b2327; --fg:#e6eaec; --muted:#9aa7ae; --line:#2e3a40;
+  --apple:#ee8279; --dome:#4cc2bf; --amber:#e0b04c; --chip-bg:#26323a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12181b; --surface:#1b2327; --fg:#e6eaec; --muted:#9aa7ae; --line:#2e3a40;
+  --apple:#ee8279; --dome:#4cc2bf; --amber:#e0b04c; --chip-bg:#26323a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:16px;line-height:1.6;
+  padding-block:0 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+.fa{font-family:var(--font-fa)}
+h1,h2,h3{font-family:var(--font-head);line-height:1.15;text-wrap:balance;margin:0}
+header{padding-top:40px;display:flex;flex-direction:column;gap:14px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.big-fa{font-family:var(--font-fa);font-weight:700;font-size:clamp(88px,22vw,148px);line-height:1;color:var(--apple);margin:0}
+h1{font-size:clamp(30px,6vw,44px);font-weight:700}
+.lede{font-size:18px;color:var(--muted);max-width:56ch;margin:0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 14px;min-width:0}
+.stat b{display:block;font-family:var(--font-head);font-size:26px;font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;color:var(--muted)}
+section{display:flex;flex-direction:column;gap:14px;min-width:0}
+h2{font-size:24px;border-top:3px solid var(--apple);padding-top:12px}
+p{margin:0}
+.muted{color:var(--muted);font-size:14px}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.item h3{font-size:18px;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
+.item h3 .fa{font-size:16px;color:var(--dome);font-weight:700}
+.src{font-size:12.5px;color:var(--muted)}
+.chip{display:inline-block;font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:99px;background:var(--chip-bg);color:var(--muted);margin-right:6px;vertical-align:1px}
+.chip-reported{color:var(--dome)} .chip-unverified{color:var(--amber)} .chip-census{color:var(--apple)} .chip-family{color:var(--dome)}
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar{display:grid;grid-template-columns:48px 1fr 150px;gap:10px;align-items:center;font-size:14px;font-variant-numeric:tabular-nums}
+.bar i{display:block;height:14px;background:var(--apple);border-radius:2px}
+.tags{display:flex;flex-wrap:wrap;gap:6px;padding:0;margin:0;list-style:none}
+.tags li{background:var(--chip-bg);border-radius:4px;padding:3px 10px;font-size:14px}
+dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 18px;margin:0}
+dt{color:var(--muted);font-size:14px} dd{margin:0}
+ul.plain{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.todo{border:1px dashed var(--amber);border-radius:6px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.todo h3{font-size:17px}
+a{color:var(--dome)}
+a:focus-visible{outline:2px solid var(--dome);outline-offset:2px}
+footer{font-size:13px;color:var(--muted)}
+@media (max-width:480px){.bar{grid-template-columns:44px 1fr}.bar span.n{grid-column:1/-1}dl{grid-template-columns:1fr}}
+</style>
+<div class="wrap">
+<header>
+  <div class="eyebrow">Murcheh Khvort Rural District · Shahin Shahr and Meymeh County · Isfahan</div>
+  <p class="big-fa" lang="fa" dir="rtl">سُه</p>
+  <h1>Soh</h1>
+  <p class="lede">A mountain village on the slopes of the Karkas range, Isfahan province, Iran.</p>
+  <div class="stats">
+    <div class="stat"><b>2,350 m</b><span>altitude (Kojaro)</span></div>
+    <div class="stat"><b>295</b><span>people, 2016 census</span></div>
+    <div class="stat"><b>~94 km</b><span>to Isfahan city</span></div>
+    <div class="stat"><b>33.439, 51.452</b><span>latitude, longitude</span></div>
+  </div>
+</header>
+
+<section>
+  <h2>Where it is</h2>
+  <p>Soh is in the Central District of Shahin Shahr and Meymeh County, on the slopes of the Karkas mountains. It is also written Seh, Sō or Sūh. Neighbours are Abyaneh (north), Bidshak (south), Kalahrud (east), Rebat Aqa Kamal and Meymeh (west).</p>
+  <dl><dt>Isfahan city</dt><dd>about 94 to 100 km <span class="src">(FA Wikipedia 94 km, Kojaro 100 km)</span></dd><dt>Shahin Shahr and Meymeh town</dt><dd>about 75 km <span class="src">(Kojaro)</span></dd><dt>Meymeh</dt><dd>about 15 (disputed) km <span class="src">(Kojaro gives both '15 km east' and 'Meymeh borders on the west')</span></dd></dl>
+  <p>From the Shahin Shahr to Meymeh road, turn off about 50 km north of Shahin Shahr at Dehlor, then pass Bidshak. Soh is at the end of the road. There is no bus terminal or railway station in the village.</p>
+  <dl><dt>Time zone</dt><dd>UTC+3:30</dd><dt>Religion</dt><dd>Shia Islam <span class="src">(Kojaro)</span></dd><dt>Language</dt><dd>Persian, with a local dialect (not yet documented) <span class="src">(Kojaro, FA Wikipedia)</span></dd><dt>Best time to visit</dt><dd>Spring and early summer <span class="src">(Kojaro)</span></dd><dt>Climate</dt><dd>Temperate summers, cold winters <span class="src">(Kojaro)</span></dd></dl>
+</section>
+
+<section>
+  <h2>People who live there</h2>
+  <div class="bars" role="img" aria-label="Population: 2006 403, 2011 281, 2016 295">
+    <div class="bar"><b>2006</b><i style="width:100%"></i><span class="n">403 people · 141 households</span></div><div class="bar"><b>2011</b><i style="width:70%"></i><span class="n">281 people · 108 households</span></div><div class="bar"><b>2016</b><i style="width:73%"></i><span class="n">295 people · 127 households</span></div>
+  </div>
+  <p class="muted"><span class="chip chip-census">census</span>Statistical Centre of Iran, via EN Wikipedia. Kojaro says about 1,000 people are in the village in spring and summer (seasonal residents for 7 to 8 months). This is not a census figure.</p>
+</section>
+
+<section>
+  <h2>History</h2>
+  <div class="item"><p><span class="chip chip-unverified">unverified</span>Said to be more than 2,000 years old. Evidence cited: castles with Gabri (Zoroastrian-era) names, the Nachaft castle, the Qal'eh Miyan, millstones and the ruins of a fire temple. FA Wikipedia states that no documents support the age.</p><span class="src">FA Wikipedia, EN Wikipedia, Kojaro</span></div><div class="item"><p><span class="chip chip-unverified">unverified</span>The name is said to come from 'sohi' or 'sahi', meaning tall or high, because the village sits on the slopes of the Karkas (کرکس) mountains.</p><span class="src">Kojaro</span></div><div class="item"><p><span class="chip chip-reported">reported</span>The caravan road made the village a trading and resting point until the middle of the Qajar era. Surviving buildings date from the Safavid and Qajar periods.</p><span class="src">Kojaro</span></div><div class="item"><p><span class="chip chip-unverified">unverified</span>Until 1996 (1375) the village belonged to Natanz County, then was separated.</p><span class="src">FA Wikipedia (tagged 'needs citation')</span></div>
+</section>
+
+<section>
+  <h2>Places to see</h2>
+  <div class="item"><h3>Soh Caravanserai <span class="fa" lang="fa" dir="rtl">کاروانسرای سُه</span></h3><p>A stone inscription on the portal dates it to 1223 AH (1808 CE), in the reign of Fath-Ali Shah Qajar, with the builder named as Abolqasem Esfahani. About 3,000 m², four iwans and 20 rooms around a courtyard. National monument no. 7641 (registered 17 Esfand 1381). Restored 1395 to 1400 with local donations.</p><span class="src"><span class="chip chip-reported">reported</span>Kojaro</span></div><div class="item"><h3>Imamzadeh Yusuf <span class="fa" lang="fa" dir="rtl">امامزاده یوسف</span></h3><p>Shrine in the upper village, about 400 years old, with a 16 m dome in turquoise tile. Said to be the resting place of Yusuf, son of Imam Hadi.</p><span class="src"><span class="chip chip-reported">reported</span>Kojaro</span></div><div class="item"><h3>Imamzadeh Golileh <span class="fa" lang="fa" dir="rtl">امامزاده گلیله</span></h3><p>Turquoise-domed shrine in the lower village, at its centre.</p><span class="src"><span class="chip chip-reported">reported</span>Kojaro</span></div><div class="item"><h3>The old bath <span class="fa" lang="fa" dir="rtl">حمام قدیمی</span></h3><p>A Qajar-era bath about 200 years old. Of the upper and lower baths, one survives, restored with local help.</p><span class="src"><span class="chip chip-reported">reported</span>Kojaro</span></div><div class="item"><h3>Kadkhoda house <span class="fa" lang="fa" dir="rtl">خانه تاریخی کدخدا</span></h3><p>Home of the village headman, Mirza Bahram Safavi.</p><span class="src"><span class="chip chip-reported">reported</span>Kojaro</span></div><div class="item"><h3>Other historic places </h3><p>Nav Bridge (پل نواب), the Imamzadeh mill and two other mills, the old telegraph house, a dovecote tower, Mirza Jafar's house, a brick kiln and a small zurkhaneh (traditional gym).</p><span class="src"><span class="chip chip-reported">reported</span>Kojaro</span></div>
+  <p class="muted">Nature and walks (Kojaro, FA Wikipedia):</p>
+  <ul class="tags"><li>Kuh-e Char and Kuh-e Baghal Siyah mountains</li><li>Lab Char river</li><li>Qash Sorkheh</li><li>Margaleh</li><li>Sar-Marq (Morghzar) meadow</li><li>Gazi meadow</li><li>Haz spring</li><li>Paymil plain</li><li>A waterfall, Sarkarriz, Gol Parde Haz, Nachaft, Zir-Pol</li></ul>
+</section>
+
+<section>
+  <h2>Land and livelihood</h2>
+  <p>About 86% of residents worked in agriculture in a survey from 2007 to 2008: crops 56%, livestock 27%, beekeeping 2.4%, poultry 0.8%. Homes are spread out, far from the fields and orchards. Water comes mainly from surface streams.</p>
+  <p>The apples are described as among the best in Isfahan province, and about 30% of the village's economic capacity is apple growing.</p>
+  <p class="muted">Grown here</p><ul class="tags"><li>Wheat</li><li>Barley</li><li>Potato</li><li>Walnut</li><li>Almond</li><li>Apple (many varieties)</li><li>Grape</li><li>Cherry and sour cherry</li><li>Apricot</li><li>Pear</li><li>Plum</li><li>Peach</li><li>Quince</li><li>Mulberry</li><li>Melon and watermelon</li><li>Medicinal plants</li></ul>
+  <p class="muted">From the animals</p><ul class="tags"><li>Milk</li><li>Yogurt</li><li>Cheese</li><li>Kashk</li><li>Buttermilk</li><li>Ghee</li><li>Village bread</li><li>Free-range eggs</li></ul>
+  <p class="muted">Crafts</p><ul class="tags"><li>Hand-woven carpets in the Joshaqani style, sold in Isfahan and Tehran</li><li>Giveh weaving</li><li>Chadorshab weaving</li><li>Embroidery</li><li>Willow baskets</li><li>Goat-hair containers (gharreh)</li><li>Patchwork quilts</li><li>Hand spinning</li><li>Goatskin water bags</li></ul>
+  <span class="src">FA Wikipedia (survey), Kojaro</span>
+</section>
+
+<section>
+  <h2>Muharram traditions</h2>
+  <div class="item"><p><span class="chip chip-reported">reported</span>On Tasua, during Muharram, the village carries a palm-shaped standard (nakhl-gardani). It is decorated in the morning at Imamzadeh Yusuf, carried to Imamzadeh Golileh, and returned after the Ashura noon mourning. Other rituals include alam-gardani, ammar-gardani, taziyeh and nowheh chanting. Kojaro says these mourning rituals are about 200 years old and were listed in Iran's national intangible heritage (no. 1207) on 5 Mordad 1395.</p><span class="src">Kojaro</span></div>
+</section>
+
+<section>
+  <h2>Notable people</h2>
+  <p class="muted">Notable people listed on FA Wikipedia. Kept short on purpose; add family and local figures only with Al's OK.</p>
+  <div class="item"><h3>Seyed Ali Safavi Sohi <span class="fa" lang="fa" dir="rtl">سید علی صفوی سُهی</span></h3><p>Tank battalion commander in the Iran-Iraq war, killed 1983. A bridge in Tehran carries his name.</p></div><div class="item"><h3>Behzad Ghaderi <span class="fa" lang="fa" dir="rtl">بهزاد قادری</span></h3><p>Writer and translator, retired professor of English literature at the University of Tehran. His father was from Soh.</p></div><div class="item"><h3>Seyed Farhad Sohi <span class="fa" lang="fa" dir="rtl">سید فرهاد سُهی</span></h3><p>Resistance fighter under the Pahlavi regime.</p></div>
+</section>
+
+<section>
+  <h2>Is there a website already?</h2>
+  <p>None found (23 Nov 2026).</p>
+  <ul class="plain"><li><b>Instagram: soh_village</b>: Credited by Kojaro for most photos. Not yet checked whether it is active.</li><li><b>shaahinshahr.ir</b>: Likely the county site. Not verified.</li></ul>
+</section>
+
+<section>
+  <h2>Still to fill in</h2>
+  <div class="todo"><h3>Needs checking</h3><ul class="plain"><li>Coordinates: EN Wikipedia's infobox (31.78 N, 51.37 E) is about 200 km away from every other source (33.44 N, 51.45 E). The second value is used here.</li><li>Distance and direction to Meymeh (15 km east vs borders on the west).</li><li>Whether the village really has about 1,000 people in summer.</li><li>The 2,000-year age and the 1996 transfer from Natanz.</li><li>Whether the Instagram page soh_village is active and who runs it.</li></ul></div>
+  <div class="todo"><h3>Questions for family</h3><ul class="plain"><li>What do you call the village and the dialect? Any words or sayings?</li><li>Which family lines and old houses are known there?</li><li>Photos you are happy to share (and who may be shown).</li><li>Stories, festivals, foods and seasonal work you remember.</li><li>Names of local families, the dehyari (village council) and a contact for updates.</li></ul></div>
+</section>
+
+<footer>
+  <p>Sources: <a href="https://en.wikipedia.org/wiki/Soh,_Shahinshahr" target="_blank" rel="noopener">EN Wikipedia: Soh, Shahinshahr</a> · <a href="https://fa.wikipedia.org/wiki/%D8%B3%D9%87_(%D8%B4%D8%A7%D9%87%DB%8C%D9%86%E2%80%8C%D8%B4%D9%87%D8%B1_%D9%88_%D9%85%DB%8C%D9%85%D9%87)" target="_blank" rel="noopener">FA Wikipedia: سه (شاهین‌شهر)</a> · <a href="https://www.kojaro.com/attraction/64660-isfahan-soh-village/" target="_blank" rel="noopener">Kojaro: روستای سه اصفهان</a> · <a href="https://www.wikidata.org/wiki/Q5955889" target="_blank" rel="noopener">Wikidata Q5955889</a></p>
+  <p>Draft built from public web sources on 2026-11-23. Labels show how well each fact is backed.</p>
+</footer>
+</div>

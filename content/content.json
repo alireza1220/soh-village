@@ -1,0 +1,103 @@
+{
+  "meta": {
+    "updated": "2026-11-23",
+    "note": "Single source of truth. Edit this file (or tell Claude new facts); the Artifact and the Next.js site are both built from it. status: census = official census, reported = one or more web sources, unverified = single source or conflicting, family = told by Al's family."
+  },
+  "name": { "en": "Soh", "fa": "سُه", "alt": ["Seh", "Sō", "Sūh"] },
+  "tagline": "A mountain village on the slopes of the Karkas range, Isfahan province, Iran",
+  "location": {
+    "country": "Iran",
+    "province": "Isfahan",
+    "county": "Shahin Shahr and Meymeh",
+    "ruralDistrict": "Murcheh Khvort",
+    "lat": 33.439,
+    "lon": 51.452,
+    "altitudeM": 2350,
+    "distances": [
+      { "to": "Isfahan city", "km": "about 94 to 100", "source": "FA Wikipedia 94 km, Kojaro 100 km" },
+      { "to": "Shahin Shahr and Meymeh town", "km": "about 75", "source": "Kojaro" },
+      { "to": "Meymeh", "km": "about 15 (disputed)", "source": "Kojaro gives both '15 km east' and 'Meymeh borders on the west'" }
+    ],
+    "neighbours": ["Abyaneh (north)", "Bidshak (south)", "Kalahrud (east)", "Rebat Aqa Kamal and Meymeh (west)"],
+    "route": "From the Shahin Shahr to Meymeh road, turn off about 50 km north of Shahin Shahr at Dehlor, then pass Bidshak. Soh is at the end of the road. There is no bus terminal or railway station in the village."
+  },
+  "population": [
+    { "year": 2006, "people": 403, "households": 141 },
+    { "year": 2011, "people": 281, "households": 108 },
+    { "year": 2016, "people": 295, "households": 127 }
+  ],
+  "populationNote": "Kojaro says about 1,000 people are in the village in spring and summer (seasonal residents for 7 to 8 months). This is not a census figure.",
+  "facts": [
+    { "label": "Time zone", "value": "UTC+3:30" },
+    { "label": "Religion", "value": "Shia Islam", "source": "Kojaro" },
+    { "label": "Language", "value": "Persian, with a local dialect (not yet documented)", "source": "Kojaro, FA Wikipedia" },
+    { "label": "Best time to visit", "value": "Spring and early summer", "source": "Kojaro" },
+    { "label": "Climate", "value": "Temperate summers, cold winters", "source": "Kojaro" }
+  ],
+  "history": [
+    { "text": "Said to be more than 2,000 years old. Evidence cited: castles with Gabri (Zoroastrian-era) names, the Nachaft castle, the Qal'eh Miyan, millstones and the ruins of a fire temple. FA Wikipedia states that no documents support the age.", "status": "unverified", "source": "FA Wikipedia, EN Wikipedia, Kojaro" },
+    { "text": "The name is said to come from 'sohi' or 'sahi', meaning tall or high, because the village sits on the slopes of the Karkas (کرکس) mountains.", "status": "unverified", "source": "Kojaro" },
+    { "text": "The caravan road made the village a trading and resting point until the middle of the Qajar era. Surviving buildings date from the Safavid and Qajar periods.", "status": "reported", "source": "Kojaro" },
+    { "text": "Until 1996 (1375) the village belonged to Natanz County, then was separated.", "status": "unverified", "source": "FA Wikipedia (tagged 'needs citation')" }
+  ],
+  "landmarks": [
+    { "name": "Soh Caravanserai", "fa": "کاروانسرای سُه", "text": "A stone inscription on the portal dates it to 1223 AH (1808 CE), in the reign of Fath-Ali Shah Qajar, with the builder named as Abolqasem Esfahani. About 3,000 m², four iwans and 20 rooms around a courtyard. National monument no. 7641 (registered 17 Esfand 1381). Restored 1395 to 1400 with local donations.", "status": "reported", "source": "Kojaro" },
+    { "name": "Imamzadeh Yusuf", "fa": "امامزاده یوسف", "text": "Shrine in the upper village, about 400 years old, with a 16 m dome in turquoise tile. Said to be the resting place of Yusuf, son of Imam Hadi.", "status": "reported", "source": "Kojaro" },
+    { "name": "Imamzadeh Golileh", "fa": "امامزاده گلیله", "text": "Turquoise-domed shrine in the lower village, at its centre.", "status": "reported", "source": "Kojaro" },
+    { "name": "The old bath", "fa": "حمام قدیمی", "text": "A Qajar-era bath about 200 years old. Of the upper and lower baths, one survives, restored with local help.", "status": "reported", "source": "Kojaro" },
+    { "name": "Kadkhoda house", "fa": "خانه تاریخی کدخدا", "text": "Home of the village headman, Mirza Bahram Safavi.", "status": "reported", "source": "Kojaro" },
+    { "name": "Other historic places", "fa": "", "text": "Nav Bridge (پل نواب), the Imamzadeh mill and two other mills, the old telegraph house, a dovecote tower, Mirza Jafar's house, a brick kiln and a small zurkhaneh (traditional gym).", "status": "reported", "source": "Kojaro" }
+  ],
+  "nature": {
+    "places": ["Kuh-e Char and Kuh-e Baghal Siyah mountains", "Lab Char river", "Qash Sorkheh", "Margaleh", "Sar-Marq (Morghzar) meadow", "Gazi meadow", "Haz spring", "Paymil plain", "A waterfall, Sarkarriz, Gol Parde Haz, Nachaft, Zir-Pol"],
+    "source": "Kojaro, FA Wikipedia"
+  },
+  "livelihood": {
+    "summary": "About 86% of residents worked in agriculture in a survey from 2007 to 2008: crops 56%, livestock 27%, beekeeping 2.4%, poultry 0.8%. Homes are spread out, far from the fields and orchards. Water comes mainly from surface streams.",
+    "apples": "The apples are described as among the best in Isfahan province, and about 30% of the village's economic capacity is apple growing.",
+    "crops": ["Wheat", "Barley", "Potato", "Walnut", "Almond", "Apple (many varieties)", "Grape", "Cherry and sour cherry", "Apricot", "Pear", "Plum", "Peach", "Quince", "Mulberry", "Melon and watermelon", "Medicinal plants"],
+    "dairy": ["Milk", "Yogurt", "Cheese", "Kashk", "Buttermilk", "Ghee", "Village bread", "Free-range eggs"],
+    "crafts": ["Hand-woven carpets in the Joshaqani style, sold in Isfahan and Tehran", "Giveh weaving", "Chadorshab weaving", "Embroidery", "Willow baskets", "Goat-hair containers (gharreh)", "Patchwork quilts", "Hand spinning", "Goatskin water bags"],
+    "source": "FA Wikipedia (survey), Kojaro"
+  },
+  "traditions": {
+    "text": "On Tasua, during Muharram, the village carries a palm-shaped standard (nakhl-gardani). It is decorated in the morning at Imamzadeh Yusuf, carried to Imamzadeh Golileh, and returned after the Ashura noon mourning. Other rituals include alam-gardani, ammar-gardani, taziyeh and nowheh chanting. Kojaro says these mourning rituals are about 200 years old and were listed in Iran's national intangible heritage (no. 1207) on 5 Mordad 1395.",
+    "status": "reported",
+    "source": "Kojaro"
+  },
+  "people": {
+    "note": "Notable people listed on FA Wikipedia. Kept short on purpose; add family and local figures only with Al's OK.",
+    "list": [
+      { "name": "Seyed Ali Safavi Sohi", "fa": "سید علی صفوی سُهی", "text": "Tank battalion commander in the Iran-Iraq war, killed 1983. A bridge in Tehran carries his name." },
+      { "name": "Behzad Ghaderi", "fa": "بهزاد قادری", "text": "Writer and translator, retired professor of English literature at the University of Tehran. His father was from Soh." },
+      { "name": "Seyed Farhad Sohi", "fa": "سید فرهاد سُهی", "text": "Resistance fighter under the Pahlavi regime." }
+    ]
+  },
+  "online": {
+    "official": "None found (23 Nov 2026).",
+    "channels": [
+      { "name": "Instagram: soh_village", "note": "Credited by Kojaro for most photos. Not yet checked whether it is active." },
+      { "name": "shaahinshahr.ir", "note": "Likely the county site. Not verified." }
+    ]
+  },
+  "toVerify": [
+    "Coordinates: EN Wikipedia's infobox (31.78 N, 51.37 E) is about 200 km away from every other source (33.44 N, 51.45 E). The second value is used here.",
+    "Distance and direction to Meymeh (15 km east vs borders on the west).",
+    "Whether the village really has about 1,000 people in summer.",
+    "The 2,000-year age and the 1996 transfer from Natanz.",
+    "Whether the Instagram page soh_village is active and who runs it."
+  ],
+  "askFamily": [
+    "What do you call the village and the dialect? Any words or sayings?",
+    "Which family lines and old houses are known there?",
+    "Photos you are happy to share (and who may be shown).",
+    "Stories, festivals, foods and seasonal work you remember.",
+    "Names of local families, the dehyari (village council) and a contact for updates."
+  ],
+  "sources": [
+    { "name": "EN Wikipedia: Soh, Shahinshahr", "url": "https://en.wikipedia.org/wiki/Soh,_Shahinshahr" },
+    { "name": "FA Wikipedia: سه (شاهین‌شهر)", "url": "https://fa.wikipedia.org/wiki/%D8%B3%D9%87_(%D8%B4%D8%A7%D9%87%DB%8C%D9%86%E2%80%8C%D8%B4%D9%87%D8%B1_%D9%88_%D9%85%DB%8C%D9%85%D9%87)" },
+    { "name": "Kojaro: روستای سه اصفهان", "url": "https://www.kojaro.com/attraction/64660-isfahan-soh-village/" },
+    { "name": "Wikidata Q5955889", "url": "https://www.wikidata.org/wiki/Q5955889" }
+  ]
+}
