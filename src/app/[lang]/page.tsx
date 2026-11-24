@@ -56,7 +56,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
             </div>
           ))}
         </div>
-        <p className="text-sm muted">{lang === "fa" ? "مرکز آمار ایران، از ویکی‌پدیا. کجارو می‌نویسد در بهار و تابستان حدود ۱۰۰۰ نفر در روستا هستند (سرشماری نیست)." : "Statistical Centre of Iran, via Wikipedia. Kojaro says about 1,000 people are in the village in spring and summer (not a census figure)."}</p>
+        <p className="text-sm muted">{lang === "fa" ? "مرکز آمار ایران، از ویکی‌پدیا. کجارو می‌نویسد در بهار و تابستان حدود ۱۰۰۰ نفر در روستا هستند و گردشنامه تا ۵۰۰۰ نفر در نوروز، محرم و تابستان (سرشماری نیست و دو عدد با هم نمی‌خوانند)." : "Statistical Centre of Iran, via Wikipedia. Kojaro says about 1,000 people are in the village in spring and summer, and Gardeshnama up to 5,000 at Nowruz, Muharram and in summer (not census figures, and they disagree)."}</p>
       </section>
     </div>
   );

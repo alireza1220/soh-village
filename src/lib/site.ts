@@ -76,11 +76,39 @@ export const sections: Section[] = [
             title: { fa: "کاروانسرای سُه", en: "Soh Caravanserai" },
             fa: "کاروانسرای سُه",
             text: {
-              fa: "کتیبه‌ی سنگی سردر، ساخت آن را به سال ۱۲۲۳ هجری قمری (۱۸۰۸ میلادی) و زمان فتحعلی‌شاه قاجار می‌رساند. بانی آن «ابوالقاسم اصفهانی» نوشته شده است. حدود ۳۰۰۰ مترمربع، چهار ایوان و ۲۰ اتاق. اثر ملی شماره‌ی ۷۶۴۱ (ثبت: ۱۷ اسفند ۱۳۸۱). مرمت: ۱۳۹۵ تا ۱۴۰۰ با کمک مردم.",
-              en: "A stone inscription over the portal dates it to 1223 AH (1808 CE), in the reign of Fath-Ali Shah Qajar; the builder is named as Abolqasem Esfahani. About 3,000 m², four iwans, 20 rooms. National monument no. 7641 (registered 17 Esfand 1381). Restored 1395 to 1400 with local donations.",
+              fa: "کتیبه‌ی سنگی سردر، ساخت آن را به سال ۱۲۲۳ هجری قمری (۱۸۰۸ میلادی) و زمان فتحعلی‌شاه قاجار می‌رساند. بانی آن «ابوالقاسم اصفهانی» نوشته شده است. حدود ۳۰۰۰ مترمربع، چهار ایوان، چهار برج گرد در گوشه‌ها و ۲۰ اتاق. اثر ملی شماره‌ی ۷۶۴۱ (ثبت: ۱۷ اسفند ۱۳۸۱). مرمت: ۱۳۹۵ تا ۱۴۰۰ با کمک مردم.",
+              en: "A stone inscription over the portal dates it to 1223 AH (1808 CE), in the reign of Fath-Ali Shah Qajar; the builder is named as Abolqasem Esfahani. About 3,000 m², four iwans, four round corner towers, 20 rooms. National monument no. 7641 (registered 17 Esfand 1381). Restored 1395 to 1400 with local donations.",
             },
             status: "reported",
             source: "Kojaro",
+          },
+          {
+            title: { fa: "قلعه‌ها", en: "The forts" },
+            text: {
+              fa: "چهار قلعه‌ی روستا با نام‌های بالا، پایین، میان و چال یاد شده است. «قلعه‌میان» بیشتر از بقیه نام برده می‌شود.",
+              en: "Four forts are named around the village: Bala (upper), Pain (lower), Miyan (middle) and Chal. The Miyan fort is the one mentioned most often.",
+            },
+            status: "reported",
+            source: "Kojaro",
+          },
+          {
+            title: { fa: "یادداشت قدیمی مسافران", en: "An old travellers' route book" },
+            text: {
+              fa: "کتاب راه‌های ایران (سده‌ی نوزدهم) از «سه» روی راه اصفهان نام می‌برد و دو ده دیوارکشیده و کاروانسرایی بزرگ از آجر را شرح می‌دهد. روشن نیست که این همان سُه‌ی میمه باشد.",
+              en: "A 19th-century route book (Routes in Persia) mentions a “Soh” on the Isfahan road with two walled villages and a large brick caravanserai. It is not certain that this is the Soh near Meymeh.",
+            },
+            status: "unverified",
+            source: "Qatar Digital Library",
+            href: "https://www.qdl.qa/archive/81055/vdc_100024054422.0x0000c4",
+          },
+          {
+            title: { fa: "تغییر چهره‌ی روستا", en: "How the village is changing" },
+            text: {
+              fa: "پژوهشگر میراث فرهنگی، مهرخ هاشمی (۱۴۰۰)، می‌گوید ساخت‌وسازهای تازه به منظر تاریخی و طبیعی آسیب می‌زند. او توان گردشگری را بالا می‌داند ولی تبلیغ و سرمایه‌گذاری کم است؛ مرمت و اقامتگاه‌های بوم‌گردی محلی را پیشنهاد می‌کند. نویسنده‌ی یک گزارش سفر (اسفند ۱۴۰۰) هم می‌نویسد بخش‌هایی از روستا در حال تغییر یا تخریب است و حمام را از دوره‌ی رضاشاه می‌داند.",
+              en: "Heritage researcher Mahrokh Hashemi (2021) says new construction is damaging the historic and natural landscape. She sees high tourism potential but little promotion or investment, and recommends restoration and local eco-lodges. A travel writer (Feb 2022) also says parts of the village are being altered or demolished, and dates the bath to the Reza Shah era.",
+            },
+            status: "unverified",
+            source: "A 2021 blog, Beinabein (2022), single sources",
           },
           {
             title: { fa: "جدایی از نطنز", en: "Separation from Natanz" },
@@ -116,6 +144,7 @@ export const sections: Section[] = [
         items: [
           { k: { fa: "بهترین زمان سفر", en: "Best time to visit" }, v: { fa: "بهار و اوایل تابستان", en: "Spring and early summer" } },
           { k: { fa: "هوا", en: "Climate" }, v: { fa: "تابستان معتدل، زمستان سرد", en: "Temperate summers, cold winters" } },
+          { k: { fa: "دهستان", en: "Rural district" }, v: { fa: "مورچه‌خورت: ۳۹ روستا و ۲٬۱۹۸ نفر در سرشماری ۱۳۹۵ (خود روستای مورچه‌خورت ۱٬۳۶۹ نفر)", en: "Murcheh Khvort: 39 villages and 2,198 people in the 2016 census (Murcheh Khvort village itself 1,369)" } },
           { k: { fa: "همسایه‌ها", en: "Neighbours" }, v: { fa: "ابیانه (شمال)، بیدشک (جنوب)، کله‌رود (شرق)، رباط آقا کمال و میمه (غرب)", en: "Abyaneh (north), Bidshak (south), Kalahrud (east), Rebat Aqa Kamal and Meymeh (west)" } },
           { k: { fa: "راه", en: "Getting there" }, v: { fa: "از جاده‌ی شاهین‌شهر به میمه، حدود ۵۰ کیلومتر بعد از شاهین‌شهر وارد جاده‌ی دهلر و بیدشک شوید؛ سُه در انتهای مسیر است. پایانه‌ی اتوبوس یا ایستگاه قطار در روستا نیست.", en: "From the Shahin Shahr to Meymeh road, turn off about 50 km north of Shahin Shahr at Dehlor and pass Bidshak; Soh is at the end of the road. There is no bus terminal or railway station in the village." } },
         ],
@@ -128,7 +157,7 @@ export const sections: Section[] = [
           { title: { fa: "امامزاده گلیله", en: "Imamzadeh Golileh" }, text: { fa: "بقعه‌ی گنبد فیروزه‌ای در پایین روستا و در مرکز آن.", en: "A turquoise-domed shrine in the lower village, at its centre." }, status: "reported", source: "Kojaro" },
           { title: { fa: "حمام قدیمی", en: "The old bath" }, text: { fa: "حمام قاجاری با حدود ۲۰۰ سال قدمت. از دو حمام بالا و پایین، یکی مانده و با کمک مردم مرمت شده است.", en: "A Qajar-era bath about 200 years old. Of the upper and lower baths one survives, restored with local help." }, status: "reported", source: "Kojaro" },
           { title: { fa: "خانه‌ی کدخدا", en: "Kadkhoda house" }, text: { fa: "خانه‌ی تاریخی کدخدای روستا، میرزا بهرام صفوی.", en: "The historic home of the village headman, Mirza Bahram Safavi." }, status: "reported", source: "Kojaro" },
-          { title: { fa: "جاهای دیگر", en: "Other historic places" }, text: { fa: "پل نواب، آسیاب امامزاده و دو آسیاب دیگر، خانه‌ی تلگراف، برج کبوتر، خانه‌ی میرزا جعفر، کوره‌ی آجرپزی و یک زورخانه‌ی کوچک.", en: "Nav Bridge, the Imamzadeh mill and two other mills, the old telegraph house, a dovecote tower, Mirza Jafar's house, a brick kiln and a small zurkhaneh (traditional gym)." }, status: "reported", source: "Kojaro" },
+          { title: { fa: "جاهای دیگر", en: "Other historic places" }, text: { fa: "پل نواب، سه آسیاب (امامزاده، میرزا ابوالحسن و میرزا محمد)، خانه‌ی تلگراف («تلگراف‌خانه‌ی انگلیسی»)، برج کبوتر، خانه‌ی میرزا جعفر، کوره‌ی آجرپزی، یک زورخانه‌ی کوچک، مسجدی حدود ۲۰۰ ساله کنار حمام، کاروانسرای عباسی در آقاکمال پایین (سر راه روستا)، «عمارت فرنگی»، ساباط کوچه‌ی قلعه‌ی بالا و کنده‌ی باغستان.", en: "Nav Bridge, three mills (Imamzadeh, Mirza Abolhasan and Mirza Mohammad), the old telegraph house (called the “English telegraph house”), a dovecote tower, Mirza Jafar's house, a brick kiln, a small zurkhaneh (traditional gym), a mosque about 200 years old beside the bath, the Abbasi caravanserai at Aqa Kamal Pain (on the access road), a “Farangi” mansion, the covered passage (sabat) in the upper-castle alley and Kandeh Baghestan." }, status: "reported", source: "Kojaro" },
         ],
       },
       { t: "p", text: { fa: "آیین‌های سُه، مانند نخل‌گردانی تاسوعا، در بخش «آیین‌ها و سنت‌ها» آمده است.", en: "Soh's traditions, such as the Tasua palm carrying, are in the Traditions section." } },
@@ -139,6 +168,66 @@ export const sections: Section[] = [
           { fa: "کوه چار", en: "Kuh-e Char" }, { fa: "کوه بغل سیاه", en: "Kuh-e Baghal Siyah" }, { fa: "رودخانه‌ی لب‌چار", en: "Lab Char river" },
           { fa: "قاش سرخه", en: "Qash Sorkheh" }, { fa: "مارگله", en: "Margaleh" }, { fa: "مرغزار سرمرغ", en: "Sar-Marq meadow" },
           { fa: "مرغزار گزی", en: "Gazi meadow" }, { fa: "چشمه‌ی هاز", en: "Haz spring" }, { fa: "دشت پایمیل", en: "Paymil plain" }, { fa: "آبشار", en: "A waterfall" },
+        ],
+      },
+    ],
+  },
+  {
+    slug: "people",
+    title: { fa: "چهره‌ها", en: "People" },
+    intro: {
+      fa: "کسانی که با سُه شناخته می‌شوند. فقط مواردی با منبع آمده است.",
+      en: "People connected with Soh. Only items with a source are listed.",
+    },
+    blocks: [
+      {
+        t: "cards",
+        items: [
+          {
+            title: { fa: "سید علی صفوی سُهی", en: "Seyed Ali Safavi Sohi" },
+            fa: "سید علی صفوی سُهی",
+            text: {
+              fa: "متولد ۷ مرداد ۱۳۱۹، فرمانده گردان تانک (گردان ۲۹۳) در آغاز جنگ ایران و عراق. ۱۱ مرداد ۱۳۶۲ بر اثر ترکش کشته شد. نام پدرش سید موسی صفوی است. در تهران پلی به نام او نام‌گذاری شده است. محل شهادت در دو منبع فرق می‌کند (فکه و جنگل عمق).",
+              en: "Born 29 July 1940. Commanded a tank battalion (the 293rd) at the start of the Iran-Iraq war. Killed by shrapnel on 2 August 1983. His father was Seyed Musa Safavi, and a bridge in Tehran is named after him. Two sources disagree on where he died (Fakkeh or the Jangal-e Amqar area).",
+            },
+            status: "unverified",
+            source: "FA Wikipedia, Khabar Foori (Mar 2021)",
+          },
+          {
+            title: { fa: "میرزا بهرام صفوی", en: "Mirza Bahram Safavi" },
+            text: {
+              fa: "کدخدای روستا؛ خانه‌ی او از جاهای تاریخی سُه است.",
+              en: "The village headman (kadkhoda); his house is one of Soh's historic sites.",
+            },
+            status: "reported",
+            source: "Kojaro",
+          },
+          {
+            title: { fa: "گروه خانوادگی «صفوی سُهی»", en: "The Safavi Sohi family group" },
+            text: {
+              fa: "گردشنامه بزرگ‌ترین گروه خانوادگی روستا را «صفوی سُهی» می‌نامد. این فقط در یک منبع آمده و نام خانواده‌های دیگر را نمی‌دانیم.",
+              en: "Gardeshnama names “Safavi Sohi” as the village's largest family group. This is from one source only, and we do not know the other family names.",
+            },
+            status: "unverified",
+            source: "Gardeshnama",
+          },
+          {
+            title: { fa: "ابوالقاسم اصفهانی", en: "Abolqasem Esfahani" },
+            text: {
+              fa: "بانی کاروانسرای سُه بر پایه‌ی کتیبه‌ی سنگی سردر (۱۲۲۳ هجری قمری).",
+              en: "Named on the portal inscription as the builder of the Soh Caravanserai (1223 AH).",
+            },
+            status: "reported",
+            source: "Kojaro",
+          },
+        ],
+      },
+      {
+        t: "notice",
+        title: { fa: "هنوز تأیید نشده", en: "Not verified yet" },
+        items: [
+          { fa: "ویکی‌پدیای فارسی چند نام دیگر را بدون توضیح آورده است. برای هیچ‌کدام منبع دومی پیدا نشد، پس نام‌ها را این‌جا نمی‌نویسیم.", en: "Persian Wikipedia lists a few more names with no detail. We found no second source for any of them, so they are not published here." },
+          { fa: "چهره‌های محلی (ورزشکاران، هنرمندان، شهدا و بزرگان روستا) با کمک خانواده و با رضایت خودشان یا خانواده‌شان", en: "Local figures (athletes, artists, martyrs and elders), added with the family's help and with their or their family's consent" },
         ],
       },
     ],
@@ -157,11 +246,12 @@ export const sections: Section[] = [
           {
             title: { fa: "نخل‌گردانی تاسوعا", en: "Tasua palm carrying" },
             text: {
-              fa: "در تاسوعای محرم، نخل صبح در امامزاده یوسف آراسته می‌شود، به امامزاده گلیله برده می‌شود و پس از عزاداری ظهر عاشورا برمی‌گردد. اهالی تاسوعا را «روز عباس علی» می‌نامند.",
-              en: "On Tasua in Muharram the palm-shaped standard is decorated in the morning at Imamzadeh Yusuf, carried to Imamzadeh Golileh and returned after the Ashura noon mourning. Locals call Tasua “Roz-e Abbas Ali”.",
+              fa: "در تاسوعای محرم، نخل صبح در امامزاده یوسف آراسته می‌شود، حدود ۲٫۵ کیلومتر تا امامزاده گلیله برده می‌شود و پس از عزاداری ظهر عاشورا برمی‌گردد. در هشتم محرم «عماری‌گردانی» انجام می‌شود و هفت علم در مراسم حضور دارند. اهالی تاسوعا را «روز عباس علی» می‌نامند.",
+              en: "On Tasua in Muharram the palm-shaped standard is decorated in the morning at Imamzadeh Yusuf, carried about 2.5 km to Imamzadeh Golileh and returned after the Ashura noon mourning. On 8 Muharram the amari (litter) is carried, and seven standards take part. Locals call Tasua “Roz-e Abbas Ali”.",
             },
             status: "reported",
-            source: "Kojaro",
+            source: "Mehr News (2023), Kojaro",
+            href: "https://www.mehrnews.com/news/5842144/",
           },
           {
             title: { fa: "علم‌گردانی، عمار‌گردانی، تعزیه و نوحه", en: "Alam-gardani, ammar-gardani, taziyeh and nowheh" },
@@ -171,6 +261,35 @@ export const sections: Section[] = [
             },
             status: "reported",
             source: "Kojaro",
+          },
+          {
+            title: { fa: "عماری و علم‌ها", en: "The amari and the standards" },
+            text: {
+              fa: "عماری قابی چوبی و کوچک با طاق‌های هلالی است، نمادی از تابوت علی‌اکبر. خانواده‌ای آن را به‌صورت موروثی نگه می‌دارد و جوان‌ها روز هشتم، پس از نماز ظهر و ناهار، آن را می‌گردانند. روز تاسوعا هفت علم بسته می‌شود (پنج رنگی و دو سیاه)، یکی تا چهارم برای ابوالفضل و زینب، پنجم «پنج تن» و دو علم دیگر بی‌نام، و پیشاپیش نخل حرکت می‌کنند.",
+              en: "The amari is a small rectangular wooden frame with crescent arches, a symbolic bier for Ali Akbar. A family keeps it by hereditary custody, and young men carry it on the 8th after the midday prayer and a meal. On Tasua seven standards are tied (five coloured, two black): the first four for Abolfazl and Zeynab, the fifth for the “Panj Tan”, and two unnamed. They lead the palm.",
+            },
+            status: "unverified",
+            source: "Mehr News (2023), single source",
+            href: "https://www.mehrnews.com/news/5842144/",
+          },
+          {
+            title: { fa: "سینه‌زنی و ذکر شبانه", en: "Chest-beating and nightly zekr" },
+            text: {
+              fa: "سینه‌زنی و نوحه‌خوانی از شب اول محرم آغاز می‌شود و به‌عنوان نخستین آیین روستا توصیف شده است. اوج مراسم هشتم تا دهم محرم است و مجلس‌ها در مسجد جامع برگزار می‌شود. بازدیدکنندگان از سراسر استان می‌آیند.",
+              en: "Chest-beating and dirge recitation start on the first night of Muharram and are described as the village's first rite. The peak is the 8th to the 10th, with gatherings at the Jame Mosque. Visitors come from across the province.",
+            },
+            status: "unverified",
+            source: "Mehr News (2023), single source",
+            href: "https://www.mehrnews.com/news/5842144/",
+          },
+          {
+            title: { fa: "غذا و بازی‌های محلی", en: "Local foods and games" },
+            text: {
+              fa: "کله‌جوش، کشک مامه، آبگوشت تنوری، گلمیشه، شامی و سمنو. از لبنیات: کشک، دوغ و کره. بازی‌های قدیمی: قاب‌بازی و «شاه‌بازی».",
+              en: "Kalleh-joosh, kashk-e mama, tanoori abgoosht, golmisheh, shami and semnu. Dairy: kashk, doogh and butter. Old games: knucklebones and “shah bazi”.",
+            },
+            status: "reported",
+            source: "Kojaro, a 2021 blog",
           },
           {
             title: { fa: "قالی‌بافی جوشقانی", en: "Joshaqani carpet weaving" },
@@ -223,9 +342,12 @@ export const sections: Section[] = [
       {
         t: "cards",
         items: [
-          { title: { fa: "در خود روستا", en: "In the village" }, text: { fa: "هتل یا اقامتگاه ثبت‌شده‌ای برای سُه در اینترنت پیدا نشد (جستجو در ۲ آذر ۱۴۰۵ / ۲۳ نوامبر ۲۰۲۶). اگر آشنا یا خانواده در روستا دارید، پرسیدن از آن‌ها ساده‌ترین راه است.", en: "No registered hotel or guesthouse for Soh was found online (searched 23 Nov 2026). If you have family or friends in the village, asking them is the simplest way." }, status: "unverified" },
-          { title: { fa: "سرای معلم کوه کرکس", en: "Saray-e Moallem, Karkas mountain" }, text: { fa: "یک اقامتگاه بوم‌گردی که در نقشه‌ی بلد ثبت شده است. فاصله‌ی آن تا سُه را بررسی نکرده‌ایم؛ پیش از برنامه‌ریزی تماس بگیرید.", en: "An eco-lodge listed on the Balad map. We have not checked its distance from Soh; call before planning." }, status: "unverified", href: "https://www.balad.ir/p/%D8%A7%D9%82%D8%A7%D9%85%D8%AA%DA%AF%D8%A7%D9%87-%D8%B3%D8%B1%D8%A7%D9%89-%D9%85%D8%B9%D9%84%D9%85_hotel-2ibeYQS0ucocsj", source: "Balad" },
-          { title: { fa: "شهرهای نزدیک", en: "Nearby towns" }, text: { fa: "میمه و شاهین‌شهر (حدود ۷۵ کیلومتر) و اصفهان (حدود ۹۴ تا ۱۰۰ کیلومتر) اقامتگاه بیشتری دارند. فهرست مشخص هنوز نداریم.", en: "Meymeh and Shahin Shahr (about 75 km) and Isfahan (about 94 to 100 km) have more places to stay. We have no checked list yet." }, status: "unverified" },
+          { title: { fa: "در خود روستا", en: "In the village" }, text: { fa: "کجارو می‌نویسد در سُه بوم‌گردی یا مهمان‌پذیر نیست و برای ماندن چادر زدن در دامنه‌ی کوه یا اقامت در شهرها و روستاهای نزدیک را پیشنهاد می‌کند. ما هم چیزی ثبت‌شده در اینترنت پیدا نکردیم (۲ آذر ۱۴۰۵). اگر آشنا یا خانواده در روستا دارید، پرسیدن از آن‌ها ساده‌ترین راه است.", en: "Kojaro says Soh has no eco-lodge or guest house and suggests camping in the foothills or staying in nearby towns and villages. We also found nothing listed online (23 Nov 2026). If you have family or friends in the village, asking them is the simplest way." }, status: "reported", source: "Kojaro" },
+          { title: { fa: "آمار گردشگری شهرستان", en: "County tourism count" }, text: { fa: "فهرست آذر ۱۴۰۱ شهرستان: ۴ بوم‌گردی، ۱ مسافرخانه، ۱ هتل، ۲ مهمان‌پذیر و ۳ محل کمپ. سُه و کله‌رود دو روستای هدف گردشگری شهرستان نام برده شده‌اند. نام و شماره‌ی تماس داده نشده و آمار ممکن است قدیمی باشد.", en: "The county's December 2022 inventory: 4 eco-lodges, 1 traveller's house, 1 hotel, 2 guest houses and 3 camping sites. Soh and Kalahrud are named as the county's two tourism target villages. No names or numbers are given, and it may be out of date." }, status: "reported", source: "Kojaro news, 7 Dec 2022", href: "https://www.kojaro.com/news/194447-tourist-attractions-shahinshahr-revived/" },
+          { title: { fa: "ابیانه (همسایه‌ی شمالی)", en: "Abyaneh (northern neighbour)" }, text: { fa: "چند ویلا و اقامتگاه سنتی در سایت‌های رزرو (جاجیگا، اسنپ‌تریپ) و اقامتگاه «درافشان» دیده شد. قیمت و فاصله از سُه را بررسی نکرده‌ایم.", en: "Several villas and traditional lodgings appear on booking sites (Jajiga, Snapptrip), plus the Dorafshan eco-lodge. We have not checked prices or the distance from Soh." }, status: "unverified", href: "https://ioverlander.com/places/196946-dorafshan-ecolodge", source: "iOverlander" },
+          { title: { fa: "نطنز", en: "Natanz" }, text: { fa: "«خانه‌ی توسلیان» (اتاق‌های سنتی) و «کمپ اکو متین‌آباد» در نطنز فهرست شده‌اند. قیمت و فاصله بررسی نشده.", en: "Tavasolian House (traditional rooms) and Matin Abad Eco Camp are listed in Natanz. Prices and distance not checked." }, status: "unverified", href: "https://www.visitouriran.com/en/hotel/Natanz/5002993", source: "visitouriran.com" },
+          { title: { fa: "سرای معلم کوه کرکس (طرق‌رود)", en: "Saray-e Moallem Karkas (Tarq Rud)" }, text: { fa: "بوم‌گردی در طرق‌رود، شهرستان نطنز، نزدیک دریاچه و قلعه‌ی طرق‌رود. این‌جا در سُه یا نزدیک آن نیست. فاصله بررسی نشده و ممکن است دیگر فعال نباشد (نظرها قدیمی است).", en: "An eco-lodge in Tarq Rud, Natanz County, near the Tarq Rud lake and castle. It is not in or next to Soh. Distance not checked, and it may no longer operate (the reviews are old)." }, status: "unverified", href: "https://www.balad.ir/p/%D8%A7%D9%82%D8%A7%D9%85%D8%AA%DA%AF%D8%A7%D9%87-%D8%B3%D8%B1%D8%A7%D9%89-%D9%85%D8%B9%D9%84%D9%85_hotel-2ibeYQS0ucocsj", source: "Balad" },
+          { title: { fa: "شهرهای نزدیک", en: "Nearby towns" }, text: { fa: "میمه و شاهین‌شهر (حدود ۷۵ کیلومتر) و اصفهان (حدود ۹۴ تا ۱۰۰ کیلومتر) اقامتگاه بیشتری دارند. فهرست بررسی‌شده هنوز نداریم.", en: "Meymeh and Shahin Shahr (about 75 km) and Isfahan (about 94 to 100 km) have more places to stay. We have no checked list yet." }, status: "unverified" },
         ],
       },
       {
@@ -233,7 +355,7 @@ export const sections: Section[] = [
         title: verifyTitle,
         items: [
           { fa: "نام، شماره‌ی تماس و قیمت اقامتگاه‌های نزدیک (با کمک خانواده)", en: "Names, phone numbers and prices of nearby places (with the family's help)" },
-          { fa: "اتاق‌های اجاره‌ای یا خانه‌ی مسافر در خود روستا", en: "Rooms or guest houses for rent in the village itself" },
+          { fa: "اتاق‌های اجاره‌ای یا خانه‌ی مسافر در خود روستا و در میمه، دهلر، بیدشک و کله‌رود", en: "Rooms or guest houses for rent in the village itself and in Meymeh, Dehlor, Bidshak and Kalahrud" },
         ],
       },
     ],
@@ -267,9 +389,10 @@ export const sections: Section[] = [
       en: "The Soh dialect and the words people there use.",
     },
     blocks: [
-      { t: "p", text: { fa: "گویش سُه از گویش‌های فلات مرکزی ایران (مادی) است. مورگنستیرنه سُه را با قهرود، کاشان (کشه) و میمه در یک گروه آورده است. ایرانیکا می‌نویسد نخستین یادداشت‌های گویش سُه را آندریاس و مان و هدانک ثبت کرده‌اند. پژوهش مستقلی درباره‌ی واژگان سُه پیدا نکردیم.", en: "The Soh dialect belongs to the Central Plateau (Median) dialects of Iran. Morgenstierne groups Soh with Qohrud, Kashan (Keš) and Meyma. Iranica says early notes on Soh were made by Andreas and by Mann and Hadank. We found no standalone study of Soh vocabulary." } },
+      { t: "p", text: { fa: "گویش سُه از گویش‌های فلات مرکزی ایران (مادی) است. مورگنستیرنه سُه را با قهرود، کاشان (کشه) و میمه در یک گروه آورده است. ایرانیکا می‌نویسد نخستین یادداشت‌های گویش سُه را آندریاس و مان و هدانک ثبت کرده‌اند. ایرانیکا سُه («سُهی / سُئی») را در فهرست گویش‌های مرکزی کاشان و اصفهان آورده است. متن یا فهرست واژه‌ی تأییدشده‌ی سُه را آنلاین پیدا نکردیم و پژوهش مستقلی هم نیافتیم.", en: "The Soh dialect belongs to the Central Plateau (Median) dialects of Iran. Morgenstierne groups Soh with Qohrud, Kashan (Keš) and Meyma. Iranica says early notes on Soh were made by Andreas and by Mann and Hadank. Iranica lists Soh (“Sohi / Soʾi”) among the local Central dialects of Kashan and Isfahan. We found no verified Soh word list or text online, and no standalone study." } },
       { t: "links", items: [
         { name: { fa: "ایرانیکا: گویش میمه", en: "Iranica: Meyma dialect" }, url: "https://www.iranicaonline.org/articles/meyma-ii-dialect/", note: { fa: "نزدیک‌ترین گویش مستند", en: "The closest documented dialect" } },
+        { name: { fa: "ایرانیکا: گویش‌های مادی کاشان", en: "Iranica: The Median dialects of Kashan" }, url: "https://www.iranicaonline.org/articles/kashan-ix-the-median-dialects-of-kashan", note: { fa: "سُه را در گروه گویش‌های مرکزی آورده؛ داده‌ی سُه از آندریاس و از مان و هدانک است", en: "Places Soh among the Central dialects; the Soh data come from Andreas and from Mann and Hadank" } },
         { name: { fa: "ایرانیکا: گویش‌های استان اصفهان", en: "Iranica: Isfahan provincial dialects" }, url: "https://www.iranicaonline.org/articles/isfahan-xxi-provincial-dialects", note: { fa: "پیشینه‌ی گویش‌های منطقه", en: "Background on the region's dialects" } },
       ] },
       {
@@ -304,7 +427,14 @@ export const sections: Section[] = [
         { name: { fa: "ویکی‌داده Q5955889", en: "Wikidata Q5955889" }, url: "https://www.wikidata.org/wiki/Q5955889", note: { fa: "داده‌ی ساختاریافته", en: "Structured data" } },
         { name: { fa: "کجارو: روستای سه اصفهان", en: "Kojaro: Soh village" }, url: "https://www.kojaro.com/attraction/64660-isfahan-soh-village/", note: { fa: "راهنمای گردشگری، منبع بیشتر جاذبه‌ها", en: "Travel guide, the source for most sights" } },
         { name: { fa: "نقشه‌ی گوگل (از کجارو)", en: "Google Maps (via Kojaro)" }, url: "https://goo.gl/maps/wDRqsHQ2uwYaXufJ9", note: { fa: "موقعیت روستا", en: "Village location" } },
-        { name: { fa: "اینستاگرام: soh_village", en: "Instagram: soh_village" }, url: "https://www.instagram.com/soh_village/", note: { fa: "کجارو عکس‌ها را از این صفحه آورده است. فعال بودن آن بررسی نشده.", en: "Kojaro credits most photos to this page. Not checked whether it is active." } },
+        { name: { fa: "اینستاگرام: soh_village", en: "Instagram: soh_village" }, url: "https://www.instagram.com/soh_village/", note: { fa: "صفحه‌ی «روستای تاریخی سه». در آبان ۱۴۰۵ فعال بود و هر روز مطلب می‌گذاشت. گرداننده‌اش معلوم نیست.", en: "“The historic village of Soh”. Active in November 2026, posting daily. Who runs it is not stated." } },
+        { name: { fa: "تلگرام: esfahansohi", en: "Telegram: esfahansohi" }, url: "https://t.me/esfahansohi", note: { fa: "کانال اهالی: اطلاعیه، خاطره و عکس. حدود ۸۵۰ عضو.", en: "A channel for villagers: announcements, memories and photos. About 850 subscribers." } },
+        { name: { fa: "مهر: آیین‌های محرم در سه", en: "Mehr News: Muharram rites in Soh" }, url: "https://www.mehrnews.com/news/5842144/", note: { fa: "گزارش تیر ۱۴۰۲ درباره‌ی عماری‌گردانی و نخل‌گردانی", en: "July 2023 report on the amari and nakhl carrying" } },
+        { name: { fa: "خبر صدا و سیما: روستای سُه، تماشایی اما ناشناخته", en: "IRIB News: Soh, beautiful but unknown" }, url: "https://www.irib-news.ir/fa/news/3114741/", note: { fa: "خرداد ۱۴۰۰؛ ویدیو و ۹ عکس دارد. متن را نخوانده‌ایم.", en: "May 2021; has a video and 9 photos. We have not read it." } },
+        { name: { fa: "گردشنامه: سه", en: "Gardeshnama: Soh" }, url: "https://gardeshnama.com/tours/destinations/2742/", note: { fa: "راهنمای گردشگری؛ بهترین فصل فروردین", en: "Travel guide; best season is Farvardin (spring)" } },
+        { name: { fa: "بین‌آبین: کاروانسرای سه", en: "Beinabein: Soh Caravanserai" }, url: "https://beinabein.com/%DA%A9%D8%A7%D8%B1%D9%88%D8%A7%D9%86%D8%B3%D8%B1%D8%A7-%D8%B3%D9%87-%D8%A7%D8%B5%D9%81%D9%87%D8%A7%D9%86/", note: { fa: "گزارش سفر، اسفند ۱۴۰۰", en: "Travel report, February 2022" } },
+        { name: { fa: "وبلاگ: روستای تاریخی سه (۱۴۰۰)", en: "Blog: the historic village of Soh (2021)" }, url: "https://downloadsara.expresblog.ir/post/%D8%B1%D9%88%D8%B3%D8%AA%D8%A7%DB%8C-%D8%AA%D8%A7%D8%B1%DB%8C%D8%AE%DB%8C-%D8%B3%D9%87-%D8%A7%D8%B5%D9%81%D9%87%D8%A7%D9%86-%D8%AF%D8%A7%D8%B1%D8%A7%DB%8C-4871", note: { fa: "بناهای تاریخی و دیدگاه یک پژوهشگر میراث", en: "Historic buildings and a heritage researcher's view" } },
+        { name: { fa: "جاذبه‌های شاهین‌شهر: کجارو (خبر)", en: "Kojaro news: Shahin Shahr attractions" }, url: "https://www.kojaro.com/news/194447-tourist-attractions-shahinshahr-revived/", note: { fa: "سُه و کله‌رود روستاهای هدف گردشگری", en: "Soh and Kalahrud as tourism target villages" } },
       ] },
       { t: "notice", title: verifyTitle, items: [
         { fa: "تفاوت مختصات ویکی‌پدیای انگلیسی (۳۱٫۷۸ شمالی) با همه‌ی منابع دیگر (۳۳٫۴۴ شمالی)؛ این‌جا ۳۳٫۴۴ استفاده شده.", en: "English Wikipedia's coordinates (31.78 N) differ from every other source (33.44 N); 33.44 is used here." },
@@ -322,8 +452,8 @@ export const sections: Section[] = [
     blocks: [
       { t: "p", text: { fa: "شعبه یا خودپردازی در خود سُه پیدا نشد. پیش از سفر مقداری پول نقد همراه داشته باشید.", en: "No branch or ATM was found in Soh itself. Carry some cash before you travel." } },
       { t: "cards", items: [
-        { title: { fa: "بانک صادرات، شهرک صنعتی مورچه‌خورت", en: "Bank Saderat, Murcheh Khvort industrial town" }, text: { fa: "تنها شعبه‌ی نزدیک که در نتیجه‌ی جستجو دیدیم. مورچه‌خورت در همان دهستان سُه است. آدرس و فاصله را بررسی نکرده‌ایم.", en: "The only nearby branch our search showed. Murcheh Khvort is in the same rural district as Soh. We have not checked the address or distance." }, status: "unverified", source: "Balad" },
-        { title: { fa: "میمه و شاهین‌شهر", en: "Meymeh and Shahin Shahr" }, text: { fa: "شهرهای نزدیک شعبه و خودپرداز بیشتری دارند. فهرست بانک‌ها هنوز بررسی نشده.", en: "The nearby towns have more branches and ATMs. The list of banks is not checked yet." }, status: "unverified" },
+        { title: { fa: "بانک صادرات، شهرک صنعتی مورچه‌خورت", en: "Bank Saderat, Murcheh Khvort industrial town" }, text: { fa: "نشانی در نقشه‌ی بلد: شهرک صنعتی مورچه‌خورت، بلوار شیخ‌بهایی، خیابان زکریا، ابوریحان ۴. مورچه‌خورت در همان دهستان سُه است. ساعت کار و فاصله را بررسی نکرده‌ایم؛ پیش از رفتن با ۱۴۸۸ تماس بگیرید.", en: "Address on the Balad map: Murcheh Khvort industrial town, Sheikh Bahai Blvd, Zakaria St, Abu Rayhan 4. Murcheh Khvort is in the same rural district as Soh. We have not checked the opening hours or distance; call 1488 (Saderat) before going." }, status: "unverified", source: "Balad" },
+        { title: { fa: "میمه و شاهین‌شهر", en: "Meymeh and Shahin Shahr" }, text: { fa: "شهرهای نزدیک شعبه و خودپرداز بیشتری دارند. تنها مورد پیداشده یک خودپرداز بانک دی در میدان فاطمیه‌ی شاهین‌شهر است. شعبه‌های میمه، نطنز و ابیانه و دفتر پست را پیدا نکردیم.", en: "The nearby towns have more branches and ATMs. The only one found is a Bank Day ATM on Fatemiyeh Square in Shahin Shahr. We found no branches in Meymeh, Natanz or Abyaneh, and no post office." }, status: "unverified" },
       ] },
       { t: "links", items: [
         { name: { fa: "نقشه‌ی بلد", en: "Balad map" }, url: "https://balad.ir", note: { fa: "جستجوی «بانک» و «خودپرداز» در میمه", en: "Search “bank” and “ATM” near Meymeh" } },
@@ -352,6 +482,7 @@ export const sections: Section[] = [
         { fa: "نوع سند و نام مالک در دفترخانه", en: "The deed type and the owner's name, at a notary office" },
         { fa: "کاربری زمین (مسکونی، باغ یا زراعی) و امکان ساخت", en: "Land use (residential, orchard or farmland) and whether building is allowed" },
         { fa: "حقابه‌ی آب و دسترسی به جاده", en: "Water rights and road access" },
+        { fa: "تغییر کاربری باغ و زمین زراعی بیرون از شهر در قانون محدود شده و استثناها از کمیسیون استانی می‌گذرد. پیش از خرید از وکیل بپرسید.", en: "Changing the use of orchards and farmland outside towns is restricted by law, and exceptions go through a provincial commission. Ask a lawyer before buying." },
         { fa: "این صفحه مشاوره‌ی حقوقی نیست. با وکیل یا کارشناس رسمی مشورت کنید.", en: "This page is not legal advice. Talk to a lawyer or a licensed expert." },
       ] },
     ],
