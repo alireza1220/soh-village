@@ -113,7 +113,7 @@ export const sections: Section[] = [
           {
             title: { fa: "محوطه‌های باستانی (ادعای تازه)", en: "Ancient sites (a recent claim)" },
             text: {
-              fa: "در پست بهمن ۱۴۰۳ (فوریه ۲۰۲۵) در گروه فیسبوکی روستا آمده است که یک باستان‌شناس اداره‌ی کل میراث فرهنگی اصفهان همراه با مسئول میراث فرهنگی شهرستان از چند محوطه‌ی تاریخی سُه بازدید کرده و قدمت سکونت در آن‌ها را دست‌کم پنج هزار سال دانسته است. دیدگاهی در همان گروه آن را هم‌زمان با تپه‌های سیلک کاشان می‌داند. هیچ گزارش رسمی یا خبری پیدا نشد؛ ادعا فقط از گفته‌ی یک اهل روستا است.",
+              fa: "در پست اسفند ۱۴۰۳ (فوریه ۲۰۲۵) در گروه فیسبوکی روستا آمده است که یک باستان‌شناس اداره‌ی کل میراث فرهنگی اصفهان همراه با مسئول میراث فرهنگی شهرستان از چند محوطه‌ی تاریخی سُه بازدید کرده و قدمت سکونت در آن‌ها را دست‌کم پنج هزار سال دانسته است. دیدگاهی در همان گروه آن را هم‌زمان با تپه‌های سیلک کاشان می‌داند. هیچ گزارش رسمی یا خبری پیدا نشد؛ ادعا فقط از گفته‌ی یک اهل روستا است.",
               en: "A February 2025 post in the village's Facebook group says an archaeologist from the Isfahan Cultural Heritage office, with the county heritage head, visited several historic sites at Soh and put human settlement there at no less than five thousand years. A comment in the same group says this is contemporary with the Sialk hills of Kashan. We found no official report or news story; the claim rests on one villager's post.",
             },
             status: "unverified",
@@ -440,7 +440,7 @@ export const sections: Section[] = [
       en: "What exists online about Soh that we have found so far.",
     },
     blocks: [
-      { t: "p", text: { fa: "صفحه‌ی فیسبوک روستا نشانی «soh.ir» را به‌عنوان وب‌سایت خود نوشته است، ولی این نشانی در ۴ آذر ۱۴۰۵ باز نشد (رکورد دی‌ان‌اس پیدا نشد). وب‌سایت رسمی دیگری پیدا نشد.", en: "The village\u2019s Facebook page lists “soh.ir” as its website, but that address did not load on 24 Nov 2026 (no DNS record found). We found no other official website." } },
+      { t: "p", text: { fa: "صفحه‌ی فیسبوک روستا نشانی «soh.ir» را به‌عنوان وب‌سایت خود نوشته است، ولی این نشانی در ۳ آذر ۱۴۰۵ باز نشد (رکورد دی‌ان‌اس پیدا نشد). وب‌سایت رسمی دیگری پیدا نشد.", en: "The village\u2019s Facebook page lists “soh.ir” as its website, but that address did not load on 24 Nov 2026 (no DNS record found). We found no other official website." } },
       { t: "links", items: [
         { name: { fa: "ویکی‌پدیای فارسی: سه (شاهین‌شهر)", en: "Persian Wikipedia: Soh" }, url: "https://fa.wikipedia.org/wiki/%D8%B3%D9%87_(%D8%B4%D8%A7%D9%87%DB%8C%D9%86%E2%80%8C%D8%B4%D9%87%D8%B1_%D9%88_%D9%85%DB%8C%D9%85%D9%87)", note: { fa: "تاریخ، اقتصاد، چهره‌ها", en: "History, economy, people" } },
         { name: { fa: "ویکی‌پدیای انگلیسی: Soh, Shahinshahr", en: "English Wikipedia: Soh, Shahinshahr" }, url: "https://en.wikipedia.org/wiki/Soh,_Shahinshahr", note: { fa: "جمعیت (سرشماری)", en: "Census population" } },
