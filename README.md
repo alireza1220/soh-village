@@ -1,9 +1,11 @@
 # Soh village website
 
-Village of Soh (سه), Murcheh Khvort Rural District, Shahin Shahr and Meymeh County, Isfahan, Iran.
+Village of Soh (سه), Murcheh Khvort Rural District, Shahin Shahr and Meymeh County, Isfahan, Iran. Persian (default, RTL) and English.
 
-- `content/content.json`: the single source of facts (each with a source and a status). Edit this when new information arrives.
-- `scripts/build-artifact.mjs`: `node scripts/build-artifact.mjs` builds `artifact/soh.html`, the private Claude Artifact.
-- `src/app/page.tsx`: the Next.js (Vercel template) site, a placeholder that reads the same content.json. Not deployed.
+- `src/lib/site.ts`: all page text in Persian + English, by section (history, tourism, stay, shop, words, resources, banks, property), plus contact.
+- `src/lib/photos.ts` + `public/photos/`: add photos here (alt text, caption, credit). Empty for now.
+- `content/content.json` + `scripts/build-artifact.mjs`: English research base and the private Claude Artifact (`node scripts/build-artifact.mjs`). Update `site.ts` when `content.json` changes (and vice versa).
+- Routes: `/fa`, `/en`, `/{fa,en}/{history,tourism,stay,shop,words,resources,banks,property,photos,contact}`.
+- Run: `npm run dev` (port 3000) / `npm run build`. Deploy: import the GitHub repo in Vercel.
 
-Rules: label every fact (census, reported, unverified, family); no photos, family names or contact details without Al's OK; nothing deployed or shared without his go.
+Rules: every fact has a source or a status label (reported / unverified / family); no listings, prices, names, phone numbers or photos of people unless the owner sent them; nothing deployed without Al's go.
