@@ -108,7 +108,7 @@ export const sections: Section[] = [
               en: "Heritage researcher Mahrokh Hashemi (2021) says new construction is damaging the historic and natural landscape. She sees high tourism potential but little promotion or investment, and recommends restoration and local eco-lodges. A travel writer (Feb 2022) also says parts of the village are being altered or demolished, and dates the bath to the Reza Shah era.",
             },
             status: "unverified",
-            source: "A 2021 blog, Beinabein (2022), single sources",
+            source: "A 2021 blog and a 2022 travel report (its link could not be verified)",
           },
           {
             title: { fa: "جدایی از نطنز", en: "Separation from Natanz" },
@@ -432,7 +432,6 @@ export const sections: Section[] = [
         { name: { fa: "مهر: آیین‌های محرم در سه", en: "Mehr News: Muharram rites in Soh" }, url: "https://www.mehrnews.com/news/5842144/", note: { fa: "گزارش تیر ۱۴۰۲ درباره‌ی عماری‌گردانی و نخل‌گردانی", en: "July 2023 report on the amari and nakhl carrying" } },
         { name: { fa: "خبر صدا و سیما: روستای سُه، تماشایی اما ناشناخته", en: "IRIB News: Soh, beautiful but unknown" }, url: "https://www.irib-news.ir/fa/news/3114741/", note: { fa: "خرداد ۱۴۰۰؛ ویدیو و ۹ عکس دارد. متن را نخوانده‌ایم.", en: "May 2021; has a video and 9 photos. We have not read it." } },
         { name: { fa: "گردشنامه: سه", en: "Gardeshnama: Soh" }, url: "https://gardeshnama.com/tours/destinations/2742/", note: { fa: "راهنمای گردشگری؛ بهترین فصل فروردین", en: "Travel guide; best season is Farvardin (spring)" } },
-        { name: { fa: "بین‌آبین: کاروانسرای سه", en: "Beinabein: Soh Caravanserai" }, url: "https://beinabein.com/%DA%A9%D8%A7%D8%B1%D9%88%D8%A7%D9%86%D8%B3%D8%B1%D8%A7-%D8%B3%D9%87-%D8%A7%D8%B5%D9%81%D9%87%D8%A7%D9%86/", note: { fa: "گزارش سفر، اسفند ۱۴۰۰", en: "Travel report, February 2022" } },
         { name: { fa: "وبلاگ: روستای تاریخی سه (۱۴۰۰)", en: "Blog: the historic village of Soh (2021)" }, url: "https://downloadsara.expresblog.ir/post/%D8%B1%D9%88%D8%B3%D8%AA%D8%A7%DB%8C-%D8%AA%D8%A7%D8%B1%DB%8C%D8%AE%DB%8C-%D8%B3%D9%87-%D8%A7%D8%B5%D9%81%D9%87%D8%A7%D9%86-%D8%AF%D8%A7%D8%B1%D8%A7%DB%8C-4871", note: { fa: "بناهای تاریخی و دیدگاه یک پژوهشگر میراث", en: "Historic buildings and a heritage researcher's view" } },
         { name: { fa: "جاذبه‌های شاهین‌شهر: کجارو (خبر)", en: "Kojaro news: Shahin Shahr attractions" }, url: "https://www.kojaro.com/news/194447-tourist-attractions-shahinshahr-revived/", note: { fa: "سُه و کله‌رود روستاهای هدف گردشگری", en: "Soh and Kalahrud as tourism target villages" } },
       ] },
