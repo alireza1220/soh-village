@@ -1,0 +1,125 @@
+"use client";
+import { useMemo, useState } from "react";
+import type { Locale } from "@/lib/i18n";
+import { CONTACT_KINDS, LISTING_CATEGORIES, LISTING_TYPES } from "@/lib/market";
+
+const T = {
+  intro: { fa: "فرم را پر کنید، متن آماده را کپی کنید و از راهی که در صفحه‌ی مشارکت آمده بفرستید. اگر عکس دارید، همراه متن بفرستید. سایت پولی نگه نمی‌دارد: قیمت و پرداخت را خودتان با خریدار توافق می‌کنید.", en: "Fill in the form, copy the finished text and send it by the way shown on the Contribute page. Send a photo with it if you have one. The site holds no money: you agree the price and payment with the other person yourself." },
+  type: { fa: "نوع آگهی", en: "Type" },
+  cat: { fa: "دسته", en: "Category" },
+  title: { fa: "چه می‌فروشید یا چه می‌خواهید؟ (مثلاً گیلاس تازه، نان محلی، نگهداری باغ)", en: "What are you selling or looking for? (e.g. fresh cherries, village bread, garden care)" },
+  qty: { fa: "مقدار یا حجم کار (مثلاً ۵ کیلو، دو روز در هفته)", en: "Amount or size of the job (e.g. 5 kg, two days a week)" },
+  price: { fa: "قیمت یا دستمزد به تومان (یا «توافقی»)", en: "Price or pay in toman (or “negotiable”)" },
+  area: { fa: "منطقه و محل تحویل", en: "Area and pickup place" },
+  avail: { fa: "چه زمانی؟ (مثلاً اواسط خرداد تا تیر)", en: "When? (e.g. mid-June to July)" },
+  details: { fa: "توضیح بیشتر", en: "More details" },
+  name: { fa: "نام (اختیاری)", en: "Name (optional)" },
+  ckind: { fa: "راه تماس", en: "Contact method" },
+  cval: { fa: "شماره یا شناسه", en: "Number or ID" },
+  consent: { fa: "اجازه می‌دهم راه تماسم در آگهی نوشته شود", en: "I allow my contact to be shown in the listing" },
+  consentNo: { fa: "راه تماس نوشته نمی‌شود؛ علاقه‌مندان از ما می‌خواهند شما را خبر کنیم.", en: "Your contact will not be shown; interested people ask us to pass the message on." },
+  result: { fa: "متن آماده برای ارسال", en: "Your message, ready to send" },
+  copy: { fa: "کپی متن", en: "Copy text" },
+  copied: { fa: "کپی شد", en: "Copied" },
+  failed: { fa: "کپی نشد؛ متن را انتخاب و کپی کنید.", en: "Copy failed; select the text and copy it." },
+  required: { fa: "عنوان را بنویسید تا متن ساخته شود.", en: "Write a title and the message will appear." },
+  head: { fa: "آگهی بازارچه‌ی سُه", en: "Soh village market listing" },
+};
+
+export function MarketForm({ lang }: { lang: Locale }) {
+  const [type, setType] = useState<string>(LISTING_TYPES[0].v);
+  const [cat, setCat] = useState<string>(LISTING_CATEGORIES[0].v);
+  const [title, setTitle] = useState("");
+  const [qty, setQty] = useState("");
+  const [price, setPrice] = useState("");
+  const [area, setArea] = useState("");
+  const [avail, setAvail] = useState("");
+  const [details, setDetails] = useState("");
+  const [name, setName] = useState("");
+  const [ckind, setCkind] = useState<string>(CONTACT_KINDS[0].v);
+  const [cval, setCval] = useState("");
+  const [consent, setConsent] = useState(false);
+  const [note, setNote] = useState("");
+  const lab = (list: { v: string; fa: string; en: string }[], v: string) => list.find((o) => o.v === v)?.[lang] ?? v;
+  const short = (s: string) => s.replace(/\s*[(（].*$/, "");
+
+  const text = useMemo(() => {
+    if (!title.trim()) return "";
+    const L = (k: string, v: string) => (v.trim() ? [`${short(k)}: ${v.trim()}`] : []);
+    return [
+      T.head[lang],
+      `${T.type[lang]}: ${lab(LISTING_TYPES, type)}`,
+      `${T.cat[lang]}: ${lab(LISTING_CATEGORIES, cat)}`,
+      `${lang === "fa" ? "عنوان" : "Title"}: ${title.trim()}`,
+      ...L(T.qty[lang], qty), ...L(T.price[lang], price), ...L(T.area[lang], area), ...L(T.avail[lang], avail), ...L(T.details[lang], details), ...L(T.name[lang], name),
+      ...(cval.trim() ? [`${T.ckind[lang]}: ${lab(CONTACT_KINDS, ckind)} ${cval.trim()}`] : []),
+      `${lang === "fa" ? "اجازه‌ی نوشتن راه تماس" : "Permission to publish contact"}: ${consent && cval.trim() ? (lang === "fa" ? "بله" : "yes") : (lang === "fa" ? "خیر" : "no")}`,
+    ].join("\n");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [type, cat, title, qty, price, area, avail, details, name, ckind, cval, consent, lang]);
+
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(text); setNote(T.copied[lang]); } catch { setNote(T.failed[lang]); }
+  };
+  const field = "w-full rounded-xl border px-3 py-2 bg-[var(--surface)]";
+  const brd = { borderColor: "var(--line)" } as const;
+  const lbl = "flex flex-col gap-1 text-sm";
+  return (
+    <form className="card p-5 md:p-6 flex flex-col gap-4" onSubmit={(e) => e.preventDefault()} aria-label={T.head[lang]}>
+      <p className="text-sm muted">{T.intro[lang]}</p>
+      <fieldset className="flex flex-wrap gap-2 border-0 p-0 m-0">
+        <legend className="text-sm muted mb-1">{T.type[lang]}</legend>
+        {LISTING_TYPES.map((m) => (
+          <label key={m.v} className={`btn ${type === m.v ? "btn-primary" : "btn-ghost"} cursor-pointer`}>
+            <input type="radio" className="sr-only" name="market-type" checked={type === m.v} onChange={() => setType(m.v)} />
+            {m[lang]}
+          </label>
+        ))}
+      </fieldset>
+      <label className={lbl}>{T.cat[lang]}
+        <select id="market-form-cat" className={field} style={brd} value={cat} onChange={(e) => setCat(e.target.value)}>
+          {LISTING_CATEGORIES.map((o) => <option key={o.v} value={o.v}>{o[lang]}</option>)}
+        </select>
+      </label>
+      <label className={lbl}>{T.title[lang]}
+        <input id="market-title" className={field} style={brd} value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
+      </label>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label className={lbl}>{T.qty[lang]}<input id="market-qty" className={field} style={brd} value={qty} onChange={(e) => setQty(e.target.value)} maxLength={80} /></label>
+        <label className={lbl}>{T.price[lang]}<input id="market-price" className={field} style={brd} value={price} onChange={(e) => setPrice(e.target.value)} maxLength={80} /></label>
+        <label className={lbl}>{T.area[lang]}<input id="market-area" className={field} style={brd} value={area} onChange={(e) => setArea(e.target.value)} maxLength={80} /></label>
+        <label className={lbl}>{T.avail[lang]}<input id="market-avail" className={field} style={brd} value={avail} onChange={(e) => setAvail(e.target.value)} maxLength={80} /></label>
+      </div>
+      <label className={lbl}>{T.details[lang]}
+        <textarea id="market-details" className={field} style={brd} rows={3} value={details} onChange={(e) => setDetails(e.target.value)} maxLength={800} />
+      </label>
+      <div className="grid gap-4 sm:grid-cols-3">
+        <label className={lbl}>{T.name[lang]}<input id="market-name" className={field} style={brd} value={name} onChange={(e) => setName(e.target.value)} maxLength={60} /></label>
+        <label className={lbl}>{T.ckind[lang]}
+          <select id="market-ckind" className={field} style={brd} value={ckind} onChange={(e) => setCkind(e.target.value)}>
+            {CONTACT_KINDS.map((o) => <option key={o.v} value={o.v}>{o[lang]}</option>)}
+          </select>
+        </label>
+        <label className={lbl}>{T.cval[lang]}<input id="market-cval" dir="ltr" className={field} style={brd} value={cval} onChange={(e) => setCval(e.target.value)} maxLength={60} /></label>
+      </div>
+      <label className="flex items-start gap-2 text-sm">
+        <input id="market-consent" type="checkbox" className="mt-1" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+        <span>{T.consent[lang]}{!consent && <span className="block muted">{T.consentNo[lang]}</span>}</span>
+      </label>
+      <div className="flex flex-col gap-2" aria-live="polite">
+        <b className="text-sm">{T.result[lang]}</b>
+        {text ? (
+          <>
+            <textarea readOnly rows={Math.min(14, text.split("\n").length + 1)} className={`${field} font-mono text-sm`} style={brd} value={text} onFocus={(e) => e.currentTarget.select()} aria-label={T.result[lang]} />
+            <div className="flex items-center gap-3">
+              <button type="button" className="btn btn-primary" onClick={copy}>{T.copy[lang]}</button>
+              {note && <span className="text-sm muted">{note}</span>}
+            </div>
+          </>
+        ) : (
+          <p className="text-sm muted">{T.required[lang]}</p>
+        )}
+      </div>
+    </form>
+  );
+}

@@ -352,6 +352,24 @@ export const sections: Section[] = [
     ],
   },
   {
+    slug: "market",
+    title: { fa: "بازارچه", en: "Village market" },
+    intro: {
+      fa: "خرید و فروش میوه، نان و خوراک محلی، و آگهی کار و نگهداری باغ، بدون پرداخت در سایت.",
+      en: "Buy and sell fruit, bread and village food, and post work and garden-care listings, with no payments on the site.",
+    },
+    blocks: [
+      { t: "p", text: { fa: "این‌جا تابلوی آگهی روستاست: کسی که گیلاس، سیب، گردو یا نان دارد، کسی که کارگر یا نگهبان باغ می‌خواهد و کسی که دنبال کار است آگهی می‌دهد. سایت پول نمی‌گیرد و پولی را نگه نمی‌دارد. خریدار و فروشنده خودشان توافق می‌کنند و پرداخت را بیرون از سایت انجام می‌دهند.", en: "This is the village notice board: people who have cherries, apples, walnuts or bread, people who need workers or someone to look after a garden, and people looking for work post here. The site takes no commission and holds no money. Buyer and seller agree between themselves and pay outside the site." } },
+      { t: "notice", title: { fa: "قواعد (پیش‌نویس)", en: "Rules (draft)" }, items: [
+        { fa: "پرداخت بیرون از سایت است. پیش از پرداخت یا سفر مطمئن شوید؛ سایت طرفین را تأیید نمی‌کند.", en: "Payment happens outside the site. Make sure before you pay or travel; the site does not verify the people." },
+        { fa: "برای پیدا کردن کار پول ندهید. آگهی‌ای که پول پیش‌پرداخت می‌خواهد منتشر نمی‌شود.", en: "Never pay to get a job. A listing that asks for money upfront is not published." },
+        { fa: "دستمزد، ساعت کار و مدت همکاری را پیش از شروع مکتوب کنید. کار کودکان پذیرفته نیست.", en: "Put pay, hours and length of work in writing before you start. Work for children is not accepted." },
+        { fa: "فقط کالا و خدمات قانونی منتشر می‌شود. شماره‌ی تماس و نام فقط با اجازه‌ی صاحبش نوشته می‌شود.", en: "Only legal goods and services are published. Names and phone numbers are shown only with the owner's permission." },
+        { fa: "هر آگهی پس از ۳۰ روز برداشته می‌شود، مگر تمدید شود.", en: "Each listing is removed after 30 days unless renewed." },
+      ] },
+    ],
+  },
+  {
     slug: "stay",
     title: { fa: "اقامت", en: "Where to stay" },
     intro: {

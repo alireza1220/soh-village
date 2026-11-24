@@ -2,6 +2,8 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { Blocks } from "@/components/blocks";
 import { PhotoStrip } from "@/components/photo-strip";
+import { MarketBoard } from "@/components/market-board";
+import { MarketForm } from "@/components/market-form";
 import { PostForm } from "@/components/post-form";
 import { hasLocale, locales } from "@/lib/i18n";
 import { sectionBySlug, sections } from "@/lib/site";
@@ -24,7 +26,14 @@ async function Content({ params }: { params: PageProps<"/[lang]/[section]">["par
       </header>
       <PhotoStrip section={s.slug} lang={lang} />
       <div className="narrow w-full flex flex-col gap-8">
+        {s.slug === "market" && <MarketBoard lang={lang} />}
         <Blocks blocks={s.blocks} lang={lang} />
+        {s.slug === "market" && (
+          <section className="flex flex-col gap-3">
+            <h2 className="text-2xl">{lang === "fa" ? "آگهی خود را بنویسید" : "Write your listing"}</h2>
+            <MarketForm lang={lang} />
+          </section>
+        )}
         {(s.slug === "needs" || s.slug === "careers") && (
           <section className="flex flex-col gap-3">
             <h2 className="text-2xl">{lang === "fa" ? (s.slug === "needs" ? "نیاز یا پیشنهاد خود را بنویسید" : "آگهی کاری خود را بنویسید") : s.slug === "needs" ? "Write your request or offer" : "Write your job post"}</h2>
