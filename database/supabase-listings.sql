@@ -23,8 +23,20 @@ create table if not exists public.listings (
   status         text not null default 'pending' check (status in ('pending','approved','rejected','removed')),
   created_at     timestamptz not null default now(),
   approved_at    timestamptz,
-  expires_at     timestamptz
+  expires_at     timestamptz,
+  manage_hash    text unique,                                   -- HMAC-SHA256 of the manage code with a server secret; the code itself is never stored; never public
+  owner_id       uuid,                                          -- auth.users id of a logged-in poster (no FK on purpose); never public
+  renewals       int not null default 0,                        -- how many times the poster renewed the 30 days
+  updated_at     timestamptz not null default now()             -- maintained by the listing_touch trigger
 );
+
+-- Upgrade path for tables created by an older version of this file (no-op on a fresh install).
+alter table public.listings add column if not exists manage_hash text;
+alter table public.listings add column if not exists owner_id    uuid;
+alter table public.listings add column if not exists renewals    int not null default 0;
+alter table public.listings add column if not exists updated_at  timestamptz not null default now();
+create unique index if not exists listings_manage_hash_key on public.listings (manage_hash);
+create index if not exists listings_owner_idx on public.listings (owner_id, created_at desc);
 
 create index if not exists listings_status_idx on public.listings (status, expires_at);
 create index if not exists listings_ip_idx on public.listings (ip_hash, created_at);
@@ -32,7 +44,9 @@ create index if not exists listings_ip_idx on public.listings (ip_hash, created_
 -- When an admin approves a row, start the 30-day clock.
 create or replace function public.listing_on_approve() returns trigger language plpgsql as $$
 begin
-  if new.status = 'approved' and (old.status is distinct from 'approved') then
+  -- Only the FIRST approval starts the 30-day clock. A re-approval after a poster edit keeps the old expiry,
+  -- so edits cannot be used to dodge the renewal limit.
+  if new.status = 'approved' and (old.status is distinct from 'approved') and old.approved_at is null then
     new.approved_at := now();
     new.expires_at  := now() + interval '30 days';
   end if;
@@ -43,10 +57,37 @@ drop trigger if exists listing_on_approve on public.listings;
 create trigger listing_on_approve before update on public.listings
   for each row execute function public.listing_on_approve();
 
+-- Keep updated_at current on every update. Named so it fires after listing_on_approve (triggers run alphabetically).
+create or replace function public.listing_touch() returns trigger language plpgsql as $$
+begin
+  new.updated_at := now();
+  return new;
+end $$;
+
+drop trigger if exists listing_touch on public.listings;
+create trigger listing_touch before update on public.listings
+  for each row execute function public.listing_touch();
+
+-- Rate-limit log used by the server for manage-code attempts (kind = 'manage'). Only hashed IPs, never public.
+create table if not exists public.rate_events (
+  id         bigint generated always as identity primary key,
+  ip_hash    text not null,
+  kind       text not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists rate_events_lookup_idx on public.rate_events (ip_hash, kind, created_at);
+
+alter table public.rate_events enable row level security;
+revoke all on public.rate_events from anon, authenticated;
+revoke all on sequence public.rate_events_id_seq from anon, authenticated;
+
 -- Lock the base table: nobody but the server (service role) and you in the dashboard can read or write it.
 alter table public.listings enable row level security;
 revoke all on public.listings from anon, authenticated;
 
+-- The public sees only this view. The column list is explicit on purpose: ip_hash, manage_hash, owner_id,
+-- poster_name, renewals and updated_at are NOT selected, so they can never leak. Do not use select *.
+-- Note: the view runs with its owner's rights, so anon can read it although the base table is locked.
 -- The public sees only this view: approved, unexpired, and contact only if allowed.
 create or replace view public.public_listings as
   select id, type, category, title, quantity, price, area, available, details,

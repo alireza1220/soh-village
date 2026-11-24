@@ -4,6 +4,7 @@ import { Blocks } from "@/components/blocks";
 import { PhotoStrip } from "@/components/photo-strip";
 import { MarketBoard } from "@/components/market-board";
 import { MarketForm } from "@/components/market-form";
+import Link from "next/link";
 import { PostForm } from "@/components/post-form";
 import { hasLocale, locales } from "@/lib/i18n";
 import { sectionBySlug, sections } from "@/lib/site";
@@ -27,6 +28,9 @@ async function Content({ params }: { params: PageProps<"/[lang]/[section]">["par
       <PhotoStrip section={s.slug} lang={lang} />
       <div className="narrow w-full flex flex-col gap-8">
         {s.slug === "market" && <MarketBoard lang={lang} />}
+        {s.slug === "market" && (
+          <p className="text-sm"><Link className="link" href={`/${lang}/manage`}>{lang === "fa" ? "مدیریت آگهی با کد" : "Manage a listing with your code"}</Link></p>
+        )}
         <Blocks blocks={s.blocks} lang={lang} />
         {s.slug === "market" && (
           <section className="flex flex-col gap-3">

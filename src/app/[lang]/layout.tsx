@@ -5,6 +5,7 @@ import Link from "next/link";
 import "../globals.css";
 import { dirOf, hasLocale, locales } from "@/lib/i18n";
 import { sections, siteName } from "@/lib/site";
+import { AuthLink } from "@/components/auth-link";
 
 const inter = Inter({ variable: "--font-body", subsets: ["latin"] });
 const fraunces = Fraunces({ variable: "--font-serif", subsets: ["latin"] });
@@ -55,12 +56,14 @@ export default async function LangLayout({ children, params }: LayoutProps<"/[la
             </nav>
             <div className="flex items-center gap-2">
               <Link href={`/${other}`} className="btn btn-ghost" hrefLang={other} lang={other}>{other === "fa" ? "فارسی" : "English"}</Link>
+              <AuthLink lang={lang} className="btn btn-ghost hidden sm:inline-flex" />
               <Link href={`/${lang}/contribute`} className="btn btn-primary hidden sm:inline-flex">{contributeLabel}</Link>
               <details className="relative lg:hidden">
                 <summary className="btn btn-ghost cursor-pointer list-none" aria-label={lang === "fa" ? "منو" : "Menu"}>☰</summary>
                 <div className="menu card absolute end-0 mt-2 flex flex-col p-2 min-w-56 z-30 max-h-[70vh] overflow-auto">
                   {all.map((m) => <Link key={m.href} href={m.href}>{m.label}</Link>)}
                   <Link href={`/${lang}/contribute`}>{contributeLabel}</Link>
+                  <AuthLink lang={lang} className="" />
                 </div>
               </details>
             </div>
@@ -78,6 +81,8 @@ export default async function LangLayout({ children, params }: LayoutProps<"/[la
             </ul>
             <ul className="list-none p-0 m-0 flex flex-col gap-1 text-sm">
               <li><Link className="muted hover:underline" href={`/${lang}/contribute`}>{contributeLabel}</Link></li>
+              <li><AuthLink lang={lang} className="muted hover:underline" /></li>
+              <li><Link className="muted hover:underline" href={`/${lang}/manage`}>{lang === "fa" ? "مدیریت آگهی با کد" : "Manage a listing with your code"}</Link></li>
               <li><Link className="muted hover:underline" href={`/${lang}/credits`}>{lang === "fa" ? "منبع عکس‌ها و مجوزها" : "Photo credits and licences"}</Link></li>
             </ul>
           </div>

@@ -1,8 +1,11 @@
 "use client";
+import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
 import type { Locale } from "@/lib/i18n";
 import { CONTACT_KINDS, LISTING_CATEGORIES, LISTING_TYPES } from "@/lib/market";
 import { publicSupabase } from "@/lib/supabase";
+import { useSession } from "@/components/use-session";
+import { getSession, refreshSession } from "@/lib/auth";
 
 const T = {
   intro: { fa: "فرم را پر کنید، متن آماده را کپی کنید و از راهی که در صفحه‌ی مشارکت آمده بفرستید. اگر عکس دارید، همراه متن بفرستید. سایت پولی نگه نمی‌دارد: قیمت و پرداخت را خودتان با خریدار توافق می‌کنید.", en: "Fill in the form, copy the finished text and send it by the way shown on the Contribute page. Send a photo with it if you have one. The site holds no money: you agree the price and payment with the other person yourself." },
@@ -31,6 +34,13 @@ const T = {
   err: { fa: "ارسال نشد. متن را کپی کنید و از راه صفحه‌ی مشارکت بفرستید.", en: "Could not send. Copy the text and send it through the Contribute page." },
   needContact: { fa: "برای ارسال، راه تماس (شماره یا شناسه) لازم است. اگر نمی‌خواهید نوشته شود، تیک اجازه را نزنید؛ فقط ما می‌بینیم.", en: "To send, a way to reach you is required. If you do not want it shown, leave the permission box unticked; only we see it." },
   slow: { fa: "چند ثانیه صبر کنید و دوباره بزنید.", en: "Wait a few seconds and try again." },
+  codeTitle: { fa: "کد مدیریت آگهی شما", en: "Your listing manage code" },
+  codeWarn: { fa: "این کد را همین حالا ذخیره کنید. فقط یک بار نشان داده می‌شود. با آن می‌توانید آگهی را ویرایش، تمدید یا حذف کنید؛ ما نمی‌توانیم آن را بازیابی کنیم.", en: "Save this code now. It is shown only once. With it you can edit, renew or delete your listing; we cannot recover it." },
+  codeCopy: { fa: "کپی کد", en: "Copy code" },
+  codeManage: { fa: "رفتن به صفحه‌ی مدیریت آگهی", en: "Go to the manage page" },
+  postingAs: { fa: "ارسال با حساب", en: "Posting as" },
+  myListings: { fa: "آگهی‌های من", en: "My listings" },
+  loginHint: { fa: "برای نگه‌داشتن آگهی‌هایتان در یک‌جا وارد شوید (اختیاری)", en: "Log in to keep your listings in one place (optional)" },
   limit: { fa: "امروز آگهی‌های زیادی فرستاده‌اید؛ بعداً دوباره امتحان کنید.", en: "Too many listings sent; try again later." },
 };
 
@@ -51,6 +61,9 @@ export function MarketForm({ lang }: { lang: Locale }) {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [msg, setMsg] = useState("");
   const [website, setWebsite] = useState(""); // honeypot
+  const [manageCode, setManageCode] = useState("");
+  const [codeNote, setCodeNote] = useState("");
+  const { session } = useSession();
   const opened = useRef(Date.now());
   const canSend = !!publicSupabase();
   const lab = (list: { v: string; fa: string; en: string }[], v: string) => list.find((o) => o.v === v)?.[lang] ?? v;
@@ -78,15 +91,20 @@ export function MarketForm({ lang }: { lang: Locale }) {
     if (!cval.trim()) { setStatus("error"); setMsg(T.needContact[lang]); return; }
     setStatus("sending"); setMsg("");
     try {
+      // Read the session right now: a tab left open for a long time may hold an expired token.
+      const live = session ? (getSession() ?? (await refreshSession())) : null;
       const res = await fetch("/api/listings", {
-        method: "POST", headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json", ...(live ? { Authorization: `Bearer ${live.accessToken}` } : {}) },
         body: JSON.stringify({ type, category: cat, title, quantity: qty, price, area, available: avail, details, posterName: name, contactKind: ckind, contactValue: cval, contactPublic: consent, website, openedMs: Date.now() - opened.current }),
       });
       const data = await res.json().catch(() => ({}));
-      if (res.ok && data.ok) { setStatus("sent"); setMsg(T.sent[lang]); return; }
+      if (res.ok && data.ok) { setStatus("sent"); setMsg(T.sent[lang]); if (typeof data.manageCode === "string") setManageCode(data.manageCode); return; }
       setStatus("error");
       setMsg(data.error === "too_fast" ? T.slow[lang] : data.error === "rate_limited" ? T.limit[lang] : data.error === "contact_required" ? T.needContact[lang] : T.err[lang]);
     } catch { setStatus("error"); setMsg(T.err[lang]); }
+  };
+  const copyCode = async () => {
+    try { await navigator.clipboard.writeText(manageCode); setCodeNote(T.copied[lang]); } catch { setCodeNote(T.failed[lang]); }
   };
   const field = "w-full rounded-xl border px-3 py-2 bg-[var(--surface)]";
   const brd = { borderColor: "var(--line)" } as const;
@@ -134,6 +152,27 @@ export function MarketForm({ lang }: { lang: Locale }) {
         <span>{T.consent[lang]}{!consent && <span className="block muted">{T.consentNo[lang]}</span>}</span>
       </label>
       <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" value={website} onChange={(e) => setWebsite(e.target.value)} style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }} />
+      {canSend && (
+        <p className="text-sm muted">
+          {session ? (
+            <>{T.postingAs[lang]} <b dir="ltr">{session.user.email}</b> · <Link className="link" href={`/${lang}/my`}>{T.myListings[lang]}</Link></>
+          ) : (
+            <Link className="link" href={`/${lang}/login`}>{T.loginHint[lang]}</Link>
+          )}
+        </p>
+      )}
+      {manageCode && (
+        <div className="todo flex flex-col gap-3" role="alert">
+          <b>{T.codeTitle[lang]}</b>
+          <p dir="ltr" className="font-mono text-2xl tracking-widest break-all select-all" style={{ textAlign: "center" }}>{manageCode}</p>
+          <p className="text-sm">{T.codeWarn[lang]}</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <button type="button" className="btn btn-primary" onClick={copyCode}>{T.codeCopy[lang]}</button>
+            <Link className="link text-sm" href={`/${lang}/manage`}>{T.codeManage[lang]}</Link>
+            <span className="text-sm muted" aria-live="polite">{codeNote}</span>
+          </div>
+        </div>
+      )}
       {canSend && (
         <div className="flex flex-col gap-2" aria-live="polite">
           <button type="button" className="btn btn-primary self-start" disabled={!title.trim() || status === "sending" || status === "sent"} onClick={send}>
