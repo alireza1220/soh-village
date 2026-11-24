@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import type { Locale } from "@/lib/i18n";
-import { CONTACT_KINDS, LISTING_CATEGORIES, LISTING_TYPES } from "@/lib/market";
+import { CONTACT_KINDS, LISTING_CATEGORIES, LISTING_TYPE_LABELS, LISTING_TYPES } from "@/lib/market";
 import { errorText, type ManagedListing } from "@/components/listing-api";
 
 export type RunResult = { ok: boolean; listing?: ManagedListing; error?: string };
@@ -100,7 +100,7 @@ function ListingCard({ lang, item, run, onChange, onRemoved }: { lang: Locale; i
     <li className="item flex flex-col gap-3 list-none">
       <div className="flex flex-wrap items-center gap-2">
         <span className="chip" data-status={st}>{STATUS[st]?.[lang] ?? st}</span>
-        <span className="chip">{label(LISTING_TYPES, item.type, lang)}</span>
+        <span className="chip">{label(LISTING_TYPE_LABELS, item.type, lang)}</span>
         <span className="chip">{label(LISTING_CATEGORIES, item.category, lang)}</span>
       </div>
       <h3 className="text-lg font-semibold break-words">{item.title}</h3>
@@ -114,7 +114,7 @@ function ListingCard({ lang, item, run, onChange, onRemoved }: { lang: Locale; i
           <div className="grid gap-3 sm:grid-cols-2">
             <label className={lbl} htmlFor={`${pre}-type`}>{T.type[lang]}
               <select id={`${pre}-type`} className={field} style={brd} value={f.type} onChange={(e) => set("type", e.target.value)}>
-                {LISTING_TYPES.map((o) => <option key={o.v} value={o.v}>{o[lang]}</option>)}
+                {(LISTING_TYPES.some((o) => o.v === f.type) ? LISTING_TYPES : [...LISTING_TYPES, ...LISTING_TYPE_LABELS.filter((o) => o.v === f.type)]).map((o) => <option key={o.v} value={o.v}>{o[lang]}</option>)}
               </select>
             </label>
             <label className={lbl} htmlFor={`${pre}-cat`}>{T.cat[lang]}

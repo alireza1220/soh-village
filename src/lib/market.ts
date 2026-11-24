@@ -1,16 +1,23 @@
 import type { L } from "./i18n";
 
-// Village market: listings for produce, food, services and jobs. No payments happen on the site.
+// Village market: buying and selling. No payments happen on the site.
+// Older rows may still be service, seeking or hiring; those are not offered when writing a listing.
 export type ListingType = "sell" | "need" | "service" | "seeking" | "hiring";
 export type Opt<T extends string = string> = { v: T; fa: string; en: string };
 
 export const LISTING_TYPES: Opt<ListingType>[] = [
   { v: "sell", fa: "فروش", en: "For sale" },
   { v: "need", fa: "می‌خواهم بخرم", en: "Wanted" },
+];
+
+// Names for types the market no longer offers, so a saved row still reads in both languages.
+const RETIRED_LISTING_TYPES: Opt<ListingType>[] = [
   { v: "service", fa: "خدمت می‌دهم", en: "Service offered" },
   { v: "seeking", fa: "دنبال کار", en: "Looking for work" },
   { v: "hiring", fa: "کارگر می‌خواهم", en: "Hiring" },
 ];
+
+export const LISTING_TYPE_LABELS: Opt<ListingType>[] = [...LISTING_TYPES, ...RETIRED_LISTING_TYPES];
 
 export const LISTING_CATEGORIES: Opt[] = [
   { v: "fruit", fa: "میوه (گیلاس، سیب، ...)", en: "Fruit (cherries, apples ...)" },

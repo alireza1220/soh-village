@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import type { Locale } from "@/lib/i18n";
-import { LISTING_CATEGORIES, LISTING_TYPES, listings as localListings, type Listing, type ListingType } from "@/lib/market";
+import { LISTING_CATEGORIES, LISTING_TYPE_LABELS, LISTING_TYPES, listings as localListings, type Listing, type ListingType } from "@/lib/market";
 import { publicSupabase } from "@/lib/supabase";
 
 const T = {
@@ -50,6 +50,7 @@ export function MarketBoard({ lang }: { lang: Locale }) {
   const live = useMemo(() => [...remote, ...localListings].filter((l) => l.expiresAt >= today), [remote, today]);
   const shown = live.filter((l) => (type === "all" || l.type === type) && (cat === "all" || l.category === cat));
   const label = (list: { v: string; fa: string; en: string }[], v: string) => list.find((o) => o.v === v)?.[lang] ?? v;
+  const typeLabel = (v: string) => label(LISTING_TYPE_LABELS, v);
   const chip = (active: boolean) => `btn ${active ? "btn-primary" : "btn-ghost"} !py-1.5 !px-3 !text-sm`;
 
   return (
@@ -74,7 +75,7 @@ export function MarketBoard({ lang }: { lang: Locale }) {
           <article className="item flex flex-col gap-1 opacity-80" aria-label={T.exampleTitle[lang]}>
             <p className="text-xs font-semibold muted">{T.exampleTitle[lang]}</p>
             <h3 className="text-lg">{lang === "fa" ? "گیلاس تازه‌ی باغ" : "Fresh orchard cherries"}</h3>
-            <p className="text-sm"><span className="chip">{label(LISTING_TYPES, "sell")}</span><span className="chip">{label(LISTING_CATEGORIES, "fruit")}</span></p>
+            <p className="text-sm"><span className="chip">{typeLabel("sell")}</span><span className="chip">{label(LISTING_CATEGORIES, "fruit")}</span></p>
             <dl className="grid gap-x-4 text-sm" style={{ gridTemplateColumns: "max-content 1fr" }}>
               <dt className="muted">{T.qty[lang]}</dt><dd>{lang === "fa" ? "۵ کیلو" : "5 kg"}</dd>
               <dt className="muted">{T.price[lang]}</dt><dd>{lang === "fa" ? "کیلویی ۱۲۰٬۰۰۰ تومان" : "120,000 toman per kg"}</dd>
@@ -90,7 +91,7 @@ export function MarketBoard({ lang }: { lang: Locale }) {
           {shown.map((l) => (
             <li key={l.id} className="item flex flex-col gap-2">
               <h3 className="text-lg">{l.title}</h3>
-              <p className="text-sm"><span className="chip">{label(LISTING_TYPES, l.type)}</span><span className="chip">{label(LISTING_CATEGORIES, l.category)}</span></p>
+              <p className="text-sm"><span className="chip">{typeLabel(l.type)}</span><span className="chip">{label(LISTING_CATEGORIES, l.category)}</span></p>
               <dl className="grid gap-x-4 gap-y-0.5 text-sm" style={{ gridTemplateColumns: "max-content 1fr" }}>
                 {l.quantity && (<><dt className="muted">{T.qty[lang]}</dt><dd>{l.quantity}</dd></>)}
                 {l.price && (<><dt className="muted">{T.price[lang]}</dt><dd>{l.price}</dd></>)}

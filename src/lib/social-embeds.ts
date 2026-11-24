@@ -9,14 +9,26 @@ export type SocialPost = {
   account: string;
   href: string;
   embed: string;
+  width?: number;
+  height?: number;
   tall?: boolean;
   sections: string[];
   note: L;
 };
 
+// Since September 2025 Facebook publishes these as reels. The page video URL
+// opens in a browser, but the player only accepts the reel address, with an
+// explicit width and height.
 const fbVideo = (id: string) => {
-  const href = `https://www.facebook.com/sohiran/videos/${id}/`;
-  return { href, embed: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(href)}&show_text=true&width=560` };
+  const href = `https://www.facebook.com/reel/${id}/`;
+  const width = 360;
+  const height = 640;
+  return {
+    href,
+    width,
+    height,
+    embed: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(href)}&show_text=false&width=${width}&height=${height}&t=0`,
+  };
 };
 
 const ig = (code: string, reel = false) => {
@@ -34,8 +46,9 @@ export const socialPosts: SocialPost[] = [
     title: { fa: "صفحه‌ی فیسبوک روستای تاریخی سُه", en: "Facebook page of the historic village of Soh" },
     account: "facebook.com/sohiran",
     href: pageHref,
-    embed: `https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(pageHref)}&tabs=timeline&width=500&height=720&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=false`,
-    tall: true,
+    width: 500,
+    height: 720,
+    embed: `https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(pageHref)}&tabs=timeline&width=500&height=720&small_header=false&adapt_container_width=false&hide_cover=false&show_facepile=false`,
     sections: ["history", "tourism"],
     note: { fa: "حدود ۹۳۰ دنبال‌کننده. خط زمان صفحه این‌جا نشان داده می‌شود. گروه فیسبوک جداست و قاب عمومی ندارد.", en: "About 930 followers. The page timeline is shown here. The Facebook group is separate and has no public frame." },
   },

@@ -21,12 +21,15 @@ export function SocialList({ posts, lang }: { posts: SocialPost[]; lang: Locale 
           <iframe
             src={p.embed}
             title={p.title[lang]}
-            loading="lazy"
+            width={p.width}
+            height={p.height}
+            loading={p.platform === "facebook" ? "eager" : "lazy"}
+            scrolling={p.platform === "facebook" ? "no" : undefined}
             allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-            referrerPolicy="strict-origin-when-cross-origin"
+            referrerPolicy={p.platform === "facebook" ? undefined : "strict-origin-when-cross-origin"}
             allowFullScreen
-            className="block w-full border-0 bg-white"
-            style={{ height: p.tall ? 640 : 460 }}
+            className={p.platform === "facebook" ? "mx-auto block max-w-full border-0 bg-white" : "block w-full border-0 bg-white"}
+            style={p.width && p.height ? { width: p.width, height: p.height } : { height: p.tall ? 640 : 460 }}
           />
         </li>
       ))}

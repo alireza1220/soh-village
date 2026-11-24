@@ -1,4 +1,4 @@
-import { CONTACT_KINDS, LISTING_CATEGORIES, LISTING_TYPES } from "@/lib/market";
+import { CONTACT_KINDS, LISTING_CATEGORIES, LISTING_TYPE_LABELS, LISTING_TYPES } from "@/lib/market";
 
 // Shared by POST /api/listings and the manage routes. No browser or Node-only APIs.
 // Snake_case DB columns. Every field is optional so the same type serves inserts (all set by "create") and patches ("update").
@@ -31,7 +31,9 @@ export function parseListingInput(
 
   if (create || has(b, "type")) {
     const type = clip(b.type, 20);
-    if (!LISTING_TYPES.some((t) => t.v === type)) return fail("bad_type");
+    // New listings are buy or sell. An update may keep an older type already stored on the row.
+    const allowed = create ? LISTING_TYPES : LISTING_TYPE_LABELS;
+    if (!allowed.some((t) => t.v === type)) return fail("bad_type");
     v.type = type;
   }
   if (create || has(b, "category")) {
