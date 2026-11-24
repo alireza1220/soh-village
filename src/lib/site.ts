@@ -131,6 +131,7 @@ export const sections: Section[] = [
           { title: { fa: "جاهای دیگر", en: "Other historic places" }, text: { fa: "پل نواب، آسیاب امامزاده و دو آسیاب دیگر، خانه‌ی تلگراف، برج کبوتر، خانه‌ی میرزا جعفر، کوره‌ی آجرپزی و یک زورخانه‌ی کوچک.", en: "Nav Bridge, the Imamzadeh mill and two other mills, the old telegraph house, a dovecote tower, Mirza Jafar's house, a brick kiln and a small zurkhaneh (traditional gym)." }, status: "reported", source: "Kojaro" },
         ],
       },
+      { t: "p", text: { fa: "آیین‌های سُه، مانند نخل‌گردانی تاسوعا، در بخش «آیین‌ها و سنت‌ها» آمده است.", en: "Soh's traditions, such as the Tasua palm carrying, are in the Traditions section." } },
       {
         t: "tags",
         label: { fa: "طبیعت و گردش", en: "Nature and walks" },
@@ -140,18 +141,73 @@ export const sections: Section[] = [
           { fa: "مرغزار گزی", en: "Gazi meadow" }, { fa: "چشمه‌ی هاز", en: "Haz spring" }, { fa: "دشت پایمیل", en: "Paymil plain" }, { fa: "آبشار", en: "A waterfall" },
         ],
       },
+    ],
+  },
+  {
+    slug: "traditions",
+    title: { fa: "آیین‌ها و سنت‌ها", en: "Traditions" },
+    intro: {
+      fa: "آیین‌های عزاداری، صنایع دستی و زندگی سنتی سُه.",
+      en: "Mourning rituals, crafts and traditional life in Soh.",
+    },
+    blocks: [
       {
         t: "cards",
         items: [
           {
             title: { fa: "نخل‌گردانی تاسوعا", en: "Tasua palm carrying" },
             text: {
-              fa: "در تاسوعای محرم، نخل صبح در امامزاده یوسف آراسته می‌شود، به امامزاده گلیله برده می‌شود و پس از عزاداری ظهر عاشورا برمی‌گردد. آیین‌های دیگر: علم‌گردانی، عمار‌گردانی، تعزیه و نوحه‌خوانی. کجارو می‌نویسد این آیین‌ها حدود ۲۰۰ ساله است و به شماره‌ی ۱۲۰۷ در فهرست میراث ناملموس ملی ثبت شده است.",
-              en: "On Tasua in Muharram the palm-shaped standard is decorated in the morning at Imamzadeh Yusuf, carried to Imamzadeh Golileh and returned after the Ashura noon mourning. Other rituals: alam-gardani, ammar-gardani, taziyeh and nowheh chanting. Kojaro says they are about 200 years old and listed as national intangible heritage no. 1207.",
+              fa: "در تاسوعای محرم، نخل صبح در امامزاده یوسف آراسته می‌شود، به امامزاده گلیله برده می‌شود و پس از عزاداری ظهر عاشورا برمی‌گردد. اهالی تاسوعا را «روز عباس علی» می‌نامند.",
+              en: "On Tasua in Muharram the palm-shaped standard is decorated in the morning at Imamzadeh Yusuf, carried to Imamzadeh Golileh and returned after the Ashura noon mourning. Locals call Tasua “Roz-e Abbas Ali”.",
             },
             status: "reported",
             source: "Kojaro",
           },
+          {
+            title: { fa: "علم‌گردانی، عمار‌گردانی، تعزیه و نوحه", en: "Alam-gardani, ammar-gardani, taziyeh and nowheh" },
+            text: {
+              fa: "این آیین‌ها با هیئت‌های سینه‌زنی و تعزیه انجام می‌شود. کجارو می‌نویسد حدود ۲۰۰ سال قدمت دارند و در ۵ مرداد ۱۳۹۵ با شماره‌ی ۱۲۰۷ در فهرست میراث ناملموس ملی ثبت شده‌اند.",
+              en: "These are performed by chest-beating groups (heyat) and taziyeh troupes. Kojaro says they are about 200 years old and were listed as national intangible heritage no. 1207 on 5 Mordad 1395 (27 July 2016).",
+            },
+            status: "reported",
+            source: "Kojaro",
+          },
+          {
+            title: { fa: "قالی‌بافی جوشقانی", en: "Joshaqani carpet weaving" },
+            text: {
+              fa: "بافتن قالی دست‌باف میان زنان روستا رایج است. نقش‌ها به سبک جوشقانی است و در بازار اصفهان و تهران فروخته می‌شود.",
+              en: "Hand-weaving carpets is common among the village's women. The designs are in the Joshaqani style, sold in the Isfahan and Tehran bazaars.",
+            },
+            status: "reported",
+            source: "Kojaro",
+          },
+          {
+            title: { fa: "صنایع دستی دیگر", en: "Other crafts" },
+            text: {
+              fa: "گیوه‌بافی، چادرشب‌بافی، گلدوزی، سبد بید، قره‌بافی (ظرف موی بز)، لحاف تکه‌دوزی، کلاه‌بافی با نخ پنبه، ریسندگی با دوک و مشک پوست بز.",
+              en: "Giveh weaving, chadorshab weaving, embroidery, willow baskets, goat-hair containers (gharreh), patchwork quilts, cotton-thread cap weaving, hand spinning with a spindle and goatskin water bags.",
+            },
+            status: "reported",
+            source: "Kojaro",
+          },
+          {
+            title: { fa: "خانه‌های سنتی و زورخانه", en: "Traditional houses and the zurkhaneh" },
+            text: {
+              fa: "خانه‌های قدیمی از چوب، گل، خشت و سنگ با بام‌های مسطح خاکی ساخته می‌شد. در روستا یک زورخانه‌ی کوچک هم هست.",
+              en: "Old houses were built of wood, mud, adobe brick and stone, with flat earth roofs. The village also has a small zurkhaneh (traditional gym).",
+            },
+            status: "reported",
+            source: "Kojaro",
+          },
+        ],
+      },
+      {
+        t: "notice",
+        title: { fa: "از خانواده بپرسیم", en: "To ask the family" },
+        items: [
+          { fa: "عروسی، جشن‌ها و آیین‌های فصلی (برداشت سیب، نوروز، شب یلدا) در سُه چگونه بوده؟", en: "How were weddings, feasts and seasonal customs (apple harvest, Nowruz, Yalda) in Soh?" },
+          { fa: "غذاها و نان‌های محلی و دستور پخت آن‌ها", en: "Local foods and breads, and how they are made" },
+          { fa: "ترانه‌ها، لالایی‌ها، مَثَل‌ها و قصه‌های محلی", en: "Local songs, lullabies, proverbs and stories" },
         ],
       },
     ],
@@ -304,11 +360,78 @@ export const sections: Section[] = [
 
 export const sectionBySlug = (slug: string) => sections.find((s) => s.slug === slug);
 
+// How people contribute. Fill `channel` when Al decides (email, Telegram or a form link); the page shows a placeholder while empty.
 export const contact = {
-  email: "", // add when Al decides; the page shows a placeholder while this is empty
+  channel: { label: "", url: "" },
   note: {
-    fa: "اگر اطلاعات، عکس، واژه یا اصلاحیه دارید، برای ما بفرستید. راه تماس به‌زودی اضافه می‌شود.",
-    en: "If you have facts, photos, words or corrections, send them to us. A contact address will be added soon.",
+    fa: "این سایت با کمک مردم سُه کامل می‌شود. هر چیزی که می‌دانید یا دارید بفرستید؛ پیش از انتشار بررسی می‌شود.",
+    en: "This site is finished with the help of Soh's people. Send anything you know or have; it is checked before it is published.",
+  } satisfies L,
+  pending: {
+    fa: "راه ارسال به‌زودی اضافه می‌شود. تا آن زمان، مطالب را به آشنایان خود در خانواده بدهید.",
+    en: "A way to send things will be added soon. Until then, pass your material to the family member who runs this site.",
+  } satisfies L,
+};
+
+export const contribute: { title: L; send: L[]; tip?: L }[] = [
+  {
+    title: { fa: "عکس", en: "Photos" },
+    send: [
+      { fa: "عکس با کیفیت‌ترین نسخه، نه عکس فرستاده‌شده در پیام‌رسان", en: "The original high-quality photo, not one re-sent through a chat app" },
+      { fa: "جای عکس، سال تقریبی و نام عکاس", en: "Where it was taken, the approximate year and the photographer's name" },
+      { fa: "اجازه‌ی انتشار؛ برای عکس افراد، به‌ویژه کودکان، رضایت خودشان یا خانواده‌شان", en: "Permission to publish; for photos of people, especially children, their or their family's consent" },
+    ],
+  },
+  {
+    title: { fa: "واژه و گویش", en: "Words and dialect" },
+    send: [
+      { fa: "واژه به همان شکلی که در سُه گفته می‌شود، با فارسی‌نویسی", en: "The word as said in Soh, in Persian script" },
+      { fa: "معنی، یک جمله‌ی نمونه و نام گوینده", en: "Its meaning, an example sentence and who said it" },
+      { fa: "یک صدای ضبط‌شده، اگر ممکن است", en: "A voice recording, if possible" },
+    ],
+  },
+  {
+    title: { fa: "تاریخ، خاطره و آیین", en: "History, memories and traditions" },
+    send: [
+      { fa: "آنچه می‌دانید و از چه کسی شنیده‌اید", en: "What you know and who you heard it from" },
+      { fa: "نام‌ها، سال‌ها و جاها تا جای ممکن", en: "Names, years and places, as far as you can" },
+      { fa: "اگر سند یا نوشته‌ای دارید، یک عکس از آن", en: "A photo of any document or writing you have" },
+    ],
+  },
+  {
+    title: { fa: "اقامت، فروشگاه و بانک", en: "Stay, shops and banks" },
+    send: [
+      { fa: "نام، نشانی، شماره‌ی تماس و ساعت کار", en: "Name, address, phone number and opening hours" },
+      { fa: "قیمت تقریبی و تاریخ اطلاع از آن", en: "An approximate price and the date you learned it" },
+      { fa: "اجازه‌ی نوشتن شماره‌ی تماس در سایت", en: "Permission to publish the phone number" },
+    ],
+  },
+  {
+    title: { fa: "آگهی ملک", en: "Property listings" },
+    send: [
+      { fa: "نوع ملک، متراژ، قیمت درخواستی و نوع سند", en: "Type, size, asking price and deed type" },
+      { fa: "چند عکس و نشانی تقریبی", en: "A few photos and the approximate location" },
+      { fa: "تماس مالک و رضایت او برای انتشار", en: "The owner's contact and consent to publish" },
+    ],
+  },
+  {
+    title: { fa: "اصلاح اشتباه", en: "Corrections" },
+    send: [
+      { fa: "جمله‌ای که اشتباه است و شکل درست آن", en: "The sentence that is wrong and the right version" },
+      { fa: "منبع یا دلیل، اگر دارید", en: "A source or reason, if you have one" },
+    ],
+  },
+];
+
+export const mapInfo = {
+  lat: 33.439,
+  lon: 51.452,
+  osmEmbed: "https://www.openstreetmap.org/export/embed.html?bbox=51.40%2C33.41%2C51.50%2C33.47&layer=mapnik&marker=33.439%2C51.452",
+  osm: "https://www.openstreetmap.org/?mlat=33.439&mlon=51.452#map=13/33.439/51.452",
+  google: "https://goo.gl/maps/wDRqsHQ2uwYaXufJ9",
+  note: {
+    fa: "جای نشانگر بر پایه‌ی مختصات ۳۳٫۴۴ شمالی و ۵۱٫۴۵ شرقی است (ویکی‌پدیای فارسی و کجارو). مختصات ویکی‌پدیای انگلیسی با این‌ها حدود ۲۰۰ کیلومتر فاصله دارد و اشتباه به نظر می‌رسد.",
+    en: "The marker uses 33.44 N, 51.45 E (Persian Wikipedia and Kojaro). English Wikipedia's coordinates are about 200 km away and look wrong.",
   } satisfies L,
 };
 

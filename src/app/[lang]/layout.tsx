@@ -42,7 +42,8 @@ export default async function LangLayout({ children, params }: LayoutProps<"/[la
               <Link key={s.slug} href={`/${lang}/${s.slug}`}>{s.title[lang]}</Link>
             ))}
             <Link href={`/${lang}/photos`}>{lang === "fa" ? "عکس‌ها" : "Photos"}</Link>
-            <Link href={`/${lang}/contact`}>{lang === "fa" ? "تماس" : "Contact"}</Link>
+            <Link href={`/${lang}/map`}>{lang === "fa" ? "نقشه" : "Map"}</Link>
+            <Link href={`/${lang}/contribute`}>{lang === "fa" ? "مشارکت" : "Contribute"}</Link>
           </nav>
         </header>
         <main className="wrap w-full flex-1 pb-14">{children}</main>

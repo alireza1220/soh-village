@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { hasLocale } from "@/lib/i18n";
+import { VillageMap } from "@/components/map";
 import { population, sections, siteName, stats, tagline } from "@/lib/site";
 
 export default async function Home({ params }: PageProps<"/[lang]">) {
@@ -35,6 +36,11 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="text-2xl font-bold border-t-4 pt-3" style={{ borderColor: "var(--apple)" }}>{lang === "fa" ? "نقشه" : "Map"}</h2>
+        <VillageMap lang={lang} />
       </section>
 
       <section className="flex flex-col gap-3">

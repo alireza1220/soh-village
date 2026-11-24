@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { Blocks } from "@/components/blocks";
 import { hasLocale, locales } from "@/lib/i18n";
@@ -7,7 +8,7 @@ export function generateStaticParams() {
   return locales.flatMap((lang) => sections.map((s) => ({ lang, section: s.slug })));
 }
 
-export default async function SectionPage({ params }: PageProps<"/[lang]/[section]">) {
+async function Content({ params }: { params: PageProps<"/[lang]/[section]">["params"] }) {
   const { lang, section } = await params;
   if (!hasLocale(lang)) notFound();
   const s = sectionBySlug(section);
@@ -18,5 +19,13 @@ export default async function SectionPage({ params }: PageProps<"/[lang]/[sectio
       <p className="text-lg muted">{s.intro[lang]}</p>
       <Blocks blocks={s.blocks} lang={lang} />
     </article>
+  );
+}
+
+export default function SectionPage({ params }: PageProps<"/[lang]/[section]">) {
+  return (
+    <Suspense fallback={<div className="pt-6 muted">…</div>}>
+      <Content params={params} />
+    </Suspense>
   );
 }
