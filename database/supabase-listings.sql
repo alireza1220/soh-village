@@ -118,3 +118,10 @@ do $$ begin
     update storage.buckets set file_size_limit = 614400, allowed_mime_types = array['image/webp','image/jpeg'] where id = 'listing-images';
   end if;
 end $$;
+
+-- The server (secret / service_role key) needs its own grants on the locked tables. Without them every post fails
+-- with "permission denied for table ..." (42501). Same as migrations/004-service-role-grants.sql.
+grant usage on schema public to service_role;
+grant all on public.listings    to service_role;
+grant all on public.rate_events to service_role;
+grant all on all sequences in schema public to service_role;
