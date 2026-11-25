@@ -13,6 +13,28 @@ export type Row = Record<string, unknown>;
 export const json = (body: object, status = 200) => Response.json(body, { status });
 const storeFailed = () => json({ error: "store_failed" }, 502);
 
+// Diagnostic 502: says which step failed and what Supabase answered (HTTP status plus its error code and message,
+// which never contain keys). Also written to the Vercel runtime log. Remove once the live setup is confirmed.
+export async function failure(stage: string, res?: Response, err?: unknown): Promise<Response> {
+  let detail = "";
+  try {
+    if (res) {
+      const t = (await res.text()).slice(0, 240);
+      try {
+        const j = JSON.parse(t) as { code?: string; message?: string; error?: string; hint?: string };
+        detail = [j.code, j.message ?? j.error, j.hint].filter(Boolean).join(" | ");
+      } catch {
+        detail = t;
+      }
+    } else if (err) {
+      detail = (err instanceof Error ? `${err.name}: ${err.message}` : String(err)).slice(0, 240);
+    }
+  } catch {}
+  const upstream = res?.status;
+  console.error("store_failed", { stage, upstream, detail });
+  return json({ error: "store_failed", stage, upstream, detail }, 502);
+}
+
 export const MANAGE_PER_HOUR = 20;
 const DAY = 86_400_000;
 const RENEW_WINDOW_MS = 7 * DAY;
@@ -65,18 +87,18 @@ export async function rateGate(sb: Sb, ipHash: string, kind: string, limit: numb
       body: JSON.stringify({ ip_hash: ipHash, kind }),
       cache: "no-store",
     });
-    if (!ins.ok) return storeFailed();
+    if (!ins.ok) return failure("rate_insert", ins);
     const since = new Date(Date.now() - 3600_000).toISOString();
     const count = await fetch(
       `${sb.url}/rest/v1/rate_events?select=id&ip_hash=eq.${ipHash}&kind=eq.${kind}&created_at=gte.${encodeURIComponent(since)}`,
       { headers: { ...sbHeaders(sb), Prefer: "count=exact", Range: "0-0" }, cache: "no-store" },
     );
-    if (!count.ok) return storeFailed();
+    if (!count.ok) return failure("rate_count", count);
     const total = Number(count.headers.get("content-range")?.split("/")[1] ?? 0);
     if (total > limit) return json({ error: "rate_limited" }, 429);
     return null;
-  } catch {
-    return storeFailed();
+  } catch (e) {
+    return failure("rate_exception", undefined, e);
   }
 }
 

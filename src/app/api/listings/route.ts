@@ -1,4 +1,4 @@
-import { configGate, hashedIp, json, rateGate, sbHeaders } from "@/lib/listing-actions";
+import { configGate, failure, hashedIp, json, rateGate, sbHeaders } from "@/lib/listing-actions";
 import { parseListingInput } from "@/lib/listing-validation";
 import { generateManageCode, hashManageCode, normalizeManageCode } from "@/lib/manage-code";
 import { bearerFrom, verifyAccessToken } from "@/lib/server-auth";
@@ -56,12 +56,12 @@ export async function POST(req: Request) {
       }),
       cache: "no-store",
     });
-    if (!res.ok) return json({ error: "store_failed" }, 502);
+    if (!res.ok) return failure("listing_insert", res);
     const rows = (await res.json()) as { id?: string }[];
     const id = rows[0]?.id;
     if (!id) return json({ error: "store_failed" }, 502);
     return json({ ok: true, id, manageCode });
-  } catch {
-    return json({ error: "store_failed" }, 502);
+  } catch (e) {
+    return failure("listing_exception", undefined, e);
   }
 }
