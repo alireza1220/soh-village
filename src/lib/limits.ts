@@ -3,7 +3,7 @@
 // the per-IP or the per-user count of the same `kind` in the last hour is above its limit.
 // IP limits are generous on purpose: many phones in Iran share one carrier IP. The user limits are the real budget.
 // Owned by the architect.
-export const RATE_KINDS = ["post", "manage", "images", "profile", "avatar", "admin"] as const;
+export const RATE_KINDS = ["post", "manage", "images", "profile", "avatar", "admin", "reveal"] as const;
 export type RateKind = (typeof RATE_KINDS)[number];
 
 export const LIMITS: Record<RateKind, { ip: number; user: number }> = {
@@ -12,5 +12,6 @@ export const LIMITS: Record<RateKind, { ip: number; user: number }> = {
   images: { ip: 60, user: 12 }, // POST /api/listings/images (one call may sign up to 10 photos)
   profile: { ip: 600, user: 120 }, // POST /api/profile get / save (every full page load of a logged-in visitor does one get, and carrier IPs are shared, so this is high)
   avatar: { ip: 40, user: 10 }, // POST /api/profile avatar_sign
+  reveal: { ip: 300, user: 300 }, // POST /api/listings/contact ("Show phone"; public, only the IP limit applies; carrier IPs are shared so it is high, it just stops bulk scraping)
   admin: { ip: 600, user: 600 }, // every /api/admin/* call; only logged-in admins pass, the limit just stops a stuck loop
 };

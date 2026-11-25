@@ -32,6 +32,7 @@ function parseUrl(board: BoardId): { f: Filters; ad: string | null } {
       cat: cats.includes(cat) ? cat : "all",
       photos: p.get("photos") === "1",
       saved: p.get("saved") === "1",
+      verified: p.get("verified") === "1",
       sort: sort === "old" || sort === "end" ? sort : "new",
       view: view === "gallery" ? "gallery" : view === "list" ? "list" : DEFAULTS.view,
     },
@@ -45,6 +46,7 @@ function buildUrl(f: Filters, ad: string | null, viewExplicit: boolean) {
   if (f.cat !== "all") p.set("cat", f.cat);
   if (f.photos) p.set("photos", "1");
   if (f.saved) p.set("saved", "1");
+  if (f.verified) p.set("verified", "1");
   if (f.sort !== "new") p.set("sort", f.sort);
   if (viewExplicit && f.view !== "list") p.set("view", f.view);
   const qs = p.toString();
@@ -117,8 +119,8 @@ export function MarketBoard({ lang, board }: { lang: Locale; board: BoardId }) {
 
   const base = useMemo(() => index.filter((ix) => {
     const l = ix.l;
-    return (f.type === "all" || l.type === f.type) && (!f.photos || (l.images?.length ?? 0) > 0) && (!f.saved || savedSet.has(l.id)) && matches(ix, toks);
-  }), [index, f.type, f.photos, f.saved, savedSet, toks]);
+    return (f.type === "all" || l.type === f.type) && (!f.photos || (l.images?.length ?? 0) > 0) && (!f.saved || savedSet.has(l.id)) && (!f.verified || l.verified === true) && matches(ix, toks);
+  }), [index, f.type, f.photos, f.saved, f.verified, savedSet, toks]);
   const catCounts = useMemo(() => {
     const c: Record<string, number> = {};
     for (const ix of base) c[ix.l.category] = (c[ix.l.category] ?? 0) + 1;
@@ -132,7 +134,7 @@ export function MarketBoard({ lang, board }: { lang: Locale; board: BoardId }) {
     return out;
   }, [base, f.cat, f.sort]);
 
-  const sig = `${dq}|${f.type}|${f.cat}|${f.photos}|${f.saved}|${f.sort}`;
+  const sig = `${dq}|${f.type}|${f.cat}|${f.photos}|${f.saved}|${f.verified}|${f.sort}`;
   const limit = more.sig === sig ? more.n : PAGE;
   const visible = shown.slice(0, limit);
 
@@ -166,8 +168,8 @@ export function MarketBoard({ lang, board }: { lang: Locale; board: BoardId }) {
   useEffect(() => { if (open) setGone(false); }, [open]);
 
   const loading = status === "loading" || !today;
-  const active = f.q.trim() !== "" || f.type !== "all" || f.cat !== "all" || f.photos || f.saved;
-  const clearAll = () => set({ q: "", type: "all", cat: "all", photos: false, saved: false });
+  const active = f.q.trim() !== "" || f.type !== "all" || f.cat !== "all" || f.photos || f.saved || f.verified;
+  const clearAll = () => set({ q: "", type: "all", cat: "all", photos: false, saved: false, verified: false });
   const countText = (n: number) => (lang === "fa" ? `${num(n, lang)} آگهی` : `${num(n, lang)} ${n === 1 ? "ad" : "ads"}`);
   const filteredCount = (n: number, total: number) => (lang === "fa" ? `${num(n, lang)} از ${num(total, lang)} آگهی` : `${num(n, lang)} of ${num(total, lang)} ${total === 1 ? "ad" : "ads"}`);
   const typeName = (v: string) => typeLabel(board, v, lang);
@@ -177,6 +179,7 @@ export function MarketBoard({ lang, board }: { lang: Locale; board: BoardId }) {
   if (f.type !== "all") chips.push({ key: "type", label: typeName(f.type), patch: { type: "all" } });
   if (f.cat !== "all") chips.push({ key: "cat", label: categoryLabel(board, f.cat, lang, true), patch: { cat: "all" } });
   if (f.photos) chips.push({ key: "photos", label: T.photosOnly[lang], patch: { photos: false } });
+  if (f.verified) chips.push({ key: "verified", label: T.verifiedOnly[lang], patch: { verified: false } });
   if (f.saved) chips.push({ key: "saved", label: T.saved[lang], patch: { saved: false } });
 
   const view = f.view;

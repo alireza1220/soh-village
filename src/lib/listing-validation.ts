@@ -1,6 +1,5 @@
 import type { OwnListing } from "@/lib/api-types";
 import { categoryAllowed, isArrangement, isBoard, typeAllowed, type BoardId } from "@/lib/boards";
-import { CONTACT_KINDS } from "@/lib/market";
 
 // Shared by POST /api/listings and POST /api/my/listings. No browser or Node-only APIs.
 // Snake_case DB columns. Every field is optional so the same type serves inserts (all set by "create") and patches ("update").
@@ -20,12 +19,11 @@ export type ListingRow = {
 
 /** board: the board of the listing (create: the validated body board; update: the stored row's board).
  *  currentType / currentCategory: what the row already carries, still allowed on update (older names).
- *  profilePhone: the poster's profile phone, used when no contact value is given. */
+ *  profilePhone: the poster's profile phone, stored as the (private, legacy) contact of a NEW ad. */
 export type ParseContext = { board: BoardId; currentType?: string; currentCategory?: string; profilePhone?: string };
 
 const clip = (v: unknown, n: number) => (typeof v === "string" ? v.trim().slice(0, n) : "");
 const has = (b: Record<string, unknown>, k: string) => b[k] !== undefined;
-const KINDS: string[] = CONTACT_KINDS.map((c) => c.v);
 
 /** The board a create body asks for, or null when it is missing or unknown. */
 export const boardOf = (b: Record<string, unknown>): BoardId | null => (isBoard(b.board) ? b.board : null);
@@ -65,27 +63,13 @@ export function parseListingInput(
   if (create || has(b, "price")) v.price = clip(b.price, 80) || null;
   if (create || has(b, "available")) v.available = clip(b.available, 80) || null;
   if (create || has(b, "details")) v.details = clip(b.details, 800) || null;
-  if (create || has(b, "contactPublic")) v.contact_public = b.contactPublic === true;
-
-  // Contact. The row always stores one: what was typed, else the profile phone (private unless contact_public).
-  const kindGiven = has(b, "contactKind") && b.contactKind !== null && b.contactKind !== "";
-  if (kindGiven && !KINDS.includes(clip(b.contactKind, 20))) return fail("bad_contact");
-  if (create || has(b, "contactValue") || kindGiven) {
-    const typed = clip(b.contactValue, 60);
-    if (typed) {
-      v.contact_value = typed;
-      v.contact_kind = kindGiven ? clip(b.contactKind, 20) : "phone";
-    } else if (create || has(b, "contactValue")) {
-      // empty on purpose: fall back to the profile phone
-      if (ctx.profilePhone) {
-        v.contact_value = ctx.profilePhone;
-        v.contact_kind = "phone";
-      } else if (b.contactPublic === true) {
-        return fail("contact_required");
-      }
-    } else if (kindGiven) {
-      v.contact_kind = clip(b.contactKind, 20); // kind change only
-    }
+  // Contact: clients cannot choose it any more (contactKind / contactValue / contactPublic are ignored). A new ad stores the poster's
+  // profile phone as a private, legacy contact; the real number is handed out by POST /api/listings/contact from the CURRENT profile.
+  // An update never touches these columns.
+  if (create && ctx.profilePhone) {
+    v.contact_kind = "phone";
+    v.contact_value = ctx.profilePhone;
+    v.contact_public = false;
   }
   return { ok: true, value: v };
 }

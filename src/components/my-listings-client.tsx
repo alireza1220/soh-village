@@ -10,6 +10,7 @@ import { authToken, signOut } from "@/lib/auth";
 import { publicSupabase } from "@/lib/supabase";
 import { useProfile } from "@/lib/use-profile";
 import { useSession } from "@/components/use-session";
+import { VerifiedBadge } from "@/components/verified-badge";
 import { Avatar } from "@/components/avatar";
 import { AuthGate } from "@/components/auth-gate";
 import { ListingManager, type RunAction } from "@/components/listing-manager";
@@ -68,6 +69,7 @@ function Inner({ lang }: { lang: Locale }) {
           <Avatar name={name || "?"} src={src} size={48} />
           <div>
             <b><bdi>{name}</bdi></b>
+            {profile?.verified && <VerifiedBadge lang={lang} />}
             <Link className="link" href={`/${lang}/profile`}>{T.profile[lang]}</Link>
           </div>
         </div>

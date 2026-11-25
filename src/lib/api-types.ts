@@ -52,11 +52,14 @@ export type ListingFields = {
 // POST /api/my/listings         body { action: "list" }                    -> { ok: true, listings: OwnListing[] }
 //                               body { action: "update", id, fields: ListingFields } -> { ok: true, listing: OwnListing }
 //                               body { action: "renew" | "delete", id }    -> { ok: true, listing?: OwnListing }
+// POST /api/listings/contact    body { id }  (PUBLIC, no login, rate limited per IP, kind "reveal")
+//                               -> { ok: true, contact: { kind: "phone", value: "09XXXXXXXXX" } }  the poster's CURRENT profile phone, only for an approved, unexpired ad.
+//                                  404 not_found (unknown / not public ad), 429 rate_limited, 503 not_configured. The phone is never in any public listing response.
 // POST /api/profile             body { action: "get" }                     -> { ok: true, profile: Profile | null }
 //                               body { action: "save", fields: ProfileFields } -> { ok: true, profile: Profile }
 //                               body { action: "avatar_sign", ext }        -> { ok: true, name, upload: SignedUpload }
 export type SignedUpload = { url: string; method: "PUT" };
 export type SignedPhoto = { name: string; full: SignedUpload; thumb: SignedUpload };
 
-/** Body of {action:"save"}. Create (no row yet): firstName, familyName, phone required. Update: any subset. avatar: file name | null (remove). */
-export type ProfileFields = Partial<Pick<Profile, "firstName" | "familyName" | "phone" | "showOnAds" | "avatar">>;
+/** Body of {action:"save"}. Create (no row yet): firstName, familyName, phone, address required. Update: any subset. avatar: file name | null (remove). */
+export type ProfileFields = Partial<Pick<Profile, "firstName" | "familyName" | "phone" | "address" | "showOnAds" | "avatar">>;

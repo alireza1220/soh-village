@@ -58,7 +58,9 @@ export type Listing = {
   area: string;
   available?: string;
   details?: string;
-  contact?: { kind: string; value: string }; // only with the poster's permission to publish it
+  contact?: { kind: string; value: string }; // LEGACY, never filled any more: the phone is fetched on demand by POST /api/listings/contact
+  /** the poster is a "verified seller" (an admin confirmed them). Shown even when the poster hides their name. */
+  verified?: boolean;
   postedAt: string; // YYYY-MM-DD
   expiresAt: string; // YYYY-MM-DD, 30 days after approval unless renewed
   images?: ListingImage[]; // up to 10 photos, first = cover (see listing-images.ts)

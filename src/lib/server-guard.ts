@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { LIMITS, type RateKind } from "@/lib/limits";
-import { profileFromRow, type Profile } from "@/lib/profile";
+import { isComplete, profileFromRow, type Profile } from "@/lib/profile";
 import { secret, secretsReady } from "@/lib/secrets";
 import { bearerFrom, verifyAccessToken } from "@/lib/server-auth";
 import { keyHeaders, serverSupabase } from "@/lib/supabase";
@@ -144,11 +144,11 @@ export async function loadProfile(sb: Sb, userId: string): Promise<Profile | nul
   }
 }
 
-// Step 7: no profile row = 403 profile_required.
+// Step 7: no profile row, or a profile without address / phone / names = 403 profile_required (the site sends the person to the profile page).
 export async function requireProfile(sb: Sb, userId: string): Promise<Profile | Response> {
   const p = await loadProfile(sb, userId);
   if (p === "error") return json({ error: "store_failed" }, 502);
-  if (!p) return json({ error: "profile_required" }, 403);
+  if (!p || !isComplete(p)) return json({ error: "profile_required" }, 403);
   return p;
 }
 

@@ -50,6 +50,9 @@
 .adm-thumbs img { display: block; inline-size: 72px; block-size: 72px; object-fit: cover; }
 .adm-user { gap: 6px; }
 .adm-user b { margin-inline-end: 8px; }
+.adm-verified { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.adm-address { margin: 0; font-size: 14.5px; overflow-wrap: anywhere; white-space: pre-line; }
+.adm-warn { color: var(--muted); font-style: italic; }
 
 /* Badges */
 .adm-badge { display: inline-flex; align-items: center; min-block-size: 24px; padding: 0 10px; font-size: 13px; font-weight: 700; border: 1px solid var(--line); background: var(--mist); color: var(--ink); }

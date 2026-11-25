@@ -11,13 +11,19 @@ export type ListingStatus = (typeof LISTING_STATUSES)[number];
 export const isListingStatus = (v: unknown): v is ListingStatus => typeof v === "string" && (LISTING_STATUSES as readonly string[]).includes(v);
 
 /** Who posted a listing, as only an admin sees it (the phone and family name are never public). */
-export type AdminPoster = { userId: string; firstName: string; familyName: string; phone: string } | null;
+export type AdminPoster = { userId: string; firstName: string; familyName: string; phone: string; verified: boolean } | null;
 
 /** A listing as an admin sees it: every field of OwnListing plus the poster and the contact kept on the row. */
 export type AdminListing = OwnListing & { poster: AdminPoster; approvedAt: string | null };
 
 /** A user as an admin sees it. Email lives in Supabase Auth and is not copied here. */
-export type AdminUser = { userId: string; firstName: string; familyName: string; phone: string; role: Role; createdAt: string; listingCount: number };
+export type AdminUser = {
+  userId: string; firstName: string; familyName: string; phone: string;
+  /** private home address (admins only); "" when the person has not given one yet */
+  address: string;
+  verified: boolean; verifiedAt: string | null;
+  role: Role; createdAt: string; listingCount: number;
+};
 
 // POST /api/admin/overview   body {}  ->  { ok: true, counts: AdminCounts }
 export type AdminCounts = {
@@ -48,5 +54,6 @@ export type AdminCounts = {
 
 // POST /api/admin/users
 //   body { action: "list", q?: string, offset?: number }  (page size 50)  -> { ok: true, users: AdminUser[], total: number }
-//   Read only. Roles are changed in Supabase (Table Editor > profiles > role), never here.
+//   body { action: "set_verified", userId, verified: boolean } -> { ok: true, user: AdminUser }  (sets profiles.verified and verified_at = now / null; 404 not_found when there is no such profile)
+//   body list also accepts { verified?: boolean } to filter. Roles are changed in Supabase (Table Editor > profiles > role), never here.
 export type { AdminPost, PostFields };

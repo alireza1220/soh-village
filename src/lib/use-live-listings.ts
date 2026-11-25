@@ -8,8 +8,8 @@ import { publicSupabase, keyHeaders } from "@/lib/supabase";
 
 export type LiveStatus = "loading" | "ready" | "error";
 
-// Explicit columns only: the public view never carries a phone, family name or owner, and we never ask for more than we show.
-const COLUMNS = "id,type,category,title,quantity,price,area,available,details,contact_kind,contact_value,created_at,expires_at,images,board,poster_first_name,poster_avatar";
+// Explicit columns only: the public view never carries a phone, address, family name or owner, and we never ask for more than we show.
+const COLUMNS = "id,type,category,title,quantity,price,area,available,details,created_at,expires_at,images,board,poster_first_name,poster_avatar,poster_verified";
 
 /**
  * Approved listings of one board from Supabase (the public_listings view, newest first, max 200).
@@ -43,7 +43,7 @@ export function useLiveListings(board: BoardId): { listings: Listing[]; status: 
           return {
             id, board, type: r.type as ListingType, category: String(r.category), title: String(r.title),
             quantity: s(r.quantity), price: s(r.price), area: String(r.area), available: s(r.available), details: s(r.details),
-            contact: r.contact_value ? { kind: String(r.contact_kind), value: String(r.contact_value) } : undefined,
+            verified: r.poster_verified === true,
             postedAt: String(r.created_at).slice(0, 10), expiresAt: r.expires_at ? String(r.expires_at).slice(0, 10) : "2099-12-31",
             images: images.length ? images : undefined,
             poster: first ? { firstName: first, avatarUrl: isAvatarPath(av) ? avatarUrl(sb.url, av) : undefined } : undefined,

@@ -7,7 +7,6 @@ import "@/styles/forms.css";
 import "@/styles/market.css";
 import type { Locale } from "@/lib/i18n";
 import { BOARDS, type BoardId } from "@/lib/boards";
-import { CONTACT_KINDS } from "@/lib/market";
 import { avatarUrl } from "@/lib/profile";
 import { loginHref, profileHref } from "@/lib/return-to";
 import { authToken } from "@/lib/auth";
@@ -28,11 +27,7 @@ const T = {
   cat: { fa: "دسته", en: "Category" },
   pick: { fa: "انتخاب کنید", en: "Choose" },
   opt: { fa: " (اختیاری)", en: " (optional)" },
-  showContact: { fa: "نمایش راه تماس من در این آگهی", en: "Show my contact on this ad" },
-  contactNote: { fa: "شماره‌ی موبایل پروفایل‌تان آمده است. می‌توانید عوضش کنید یا تلگرام و واتس‌اپ بگذارید.", en: "Your profile mobile is filled in. Change it, or use Telegram or WhatsApp." },
-  private: { fa: "شماره‌تان دیده نمی‌شود و فقط تیم سایت آن را می‌بیند.", en: "Your number stays hidden. Only the site team sees it." },
-  ckind: { fa: "راه تماس", en: "Contact method" },
-  cval: { fa: "شماره یا شناسه", en: "Number or ID" },
+  hiddenNote: { fa: "شماره‌ی شما پنهان می‌ماند. بازدیدکننده فقط پس از زدن «نمایش شماره» آن را می‌بیند. نشانی‌تان هرگز نمایش داده نمی‌شود.", en: "Your phone number stays hidden. Visitors see it only after tapping «Show phone». Your address is never shown." },
   send: { fa: "ارسال آگهی", en: "Send ad" },
   sending: { fa: "در حال ارسال...", en: "Sending..." },
   needTitle: { fa: "عنوان را بنویسید.", en: "Write a title first." },
@@ -58,23 +53,19 @@ const fillN = (s: string, o: Record<string, number>, lang: Locale) =>
 /** The text fields of a listing as form state. */
 export type FormValues = {
   type: string; category: string; title: string; quantity: string; price: string; area: string; available: string; details: string;
-  contactKind: string; contactValue: string; contactPublic: boolean;
 };
 export const emptyValues = (board: BoardId): FormValues => ({
   type: BOARDS[board].types[0].v, category: BOARDS[board].categories[0].v, title: "", quantity: "", price: "", area: "", available: "", details: "",
-  contactKind: CONTACT_KINDS[0].v, contactValue: "", contactPublic: false,
 });
 /** Can the form be sent? (title + every required board field) */
 export const valuesReady = (board: BoardId, v: FormValues) =>
   !!v.title.trim() && BOARDS[board].fields.every((f) => !f.required || !!v[f.col].trim());
-/** Body for POST /api/listings (create) or the `fields` of an update. A contact is only sent when the poster ticked "show". */
+/** Body for POST /api/listings (create) or the `fields` of an update. The contact is never sent: the server uses the poster's profile phone. */
 export function toFields(v: FormValues, board?: BoardId): ListingFields {
   const out: ListingFields = {
     ...(board ? { board } : {}),
     type: v.type, category: v.category, title: v.title.trim(), quantity: v.quantity, price: v.price, area: v.area, available: v.available, details: v.details,
-    contactPublic: v.contactPublic,
   };
-  if (v.contactPublic && v.contactValue.trim()) { out.contactKind = v.contactKind; out.contactValue = v.contactValue.trim(); }
   return out;
 }
 
@@ -131,41 +122,6 @@ export function ListingFieldset({ lang, board, idp, v, set, photos, keepType, ke
         <textarea id={`${idp}-details`} className="textarea" rows={3} value={v.details} onChange={(e) => set("details", e.target.value)} maxLength={800} />
       </F>
     </>
-  );
-}
-
-/** "Show my contact on this ad" (off by default). Only when ticked the kind + number appear, prefilled with the profile mobile. */
-export function ContactBlock({ lang, idp, v, set, phone }: { lang: Locale; idp: string; v: FormValues; set: Setter; phone?: string }) {
-  return (
-    <div className="frm-contact">
-      <label className="mk-check" htmlFor={`${idp}-cpub`}>
-        <input
-          id={`${idp}-cpub`} type="checkbox" checked={v.contactPublic}
-          onChange={(e) => {
-            set("contactPublic", e.target.checked);
-            if (e.target.checked && !v.contactValue.trim() && phone) { set("contactKind", "phone"); set("contactValue", phone); }
-          }}
-        />
-        <span>{T.showContact[lang]}</span>
-      </label>
-      {v.contactPublic ? (
-        <>
-          <p className="frm-contact__private">{T.contactNote[lang]}</p>
-          <div className="frm-contact__fields">
-            <F id={`${idp}-ckind`} label={T.ckind[lang]}>
-              <select id={`${idp}-ckind`} className="select" value={v.contactKind} onChange={(e) => set("contactKind", e.target.value)}>
-                {CONTACT_KINDS.map((o) => <option key={o.v} value={o.v}>{o[lang]}</option>)}
-              </select>
-            </F>
-            <F id={`${idp}-cval`} label={T.cval[lang]}>
-              <input id={`${idp}-cval`} dir="ltr" className="input" inputMode="tel" value={v.contactValue} maxLength={60} onChange={(e) => set("contactValue", e.target.value)} />
-            </F>
-          </div>
-        </>
-      ) : (
-        <p className="frm-contact__private">{T.private[lang]}</p>
-      )}
-    </div>
   );
 }
 
@@ -288,7 +244,7 @@ function FormInner({ lang, board, again }: { lang: Locale; board: BoardId; again
         lang={lang} board={board} idp={`frm-${board}`} v={v} set={set}
         photos={<PhotoPicker lang={lang} items={photos} setItems={setPhotos} id={`frm-${board}-photos`} mode={working ? "busy" : "edit"} />}
       />
-      <ContactBlock lang={lang} idp={`frm-${board}`} v={v} set={set} phone={profile?.phone} />
+      <p className="frm-contact__private">{T.hiddenNote[lang]}</p>
       <div className="mk-stack" style={{ gap: 12 }}>
         <div className="mk-row">
           <button type="submit" className="btn btn--primary mk-send" disabled={!canSubmit}>{status === "sending" ? T.sending[lang] : T.send[lang]}</button>

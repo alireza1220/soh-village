@@ -27,28 +27,11 @@ export const num = (n: number, lang: Locale) => n.toLocaleString(lang === "fa" ?
 
 const toLatinDigits = (s: string) => s.replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x06f0)).replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660));
 
-export type ContactLink = { href: string; kind: "tel" | "telegram" | "whatsapp" };
-
-/** Links we are sure about. Anything uncertain returns null and the reader can only copy the value. */
-export function contactLink(kind: string, value: string): ContactLink | null {
+/** A tel: link for a phone number, or null when it does not look like a phone number (then the reader can only copy it). */
+export function telHref(value: string): string | null {
   const v = toLatinDigits(value.trim());
   const digits = v.replace(/[^\d+]/g, "");
-  const plain = /^\+?\d{7,15}$/.test(digits) && /^[\s\d+()\-.]+$/.test(v);
-  if (kind === "phone") return plain ? { href: `tel:${digits}`, kind: "tel" } : null;
-  if (kind === "telegram") {
-    const m = v.match(/^(?:https?:\/\/)?(?:t\.me\/|telegram\.me\/)?@?([A-Za-z][A-Za-z0-9_]{4,31})$/);
-    return m ? { href: `https://t.me/${m[1]}`, kind: "telegram" } : null;
-  }
-  if (kind === "whatsapp") {
-    if (!plain) return null;
-    let d = digits;
-    if (d.startsWith("+")) d = d.slice(1);
-    else if (d.startsWith("00")) d = d.slice(2);
-    else if (/^09\d{9}$/.test(d)) d = "98" + d.slice(1); // Iranian mobile written locally
-    else return null;
-    return /^\d{8,15}$/.test(d) ? { href: `https://wa.me/${d}`, kind: "whatsapp" } : null;
-  }
-  return null;
+  return /^\+?\d{7,15}$/.test(digits) && /^[\s\d+()\-.]+$/.test(v) ? `tel:${digits}` : null;
 }
 
 export async function copyText(text: string): Promise<boolean> {

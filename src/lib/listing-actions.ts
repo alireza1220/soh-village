@@ -111,7 +111,7 @@ export async function purgeImages(sb: Sb, row: Row): Promise<boolean> {
 export type Action = "update" | "renew" | "delete";
 
 // Applies update / renew / delete to a row the caller has already proven they own.
-export async function applyAction(sb: Sb, row: Row, action: Action, fields: unknown, profilePhone?: string): Promise<Response> {
+export async function applyAction(sb: Sb, row: Row, action: Action, fields: unknown): Promise<Response> {
   const status = String(row.status);
 
   if (action === "delete") {
@@ -131,7 +131,6 @@ export async function applyAction(sb: Sb, row: Row, action: Action, fields: unkn
       board,
       currentType: String(row.type ?? ""),
       currentCategory: String(row.category ?? ""),
-      profilePhone,
     });
     if (!parsed.ok) return json({ error: parsed.error }, 400);
     const patch: Row = { ...parsed.value };

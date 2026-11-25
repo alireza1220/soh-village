@@ -4,6 +4,7 @@ import type { AdminListing, ListingStatus } from "@/lib/admin-types";
 import { BOARDS, categoryLabel, factsOf, typeLabel } from "@/lib/boards";
 import { imageUrl } from "@/lib/listing-images";
 import { publicSupabase } from "@/lib/supabase";
+import { VerifiedBadge } from "@/components/verified-badge";
 import { fmtDate } from "./admin-api";
 
 const T = {
@@ -53,7 +54,7 @@ export function AdRow({ lang, ad, busy, onSet }: { lang: Locale; ad: AdminListin
         </ul>
       )}
       <p className="adm-meta">
-        <span>{T.poster[lang]}: <b><bdi>{who || T.unknown[lang]}</bdi></b>{ad.poster?.phone && <> · <bdi dir="ltr" className="adm-phone">{ad.poster.phone}</bdi></>}</span>
+        <span>{T.poster[lang]}: <b><bdi>{who || T.unknown[lang]}</bdi></b>{ad.poster?.verified && <> <VerifiedBadge lang={lang} compact /></>}{ad.poster?.phone && <> · <bdi dir="ltr" className="adm-phone">{ad.poster.phone}</bdi></>}</span>
         <span>{T.created[lang]}: {fmtDate(ad.createdAt, lang, true)}</span>
         {ad.approvedAt && <span>{T.approvedAt[lang]}: {fmtDate(ad.approvedAt, lang)}</span>}
         <span>{T.expires[lang]}: {fmtDate(ad.expiresAt, lang)}</span>

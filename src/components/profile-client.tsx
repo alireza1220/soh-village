@@ -15,7 +15,8 @@ import { uploadBlob } from "@/lib/photo-upload";
 import { Avatar } from "@/components/avatar";
 import { PasswordField } from "@/components/password-field";
 import { AvatarError, processAvatar } from "@/lib/avatar-resize";
-import { avatarUrl, NAME_MAX, normalizePhone, cleanName, passwordProblem, type Profile } from "@/lib/profile";
+import { VerifiedBadge } from "@/components/verified-badge";
+import { ADDRESS_MAX, ADDRESS_MIN, avatarUrl, cleanAddress, NAME_MAX, normalizePhone, cleanName, passwordProblem, type Profile } from "@/lib/profile";
 import type { ProfileFields } from "@/lib/api-types";
 import { loginHref } from "@/lib/return-to";
 
@@ -26,15 +27,20 @@ const T = {
   login: { fa: "ورود", en: "Log in" },
   loadFail: { fa: "مشخصات بارگذاری نشد.", en: "Could not load your profile." },
   retry: { fa: "دوباره امتحان کنید", en: "Try again" },
-  firstTime: { fa: "یک قدم مانده: نام و شماره‌ی موبایل‌تان را بنویسید تا بتوانید آگهی بگذارید.", en: "One more step: add your name and mobile so you can post ads." },
+  firstTime: { fa: "یک قدم مانده: نام، شماره‌ی موبایل و نشانی‌تان را بنویسید تا بتوانید آگهی بگذارید. نشانی نمایش داده نمی‌شود.", en: "One more step: add your name, mobile and address so you can post ads. The address is never shown." },
   detailsTitle: { fa: "مشخصات", en: "Your details" },
   first: { fa: "نام", en: "First name" },
   family: { fa: "نام خانوادگی", en: "Family name" },
   phone: { fa: "شماره‌ی موبایل", en: "Mobile number" },
-  phoneHint: { fa: "با پیامک تأیید نمی‌شود. فقط وقتی در یک آگهی «نمایش راه تماس من در این آگهی» را بزنید، دیده می‌شود.", en: "We do not verify it by SMS. It is shown only if you tick “Show my contact on this ad”." },
+  phoneHint: { fa: "برای این لازم است که خریداران بتوانند با شما تماس بگیرند. روی آگهی‌هایتان پنهان است تا وقتی بازدیدکننده «نمایش شماره» را بزند. با پیامک تأیید نمی‌شود.", en: "Needed so buyers can reach you. Hidden on your ads until a visitor taps «Show phone». We do not verify it by SMS." },
+  address: { fa: "نشانی منزل", en: "Home address" },
+  addressHint: { fa: "برای گذاشتن آگهی لازم است. به هیچ‌کس نمایش داده نمی‌شود. فقط مدیران سایت آن را می‌بینند تا بتوانند فروشنده‌ها را تأیید کنند.", en: "Needed to post. Never shown to anyone. Only site admins can see it, so they can verify sellers." },
+  addressOld: { fa: "یک چیز دیگر مانده: نشانی‌تان را اضافه کنید (خصوصی می‌ماند) تا بتوانید آگهی بگذارید.", en: "One more thing: add your address (it stays private) to keep posting." },
+  notVerified: { fa: "هنوز تأیید نشده‌اید. ممکن است یک مدیر برای تأیید شما سر بزند.", en: "Not verified yet. An admin may visit to verify you." },
+  verifiedTitle: { fa: "وضعیت تأیید", en: "Verification" },
   phoneNow: { fa: "شماره‌ی ثبت‌شده:", en: "Number on file:" },
   show: { fa: "نامم و عکسم روی آگهی‌هایم دیده شود", en: "Show my first name and picture on my ads" },
-  showHint: { fa: "نام خانوادگی هرگز نمایش داده نمی‌شود. شماره‌تان هم فقط وقتی خودتان در یک آگهی بخواهید.", en: "Your family name is never shown. Your number is shown only if you choose to on an ad." },
+  showHint: { fa: "نام خانوادگی، نشانی و ایمیل هرگز نمایش داده نمی‌شود. شماره‌تان هم فقط وقتی بازدیدکننده «نمایش شماره» را بزند.", en: "Your family name, address and email are never shown. Your number appears only when a visitor taps «Show phone»." },
   save: { fa: "ذخیره", en: "Save" },
   saving: { fa: "در حال ذخیره...", en: "Saving..." },
   saved: { fa: "ذخیره شد.", en: "Saved." },
@@ -58,7 +64,7 @@ const T = {
   out: { fa: "خروج", en: "Log out" },
 } satisfies Record<string, L>;
 
-type Draft = { first: string; family: string; phone: string; show: boolean };
+type Draft = { first: string; family: string; phone: string; address: string; show: boolean };
 type Pic = { phase: "idle" | "preparing" | "uploading" | "ready"; name?: string | null; previewUrl?: string; progress?: number };
 
 export function ProfileClient({ lang }: { lang: Locale }) {
@@ -67,9 +73,9 @@ export function ProfileClient({ lang }: { lang: Locale }) {
   const { session, ready } = useSession();
   const prof = useProfile();
   const nextParam = useNextParam();
-  const [draft, setDraft] = useState<Draft>({ first: "", family: "", phone: "", show: true });
+  const [draft, setDraft] = useState<Draft>({ first: "", family: "", phone: "", address: "", show: true });
   const [filled, setFilled] = useState(false);
-  const [errors, setErrors] = useState<{ first?: string; family?: string; phone?: string }>({});
+  const [errors, setErrors] = useState<{ first?: string; family?: string; phone?: string; address?: string }>({});
   const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [pic, setPic] = useState<Pic>({ phase: "idle" });
@@ -87,7 +93,7 @@ export function ProfileClient({ lang }: { lang: Locale }) {
     setFilled(true);
     if (prof.profile) {
       const p = prof.profile;
-      setDraft({ first: p.firstName, family: p.familyName, phone: p.phone, show: p.showOnAds });
+      setDraft({ first: p.firstName, family: p.familyName, phone: p.phone, address: p.address, show: p.showOnAds });
       setPic({ phase: "idle", name: p.avatar });
     }
   }
@@ -150,19 +156,21 @@ export function ProfileClient({ lang }: { lang: Locale }) {
     const first = cleanName(draft.first);
     const family = cleanName(draft.family);
     const phone = normalizePhone(draft.phone);
+    const address = cleanAddress(draft.address);
     const errs = {
+      address: !address ? errorText("address_required", lang) : address.length < ADDRESS_MIN || address.length > ADDRESS_MAX ? errorText("bad_address", lang) : undefined,
       first: first ? undefined : errorText("first_name_required", lang),
       family: family ? undefined : errorText("family_name_required", lang),
       phone: phone ? undefined : errorText("bad_phone", lang),
     };
     setErrors(errs);
     setStatus(null);
-    if (errs.first || errs.family || errs.phone) {
-      const id = errs.first ? "pf-first" : errs.family ? "pf-family" : "pf-phone";
+    if (errs.first || errs.family || errs.phone || errs.address) {
+      const id = errs.first ? "pf-first" : errs.family ? "pf-family" : errs.phone ? "pf-phone" : "pf-address";
       window.setTimeout(() => document.getElementById(id)?.focus(), 0);
       return;
     }
-    const fields: ProfileFields = { firstName: first, familyName: family, phone: phone!, showOnAds: draft.show };
+    const fields: ProfileFields = { firstName: first, familyName: family, phone: phone!, address, showOnAds: draft.show };
     const newAvatar = pic.name ?? null;
     if (newAvatar !== savedAvatar) fields.avatar = newAvatar;
     setBusy(true);
@@ -175,7 +183,7 @@ export function ProfileClient({ lang }: { lang: Locale }) {
     const saved = r.data.profile as Profile;
     const wasMissing = prof.status !== "ready";
     prof.set(saved);
-    setDraft({ first: saved.firstName, family: saved.familyName, phone: saved.phone, show: saved.showOnAds });
+    setDraft({ first: saved.firstName, family: saved.familyName, phone: saved.phone, address: saved.address, show: saved.showOnAds });
     setPreview(undefined);
     setPic({ phase: "idle", name: saved.avatar });
     if (wasMissing) {
@@ -233,12 +241,14 @@ export function ProfileClient({ lang }: { lang: Locale }) {
     );
   }
 
-  const missing = prof.status === "none";
+  const missing = prof.status === "none" && !prof.profile;
+  const needsAddress = prof.status === "none" && !!prof.profile && !prof.profile.address;
   const picBusy = pic.phase === "preparing" || pic.phase === "uploading";
   const hasPic = !!picSrc;
   return (
     <div className="mk-stack mk-narrow">
       {missing && <div className="notice"><p>{T.firstTime[lang]}</p></div>}
+      {needsAddress && <div className="notice" role="status"><p>{T.addressOld[lang]}</p></div>}
       <form className="mk-panel" onSubmit={save} noValidate aria-labelledby="acc-details">
         <div className="acc-profile-head">
           <Avatar name={fullName || session.user.email} src={picSrc} size={64} />
@@ -278,6 +288,17 @@ export function ProfileClient({ lang }: { lang: Locale }) {
           <input id="pf-phone" className="input" type="tel" inputMode="tel" dir="ltr" autoComplete="tel" placeholder="09121234567" required value={draft.phone} onChange={(e) => setDraft({ ...draft, phone: e.target.value })} aria-invalid={errors.phone ? true : undefined} aria-describedby={errors.phone ? "pf-phone-err pf-phone-hint" : "pf-phone-hint"} />
           <p id="pf-phone-hint" className="field-hint">{T.phoneHint[lang]}</p>
           {errors.phone && <p id="pf-phone-err" className="mk-msg mk-msg--warn">{errors.phone}</p>}
+        </div>
+
+        <div className={`field${needsAddress ? " acc-needs" : ""}`}>
+          <label className="label" htmlFor="pf-address">{T.address[lang]}</label>
+          <textarea id="pf-address" className="textarea" rows={2} autoComplete="street-address" minLength={ADDRESS_MIN} maxLength={ADDRESS_MAX} required value={draft.address} onChange={(e) => setDraft({ ...draft, address: e.target.value })} aria-invalid={errors.address ? true : undefined} aria-describedby={errors.address ? "pf-address-err pf-address-hint" : "pf-address-hint"} />
+          <p id="pf-address-hint" className="field-hint">{T.addressHint[lang]}</p>
+          {errors.address && <p id="pf-address-err" className="mk-msg mk-msg--warn">{errors.address}</p>}
+        </div>
+
+        <div className="acc-verify" aria-label={T.verifiedTitle[lang]}>
+          {prof.profile?.verified ? <VerifiedBadge lang={lang} /> : <p className="field-hint">{T.notVerified[lang]}</p>}
         </div>
 
         <label className="mk-check">

@@ -43,11 +43,11 @@ const authState = { confirm: false, fail: null }; // confirm = "Confirm email" s
 // Columns that exist (an unknown column is a 400 in PostgREST, so a stale query shows up in tests).
 const COLUMNS = {
   listings: ["id", "board", "type", "category", "title", "quantity", "price", "area", "available", "details", "contact_kind", "contact_value", "contact_public", "ip_hash", "owner_id", "status", "renewals", "images", "created_at", "updated_at", "approved_at", "expires_at"],
-  profiles: ["user_id", "first_name", "family_name", "phone", "avatar", "show_on_ads", "role", "created_at", "updated_at"],
+  profiles: ["user_id", "first_name", "family_name", "phone", "avatar", "show_on_ads", "role", "address", "verified", "verified_at", "created_at", "updated_at"],
   posts: ["id", "kind", "title_fa", "title_en", "body_fa", "body_en", "event_at", "place_fa", "place_en", "published", "published_at", "author_id", "created_at", "updated_at", "priority", "cover"],
   rate_events: ["id", "ip_hash", "user_id", "kind", "created_at"],
 };
-const PUBLIC_COLS = ["id", "type", "category", "title", "quantity", "price", "area", "available", "details", "contact_kind", "contact_value", "created_at", "expires_at", "images", "board", "poster_first_name", "poster_avatar"];
+const PUBLIC_COLS = ["id", "type", "category", "title", "quantity", "price", "area", "available", "details", "contact_kind", "contact_value", "created_at", "expires_at", "images", "board", "poster_first_name", "poster_avatar", "poster_verified"];
 COLUMNS.public_listings = PUBLIC_COLS;
 const PUBLIC_POST_COLS = ["id", "kind", "title_fa", "title_en", "body_fa", "body_en", "event_at", "place_fa", "place_en", "published_at", "created_at", "priority", "cover"];
 COLUMNS.public_posts = PUBLIC_POST_COLS; // the view: no author_id, no published flag, published rows only
@@ -173,11 +173,12 @@ const publicView = () =>
       const show = !!p && p.show_on_ads !== false;
       const row = {
         ...Object.fromEntries(BASE_PUBLIC.map((c) => [c, r[c] ?? null])),
-        contact_kind: r.contact_public ? r.contact_kind ?? null : null,
-        contact_value: r.contact_public ? r.contact_value ?? null : null,
+        contact_kind: null, // migration 008: never public; the phone comes from POST /api/listings/contact
+        contact_value: null,
         board: r.board ?? "market",
         poster_first_name: show ? p.first_name : null,
         poster_avatar: show && p.avatar ? `${r.owner_id}/${p.avatar}` : null,
+        poster_verified: !!p && p.verified === true,
       };
       return Object.fromEntries(PUBLIC_COLS.map((c) => [c, row[c]]));
     });
@@ -225,6 +226,8 @@ const validProfile = (r) => {
   if (r.avatar != null && !/^[a-z0-9]{10,16}\.(webp|jpg)$/.test(r.avatar)) return "avatar";
   if (!["user", "admin"].includes(r.role)) return "role"; // profiles_role_check
   if (typeof r.show_on_ads !== "boolean") return "show_on_ads";
+  if (r.address != null && (typeof r.address !== "string" || r.address.length < 5 || r.address.length > 200)) return "profiles_address_check";
+  if (typeof r.verified !== "boolean") return "verified";
   return null;
 };
 
@@ -315,7 +318,7 @@ async function rest(req, res, url) {
         if (row.author_id && ![...users.values()].some((u) => u.id === row.author_id)) return send(res, 409, { code: "23503", message: "violates foreign key constraint: auth.users" });
         out.push(row);
       } else if (table === "profiles") {
-        const row = { avatar: null, show_on_ads: true, role: "user", created_at: now, updated_at: now, ...it };
+        const row = { avatar: null, show_on_ads: true, role: "user", address: null, verified: false, verified_at: null, created_at: now, updated_at: now, ...it };
         const bad = validProfile(row);
         if (bad) return send(res, 400, { code: bad === "user_id" || bad === "phone" || bad === "avatar" ? "23514" : "23514", message: "check violation: " + bad });
         if (![...users.values()].some((u) => u.id === row.user_id)) return send(res, 409, { code: "23503", message: "violates foreign key constraint: auth.users" });
@@ -584,9 +587,9 @@ const ALNUM = "abcdefghijklmnopqrstuvwxyz0123456789";
 const rid = () => Array.from(randomBytes(12), (b) => ALNUM[b % 36]).join("");
 const DEMO_PASSWORD = "demo-pass-1234"; // a fake password for the fake demo accounts below; exists only inside this mock
 const DEMO = {
-  maryam: { email: "maryam.demo@example.com", first: "مریم", family: "نمونه", phone: "09120000001", avatar: true, show: true },
-  reza: { email: "reza.demo@example.com", first: "Reza", family: "Sample", phone: "09120000002", avatar: false, show: true },
-  sara: { email: "sara.demo@example.com", first: "Sara", family: "Demo", phone: "09120000003", avatar: true, show: false }, // hides her name and picture on ads
+  maryam: { email: "maryam.demo@example.com", first: "مریم", family: "نمونه", phone: "09120000001", avatar: true, show: true, address: "اصفهان، خیابان نمونه، پلاک ۱", verified: true },
+  reza: { email: "reza.demo@example.com", first: "Reza", family: "Sample", phone: "09120000002", avatar: false, show: true, address: "Sample St 2, Kashan", verified: true },
+  sara: { email: "sara.demo@example.com", first: "Sara", family: "Demo", phone: "09120000003", avatar: true, show: false, address: "Demo Road 3, Natanz", verified: false }, // hides her name and picture on ads
   nobody: { email: "no-profile.demo@example.com", first: null }, // has an account, never filled in a profile
 };
 function avatarBuf(pic) {
@@ -616,7 +619,7 @@ function seed() {
         BUCKETS.avatars.store.set(`${u.id}/${avatar}`, { buf: avatarBuf(pics[i % pics.length]), type: "image/jpeg", at: Date.now() });
       }
       const now = new Date().toISOString();
-      db.profiles.push({ user_id: u.id, first_name: d.first, family_name: d.family, phone: d.phone, avatar, show_on_ads: d.show, role: "user", created_at: now, updated_at: now });
+      db.profiles.push({ user_id: u.id, first_name: d.first, family_name: d.family, phone: d.phone, avatar, show_on_ads: d.show, role: "user", address: d.address, verified: d.verified === true, verified_at: d.verified ? now : null, created_at: now, updated_at: now });
     }
     i++;
   }
@@ -631,7 +634,7 @@ function seed() {
     }
     const now = Date.now();
     db.listings.push({
-      id, board: "market", status: "approved", renewals: 0, contact_public: true, owner_id: owner, ip_hash: null,
+      id, board: "market", status: "approved", renewals: 0, contact_public: false, owner_id: owner, ip_hash: null,
       quantity: null, price: null, available: null, details: null, contact_kind: "phone", contact_value: "09121234567",
       created_at: new Date(now - (db.listings.length + 1) * 3600_000).toISOString(), updated_at: new Date(now).toISOString(),
       approved_at: new Date(now).toISOString(), expires_at: new Date(now + 25 * DAY).toISOString(), images, ...o,
@@ -701,11 +704,11 @@ function admin(req, res, url) {
     return send(res, 200, { hash: `#access_token=${jwtLike(email)}&refresh_token=ref-${email}&expires_in=3600&token_type=bearer&type=${sp.get("type") || "magiclink"}` });
   }
   if (p === "/__admin/confirm") { const u = users.get(normEmail(sp.get("email"))); if (!u) return send(res, 404, { error: "no user" }); u.confirmed = true; return send(res, 200, { ok: true }); }
-  if (p === "/__admin/mkprofile") { // email, first, family, phone, avatar (file name), show (1|0), role (user|admin): replaces any profile of that user
+  if (p === "/__admin/mkprofile") { // email, first, family, phone, avatar (file name), show (1|0), role (user|admin), address (default "Test Street 1, Test Town"; "none" = no address), verified (1|0): replaces any profile of that user
     const u = addUser(normEmail(sp.get("email")), null, true);
     db.profiles = db.profiles.filter((x) => x.user_id !== u.id);
     const now = new Date().toISOString();
-    const row = { user_id: u.id, first_name: sp.get("first") || "Test", family_name: sp.get("family") || "User", phone: sp.get("phone") || "09120000000", avatar: sp.get("avatar") || null, show_on_ads: sp.get("show") === null ? true : flag(sp.get("show")), role: sp.get("role") || "user", created_at: now, updated_at: now };
+    const row = { user_id: u.id, first_name: sp.get("first") || "Test", family_name: sp.get("family") || "User", phone: sp.get("phone") || "09120000000", avatar: sp.get("avatar") || null, show_on_ads: sp.get("show") === null ? true : flag(sp.get("show")), role: sp.get("role") || "user", address: sp.get("address") === "none" ? null : sp.get("address") || "Test Street 1, Test Town", verified: flag(sp.get("verified")), verified_at: flag(sp.get("verified")) ? now : null, created_at: now, updated_at: now };
     db.profiles.push(row);
     return send(res, 200, row);
   }

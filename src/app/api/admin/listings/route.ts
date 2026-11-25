@@ -52,7 +52,7 @@ export async function POST(req: Request) {
       return answer(status === "removed" ? { ...out, images: [] } : out);
     }
 
-    // update: the admin fixes fields. The poster's phone stands in when the contact value is emptied. Photos are left alone.
+    // update: the admin fixes text fields. Contact fields are ignored (the phone always comes from the poster's profile). Photos are left alone.
     if (!b.fields || typeof b.fields !== "object" || Array.isArray(b.fields)) return json({ error: "bad_fields" }, 400);
     const fields = { ...(b.fields as Record<string, unknown>) };
     delete fields.images;
@@ -60,7 +60,6 @@ export async function POST(req: Request) {
       board: isBoard(row.board) ? row.board : "market",
       currentType: String(row.type ?? ""),
       currentCategory: String(row.category ?? ""),
-      profilePhone: typeof row.owner_id === "string" ? posters.get(row.owner_id)?.phone : undefined,
     });
     if (!parsed.ok) return json({ error: parsed.error }, 400);
     if (Object.keys(parsed.value).length === 0) return answer(row);

@@ -32,7 +32,7 @@ const FIXTURE = {
   needs: { type: "offer", category: "stay", extra: {} },
   property: { type: "rent", category: "house", extra: {} },
 };
-const PUBLIC_KEYS = ["id", "type", "category", "title", "quantity", "price", "area", "available", "details", "contact_kind", "contact_value", "created_at", "expires_at", "images", "board", "poster_first_name", "poster_avatar"].sort();
+const PUBLIC_KEYS = ["id", "type", "category", "title", "quantity", "price", "area", "available", "details", "contact_kind", "contact_value", "created_at", "expires_at", "images", "board", "poster_first_name", "poster_avatar", "poster_verified"].sort();
 
 // ---------- harness ----------
 let passed = 0;
@@ -127,7 +127,7 @@ let userSeq = 0;
 async function mkUser(label, { profile = true, ...p } = {}) {
   const email = `${label}${++userSeq}@example.com`;
   let id;
-  if (profile) id = (await admin("mkprofile?" + qs({ email, first: p.first ?? "Test" + label, family: p.family ?? "Family" + label, phone: p.phone ?? "09120000000", avatar: p.avatar, show: p.show === undefined ? undefined : p.show ? 1 : 0 }))).user_id;
+  if (profile) id = (await admin("mkprofile?" + qs({ email, first: p.first ?? "Test" + label, family: p.family ?? "Family" + label, phone: p.phone ?? "09120000000", avatar: p.avatar, show: p.show === undefined ? undefined : p.show ? 1 : 0, address: p.address, verified: p.verified ? 1 : undefined }))).user_id;
   else id = (await admin("mkuser?" + qs({ email }))).id;
   return { email, id, token: `tok-${email}` };
 }
@@ -286,7 +286,7 @@ async function scenarioProfileGate() {
   check("profile get without a row: 200 profile null", get.status === 200 && get.data.ok === true && get.data.profile === null, JSON.stringify(get));
   check("avatar_sign without a profile: 200 (pick a picture before saving)", sign.status === 200 && sign.data.ok === true, JSON.stringify(sign));
   check("profile save with an empty name: 400, not 403", bad.status === 400 && bad.data.error === "first_name_required", JSON.stringify(bad));
-  const ok = await post("/api/profile", { action: "save", fields: { firstName: "Nina", familyName: "Nobody", phone: "09121112233" } }, { token: N.token });
+  const ok = await post("/api/profile", { action: "save", fields: { firstName: "Nina", familyName: "Nobody", phone: "09121112233", address: "Soh village, Main Street 4" } }, { token: N.token });
   const c2 = await createRaw(N, bodyFor("market"));
   check("after saving the profile the same user can post", ok.status === 200 && c2.status === 200, JSON.stringify([ok.data, c2.data]));
 }
@@ -295,7 +295,7 @@ async function scenarioProfile() {
   section("profile: validation, phone normalisation, privacy");
   const save = (u, fields) => post("/api/profile", { action: "save", fields }, { token: u.token });
   const U = await mkUser("prof", { profile: false });
-  const full = { firstName: "Ali", familyName: "Rezaei", phone: "09121234567" };
+  const full = { firstName: "Ali", familyName: "Rezaei", phone: "09121234567", address: "Soh, Main Street 12, blue door" };
   const bidi = await save(await mkUser("bidi", { profile: false }), { ...full, firstName: "\u202EAli\u200B\u2066x" });
   check("profile: bidi overrides and zero-width spaces are stripped from names", bidi.status === 200 && bidi.data.profile?.firstName === "Alix", JSON.stringify(bidi));
   for (const [name, fields, err] of [
@@ -303,6 +303,10 @@ async function scenarioProfile() {
     ["blank first name", { ...full, firstName: "   " }, "first_name_required"],
     ["no family name", { ...full, familyName: undefined }, "family_name_required"],
     ["no phone", { ...full, phone: undefined }, "bad_phone"],
+    ["no address", { ...full, address: undefined }, "address_required"],
+    ["blank address", { ...full, address: "    " }, "address_required"],
+    ["address too short", { ...full, address: "abcd" }, "bad_address"],
+    ["address too long", { ...full, address: "a".repeat(201) }, "bad_address"],
     ["not an object", "oops", "bad_fields"],
   ]) {
     const r = await save(U, fields);
@@ -326,9 +330,9 @@ async function scenarioProfile() {
     check(`phone ${JSON.stringify(input)} rejected (bad_phone)`, r.status === 400 && r.data.error === "bad_phone" && !(await profileRow(n.id)), JSON.stringify(r));
   }
 
-  const r1 = await save(U, { firstName: "  Ali   Reza ", familyName: "Rezaei", phone: "09121234567", junk: "ignored", userId: "x", user_id: "y" });
+  const r1 = await save(U, { firstName: "  Ali   Reza ", familyName: "Rezaei", phone: "09121234567", address: "  Soh,   Main Street 12 ", junk: "ignored", userId: "x", user_id: "y" });
   check("create: saved, 200 ok, names trimmed and collapsed", r1.status === 200 && r1.data.ok === true && r1.data.profile?.firstName === "Ali Reza", JSON.stringify(r1));
-  check("create: Profile shape {firstName, familyName, phone, avatar, showOnAds}", JSON.stringify(Object.keys(r1.data.profile ?? {}).sort()) === JSON.stringify(["avatar","familyName","firstName","phone","role","showOnAds"]) && r1.data.profile.avatar === null && r1.data.profile.showOnAds === true, JSON.stringify(r1.data));
+  check("create: Profile shape {firstName, familyName, phone, address, avatar, showOnAds, verified, role}; address trimmed and collapsed; verified false", JSON.stringify(Object.keys(r1.data.profile ?? {}).sort()) === JSON.stringify(["address","avatar","familyName","firstName","phone","role","showOnAds","verified"]) && r1.data.profile.avatar === null && r1.data.profile.showOnAds === true && r1.data.profile.address === "Soh, Main Street 12" && r1.data.profile.verified === false && r1.data.profile.role === "user", JSON.stringify(r1.data));
   const row = await profileRow(U.id);
   check("create: row belongs to the VERIFIED user (user_id from the token, not the body)", row?.user_id === U.id && row.show_on_ads === true && row.avatar === null, JSON.stringify(row));
   const long = await save(U, { firstName: "x".repeat(60) });
@@ -346,6 +350,16 @@ async function scenarioProfile() {
   const noFields = await post("/api/profile", { action: "save" }, { token: U.token });
   check("save without fields -> 400 bad_fields", noFields.status === 400 && noFields.data.error === "bad_fields", JSON.stringify(noFields));
 
+  const adrUp = await save(U, { address: "Soh, New Street 7" });
+  const adrBad = await save(U, { address: "abc" });
+  const adrBlank = await save(U, { address: "" });
+  check("update: address changed (and saved on the row)", adrUp.status === 200 && adrUp.data.profile.address === "Soh, New Street 7" && (await profileRow(U.id)).address === "Soh, New Street 7", JSON.stringify(adrUp.data));
+  check("update: too short -> bad_address, blank -> address_required, row unchanged", adrBad.data.error === "bad_address" && adrBlank.data.error === "address_required" && (await profileRow(U.id)).address === "Soh, New Street 7", JSON.stringify([adrBad.data, adrBlank.data]));
+  const mass = await save(U, { verified: true, verified_at: "2020-01-01T00:00:00Z", role: "admin", user_id: "x", showOnAds: true });
+  const mrow = await profileRow(U.id);
+  check("update: verified / role / verified_at in the body are ignored (cannot self-verify or self-promote)", mass.status === 200 && mass.data.profile.verified === false && mass.data.profile.role === "user" && mrow.verified === false && mrow.verified_at === null && mrow.role === "user", JSON.stringify([mass.data, mrow]));
+  const massNew = await save(await mkUser("mass", { profile: false }), { ...full, verified: true, role: "admin", verified_at: "2020-01-01T00:00:00Z" });
+  check("create: verified / role in the body are ignored too", massNew.status === 200 && massNew.data.profile.verified === false && massNew.data.profile.role === "user", JSON.stringify(massNew.data));
   const V = await mkUser("prof2", { first: "Vera", phone: "09120000042" });
   const gv = await post("/api/profile", { action: "get" }, { token: V.token });
   const gu = await post("/api/profile", { action: "get" }, { token: U.token });
@@ -424,7 +438,7 @@ async function scenarioAvatar() {
   section("avatar: new user, orphans, folder cap, limits");
   const N = await mkUser("av-new", { profile: false });
   const pre = await upload(N);
-  const first = await save(N, { firstName: "New", familyName: "Person", phone: "09125550000", avatar: pre.s.data.name });
+  const first = await save(N, { firstName: "New", familyName: "Person", phone: "09125550000", address: "Soh, Garden Lane 3", avatar: pre.s.data.name });
   check("avatar picked BEFORE the profile exists is accepted on create", first.status === 200 && first.data.profile.avatar === pre.s.data.name, JSON.stringify(first));
   const O = await mkUser("av-orph");
   const real = await upload(O);
@@ -482,14 +496,19 @@ async function scenarioCreate() {
 
   const own = await create(U, { title: "Own contact", contactKind: "telegram", contactValue: "@ali_soh", contactPublic: true });
   const orow = await rowOf(own.data.id);
-  check("create: own contact kept (kind, value, public)", own.status === 200 && orow.contact_kind === "telegram" && orow.contact_value === "@ali_soh" && orow.contact_public === true, JSON.stringify(orow));
-  const pubNoValue = await create(U, { title: "Public default", contactPublic: true });
-  const prow = await rowOf(pubNoValue.data.id);
-  check("create: 'show contact' without a value uses the profile phone", pubNoValue.status === 200 && prow.contact_value === "09121110000" && prow.contact_public === true, JSON.stringify(prow));
-  const trimmed = await create(U, { title: "Clip contact", contactKind: "other", contactValue: "c".repeat(200) });
-  check("create: contact value clipped to 60", (await rowOf(trimmed.data.id)).contact_value.length === 60);
+  check("create: client contactKind / contactValue / contactPublic are IGNORED (profile phone, private)", own.status === 200 && orow.contact_kind === "phone" && orow.contact_value === "09121110000" && orow.contact_public === false, JSON.stringify(orow));
   const badKind = await create(U, { contactKind: "pigeon", contactValue: "x" });
-  check("create: bad_contact", badKind.status === 400 && badKind.data.error === "bad_contact", JSON.stringify(badKind));
+  check("create: a bogus contactKind is ignored too (no bad_contact any more)", badKind.status === 200 && (await rowOf(badKind.data.id)).contact_value === "09121110000", JSON.stringify(badKind));
+  const long = await create(U, { title: "Clip contact", contactKind: "other", contactValue: "c".repeat(200) });
+  check("create: a long client contact value is ignored", (await rowOf(long.data.id)).contact_value === "09121110000");
+  const NA = await mkUser("noaddr", { phone: "09121119999", address: "none" });
+  const na = await create(NA, { title: "no address" });
+  check("create: an old profile WITHOUT an address -> 403 profile_required, nothing stored", na.status === 403 && na.data.error === "profile_required" && !(await dump()).listings.some((l) => l.owner_id === NA.id), JSON.stringify(na));
+  const naGet = await post("/api/profile", { action: "get" }, { token: NA.token });
+  check("an old profile without an address can still read it: address \"\" , other fields intact", naGet.status === 200 && naGet.data.profile?.address === "" && naGet.data.profile.phone === "09121119999" && naGet.data.profile.verified === false, JSON.stringify(naGet.data));
+  const naOk = await post("/api/profile", { action: "save", fields: { address: "Soh, Old Street 9" } }, { token: NA.token });
+  const na2 = await create(NA, { title: "now with address" });
+  check("adding the address (update) lets that person post", naOk.status === 200 && naOk.data.profile.address === "Soh, Old Street 9" && na2.status === 200, JSON.stringify([naOk.data, na2.data]));
 
   const noTitle = await create(U, { title: "  " });
   const badBoard = await createRaw(U, { ...bodyFor("market"), board: "zzz" });
@@ -596,6 +615,15 @@ async function scenarioMy() {
   const u = await post("/api/my/listings", { action: "update", id: a1, fields: { title: "A one edited", price: "55" } }, { token: A.token });
   check("update: owner ok, untouched fields kept", u.status === 200 && u.data.ok === true && u.data.listing.title === "A one edited" && u.data.listing.price === "55" && u.data.listing.area === "Soh", JSON.stringify(u));
   check("update: no secrets in the response", leaks(u.data).length === 0);
+  const cu = await post("/api/my/listings", { action: "update", id: a1, fields: { contactKind: "telegram", contactValue: "@evil", contactPublic: true, title: "A one edited" } }, { token: A.token });
+  const cur = await rowOf(a1);
+  check("update: contact fields from the client are ignored (stay phone / profile phone / private)", cu.status === 200 && cur.contact_kind === "phone" && cur.contact_value === "09120000000" && cur.contact_public === false, JSON.stringify(cur));
+  await admin(`set-profile?${qs({ email: A.email, field: "address", value: "null" })}`);
+  const noAdr = await post("/api/my/listings", { action: "update", id: a1, fields: { title: "blocked" } }, { token: A.token });
+  const noAdrRenew = await post("/api/my/listings", { action: "renew", id: a1 }, { token: A.token });
+  const noAdrList = await post("/api/my/listings", { action: "list" }, { token: A.token });
+  await admin(`set-profile?${qs({ email: A.email, field: "address", value: "Soh, Test Street 1" })}`);
+  check("update / renew with a profile that lost its address -> 403 profile_required; list still works", noAdr.status === 403 && noAdr.data.error === "profile_required" && noAdrRenew.status === 403 && noAdrList.status === 200, JSON.stringify([noAdr, noAdrRenew]));
   await admin(`approve?id=${a1}`);
   const u2 = await post("/api/my/listings", { action: "update", id: a1, fields: { title: "A one again" } }, { token: A.token });
   check("update: an approved ad goes back to pending", u2.data.listing?.status === "pending" && (await rowOf(a1)).status === "pending", JSON.stringify(u2));
@@ -679,9 +707,70 @@ async function scenarioMy() {
   check("my: stray b1 still intact", (await rowOf(b1)).status === "pending");
 }
 
+async function scenarioReveal() {
+  section("reveal: POST /api/listings/contact (Show phone), address privacy");
+  const reveal = (id, o = {}) => post("/api/listings/contact", { id }, o);
+  const U = await mkUser("rv", { first: "Rana", family: "Revealfamily", phone: "09128889900", address: "Address-Private-88 Hill Road" });
+  const mkA = async (title) => { const id = await mk(U, title); await admin(`approve?id=${id}`); return id; };
+  const id = await mkA("rv-approved");
+  const r = await reveal(id);
+  check("reveal: approved ad -> 200 {ok:true, contact:{kind:'phone', value: profile phone}} and NOTHING else", r.status === 200 && JSON.stringify(r.data) === JSON.stringify({ ok: true, contact: { kind: "phone", value: "09128889900" } }), JSON.stringify(r));
+  const raw = await fetch(APP + "/api/listings/contact", { method: "POST", headers: { "Content-Type": "application/json", "x-forwarded-for": freshIp() }, body: JSON.stringify({ id }) });
+  check("reveal: Cache-Control no-store, no login needed", (raw.headers.get("cache-control") ?? "").includes("no-store") && raw.status === 200);
+  const rt = JSON.stringify(r.data);
+  check("reveal: no address, family name, email, owner id in the answer", !rt.includes("Address-Private") && !rt.includes("Revealfamily") && !rt.includes("example.com") && !rt.includes(U.id));
+
+  await admin(`set-profile?${qs({ email: U.email, field: "phone", value: "09357776655" })}`);
+  const r2 = await reveal(id);
+  check("reveal: follows the CURRENT profile phone (single source of truth)", r2.status === 200 && r2.data.contact.value === "09357776655" && (await rowOf(id)).contact_value === "09128889900", JSON.stringify(r2));
+  const viaSave = await post("/api/profile", { action: "save", fields: { phone: "09121230000" } }, { token: U.token });
+  check("reveal: after the owner changes the phone in the profile", viaSave.status === 200 && (await reveal(id)).data.contact?.value === "09121230000");
+
+  const pend = await mk(U, "rv-pending");
+  const rej = await mk(U, "rv-rejected"); await admin(`set?id=${rej}&field=status&value=rejected`);
+  const rem = await mk(U, "rv-removed"); await admin(`approve?id=${rem}`); await admin(`set?id=${rem}&field=status&value=removed`);
+  const exp = await mk(U, "rv-expired"); await admin(`approve?id=${exp}&expires_in_days=-2`);
+  const ghost = "22222222-2222-4222-8222-222222222222";
+  for (const [name, x] of [["pending", pend], ["rejected", rej], ["removed", rem], ["expired", exp], ["unknown", ghost], ["not a uuid", "nope"], ["sql-ish", "1' or '1'='1"], ["number", 5], ["missing", undefined]]) {
+    const q = await reveal(x);
+    check(`reveal: ${name} id -> 404 not_found, no phone`, q.status === 404 && JSON.stringify(q.data) === JSON.stringify({ error: "not_found" }), JSON.stringify(q));
+  }
+  const bj = await post("/api/listings/contact", null, { raw: "{nope" });
+  check("reveal: bad JSON -> 400 bad_json", bj.status === 400 && bj.data.error === "bad_json", JSON.stringify(bj));
+
+  // an ad whose owner has no profile row any more falls back to the row's stored phone
+  const orphan = await mkA("rv-orphan");
+  await admin(`set?id=${orphan}&field=owner_id&value=${(await mkUser("rv-np", { profile: false })).id}`);
+  const ro = await reveal(orphan);
+  check("reveal: owner without a profile -> falls back to the phone stored on the row", ro.status === 200 && ro.data.contact?.value === "09121230000", JSON.stringify(ro));
+  await admin(`set?id=${orphan}&field=contact_value&value=null`);
+  const ro2 = await reveal(orphan);
+  check("reveal: neither profile nor stored phone -> 404", ro2.status === 404, JSON.stringify(ro2));
+
+  // privacy sweep: nothing public carries the phone or the address
+  const created = await create(U, { title: "rv-sweep" });
+  const publicJson = JSON.stringify([await viewRows(), created.data, (await view("*", "&limit=500")).status]);
+  check("public view + create response never contain the phone or the address", !publicJson.includes("09121230000") && !publicJson.includes("09128889900") && !publicJson.includes("Address-Private-88"), "leak");
+  check("the address exists only in profiles (not copied to any listing row)", !JSON.stringify((await dump()).listings).includes("Address-Private-88"));
+
+  // rate limit per IP (kind reveal)
+  await clearRate();
+  const ip = "10.77.7.7";
+  const codes = [];
+  for (let i = 0; i < 300; i++) codes.push((await reveal(id, { ip })).status);
+  const over = await reveal(id, { ip });
+  const other = await reveal(id, { ip: "10.77.7.8" });
+  check("reveal: 300 per hour per IP, the 301st -> 429 rate_limited; another IP is fine", codes.every((c) => c === 200) && over.status === 429 && over.data.error === "rate_limited" && other.status === 200, `${codes.filter((c) => c !== 200).length} ${over.status} ${other.status}`);
+  const ev = (await dump()).rate_events.filter((e) => e.kind === "reveal");
+  check("reveal: rate rows carry a hashed IP, no user id", ev.length >= 300 && ev.every((e) => e.user_id === null && e.ip_hash !== ip && e.ip_hash.length > 8));
+  const bad = await reveal(ghost, { ip });
+  check("reveal: rate limited before anything else (429 even for unknown ids)", bad.status === 429, JSON.stringify(bad));
+  await clearRate();
+}
+
 async function scenarioPublicView() {
   section("public view: boards and privacy matrix");
-  const U1 = await mkUser("pv1", { first: "Maryam", family: "Secretfamily", phone: "09127654321", avatar: "abcdefghijkl.jpg", show: true });
+  const U1 = await mkUser("pv1", { first: "Maryam", family: "Secretfamily", phone: "09127654321", avatar: "abcdefghijkl.jpg", show: true, address: "Address-Private-77 Lane" });
   const U2 = await mkUser("pv2", { first: "Hidden", family: "Secretfamily2", phone: "09127654322", show: false });
   const U3 = await mkUser("pv3", { profile: false });
   const mkApproved = async (u, title, over = {}) => { const id = await mk(u, title, over); await admin(`approve?id=${id}`); return id; };
@@ -701,12 +790,15 @@ async function scenarioPublicView() {
   const byTitle = Object.fromEntries(rows.map((r) => [r.title, r]));
   check("view: anon can read it", res.status === 200 && Array.isArray(rows));
   check("view: approved rows listed; pending and expired not", !!byTitle["view-hidden-contact"] && !byTitle["view-pending"] && !byTitle["view-expired"]);
-  check("view: every row has exactly the 17 public keys", rows.every((r) => JSON.stringify(Object.keys(r).sort()) === JSON.stringify(PUBLIC_KEYS)), Object.keys(rows[0] ?? {}).sort().join());
-  check("view: contact hidden unless the poster ticked it (even though the row stores the profile phone)", byTitle["view-hidden-contact"].contact_value === null && byTitle["view-default-private"].contact_value === null && byTitle["view-default-private"].contact_kind === null);
-  check("view: contact shown when ticked", byTitle["view-shown-contact"].contact_value === "SHOWN-123" && byTitle["view-shown-contact"].contact_kind === "phone");
+  check("view: every row has exactly the 18 public keys", rows.every((r) => JSON.stringify(Object.keys(r).sort()) === JSON.stringify(PUBLIC_KEYS)), Object.keys(rows[0] ?? {}).sort().join());
+  check("view: contact_kind / contact_value are ALWAYS null (even for rows with contact_public = true)", rows.every((r) => r.contact_kind === null && r.contact_value === null));
+  await admin(`set?id=${shown}&field=contact_public&value=true`);
+  await admin(`set?id=${shown}&field=contact_value&value=SHOWN-123`);
+  check("view: still null after forcing contact_public = true on the row", (await viewRows()).find((r) => r.title === "view-shown-contact")?.contact_value === null);
+  check("view: poster_verified false by default, true after an admin verifies the profile", byTitle["view-hidden-contact"].poster_verified === false && byTitle["view-no-profile"].poster_verified === false && (await (async () => { await admin(`set-profile?${qs({ email: U1.email, field: "verified", value: "true" })}`); const r = (await viewRows()).find((x) => x.title === "view-hidden-contact"); await admin(`set-profile?${qs({ email: U1.email, field: "verified", value: "false" })}`); return r.poster_verified === true; })()));
   const all = JSON.stringify(rows);
-  check("view: no phone, family name, email or hidden contact anywhere in the JSON", !all.includes("09127654321") && !all.includes("09127654322") && !all.includes("Secretfamily") && !all.includes("example.com") && !all.includes("SECRET-HIDDEN"), "found a private value");
-  const badKeys = [...FORBIDDEN, "first_name", "phone", "status", "renewals", "updated_at", "show_on_ads", "email"].filter((k) => all.includes(`"${k}":`));
+  check("view: no phone, family name, email or hidden contact anywhere in the JSON", !all.includes("09127654321") && !all.includes("09127654322") && !all.includes("Secretfamily") && !all.includes("example.com") && !all.includes("SECRET-HIDDEN") && !all.includes("Address-Private-77"), "found a private value");
+  const badKeys = [...FORBIDDEN, "first_name", "phone", "status", "renewals", "updated_at", "show_on_ads", "email", "address", "verified"].filter((k) => all.includes(`"${k}":`));
   check("view: no forbidden keys", badKeys.length === 0, badKeys.join());
   const noAvatars = JSON.stringify(rows.map((r) => ({ ...r, poster_avatar: null })));
   check("view: owner uuids are never exposed except inside a poster_avatar path", !noAvatars.includes(U1.id) && !noAvatars.includes(U2.id) && !noAvatars.includes(U3.id));
@@ -722,7 +814,7 @@ async function scenarioPublicView() {
   check("view: order=created_at.desc&limit works with the board filter", ordered.length > 0 && ordered.every((x, i) => i === 0 || ordered[i - 1].created_at >= x.created_at));
   check("view: legacy rows without a board read as market", rows.every((r) => BOARDS.includes(r.board)));
 
-  for (const col of ["owner_id", "family_name", "phone", "first_name", "status", "ip_hash", "user_id", "email", "show_on_ads", "updated_at", "renewals"]) {
+  for (const col of ["owner_id", "family_name", "phone", "address", "verified", "first_name", "status", "ip_hash", "user_id", "email", "show_on_ads", "updated_at", "renewals"]) {
     const r = await view(col);
     check(`view: selecting ${col} is refused (the column does not exist on the view)`, r.status === 400, String(r.status));
   }
@@ -752,6 +844,12 @@ async function scenarioPublicView() {
     check(`${name}: board column + check, types incl. offer and rent`, /board text not null default 'market'/.test(code) && /check \(board in \('market', ?'careers', ?'needs', ?'property'\)\)/.test(code) && /'offer'/.test(code) && /'rent'/.test(code));
     check(`${name}: owner trigger, rate_events.user_id`, /listing_require_owner/.test(code) && /user_id uuid/.test(code) && /rate_events_user_idx/.test(code));
     check(`${name}: manage_hash and poster_name are dropped`, /drop column if exists manage_hash/.test(code) && /drop column if exists poster_name/.test(code));
+  }
+  {
+    const c8 = noComments(readFileSync(join(ROOT, "database/migrations/008-address-verified-contact.sql"), "utf8"));
+    const v8 = c8.slice(c8.indexOf("create or replace view public.public_listings")).split(";")[0];
+    check("migration 008: view nulls contact_kind/contact_value and adds poster_verified", /null::text as contact_kind/.test(v8) && /null::text as contact_value/.test(v8) && /poster_verified/.test(v8));
+    check("migration 008: view selects no l.contact_*, no address", !/l\.contact_(kind|value)/.test(v8) && !/address/.test(v8), v8);
   }
   check("sql: the fresh-install file does not create manage_hash / poster_name / manage_code", !/create table[^;]*(manage_hash|poster_name)/s.test(noComments(sql)) && !/manage_code\s/i.test(noComments(sql)));
   check("sql: the fresh-install file creates listings.board and profiles itself (complete end state)", /create table if not exists public\.listings/.test(sql) && /board/.test(sql.slice(sql.indexOf("create table if not exists public.listings"), sql.indexOf("create table if not exists public.listings") + 1500)));
@@ -1053,6 +1151,7 @@ async function main() {
     await scenarioCreate();
     await scenarioMy();
     await scenarioPublicView();
+    await scenarioReveal();
     await scenarioPhotos();
     await scenarioPages();
     const devLog = dev.getLog();

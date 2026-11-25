@@ -4,6 +4,7 @@ import { resolveNav, ui } from "@/lib/nav";
 import { socialLinks } from "@/lib/social";
 import { siteName } from "@/lib/site";
 import { AccountControl } from "@/components/account-control";
+import { CreateMenu } from "@/components/create-menu";
 import { SocialIcon } from "@/components/icons";
 import { LangSwitch } from "@/components/lang-switch";
 import { LogoBlock } from "@/components/logo-block";
@@ -27,6 +28,7 @@ export function SiteHeader({ lang }: { lang: Locale }) {
                 </a>
               ))}
             </span>
+            <CreateMenu lang={lang} />
             <AccountControl lang={lang} className="ut-link" />
           </div>
         </div>

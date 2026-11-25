@@ -86,7 +86,7 @@ export function AdminApp({ lang }: { lang: Locale }) {
     );
   }
   // The shell shows only for a confirmed admin; everything else (no profile, normal user, a 403 from the server) is the denied card.
-  if (forbidden || prof.status !== "ready" || prof.profile?.role !== "admin") {
+  if (forbidden || (prof.status !== "ready" && prof.status !== "none") || prof.profile?.role !== "admin") {
     return (
       <div className="gate-card">
         <h2>{T.noTitle[lang]}</h2>

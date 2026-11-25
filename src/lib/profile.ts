@@ -35,6 +35,8 @@ export const avatarUrl = (supabaseUrl: string, path: string) =>
 
 // ---------------- Profile ----------------
 export const NAME_MAX = 40;
+export const ADDRESS_MIN = 5;
+export const ADDRESS_MAX = 200;
 
 /** The signed-in person's own profile as the API returns it. */
 export type Profile = {
@@ -46,6 +48,10 @@ export type Profile = {
   avatar: string | null;
   /** show my first name and avatar on my public ads (default true). The family name and the phone are never public. */
   showOnAds: boolean;
+  /** Home address. Required to post. NEVER public: not in any public view or response; only admins see it (to verify sellers). "" = not given yet. */
+  address: string;
+  /** "Verified seller": an admin confirmed this person (e.g. visited them). Set only by admins; no profile route can write it. */
+  verified: boolean;
   /** "admin" only when an owner set profiles.role = 'admin' in Supabase. Read-only for the site: no route ever writes it. */
   role: Role;
 };
@@ -59,6 +65,7 @@ export type ProfileRowPatch = {
   phone?: string;
   avatar?: string | null;
   show_on_ads?: boolean;
+  address?: string;
 };
 
 /** DB row (select=*) -> Profile. */
@@ -69,6 +76,8 @@ export function profileFromRow(row: Record<string, unknown>): Profile {
     phone: String(row.phone ?? ""),
     avatar: isAvatarName(row.avatar) ? row.avatar : null,
     showOnAds: row.show_on_ads !== false,
+    address: typeof row.address === "string" ? row.address : "",
+    verified: row.verified === true,
     role: row.role === "admin" ? "admin" : "user",
   };
 }
@@ -95,15 +104,19 @@ export function normalizePhone(input: unknown): string | null {
   return /^09\d{9}$/.test(s) ? s : null;
 }
 
+/** Address text: trimmed, whitespace collapsed, control and bidi characters dropped. May be longer than ADDRESS_MAX (the caller checks). */
+export const cleanAddress = (v: unknown): string =>
+  typeof v === "string" ? v.replace(/[\u0000-\u001f\u007f]/g, " ").replace(/[\u200b\u200e\u200f\u202a-\u202e\u2060-\u2069\ufeff]/g, "").replace(/\s+/g, " ").trim() : "";
+
 /** Trim, collapse inner whitespace, drop control characters. */
 export const cleanName = (v: unknown): string =>
   typeof v === "string" ? v.replace(/[\u0000-\u001f\u007f]/g, " ").replace(/[\u200b\u200e\u200f\u202a-\u202e\u2060-\u2069\ufeff]/g, "").replace(/\s+/g, " ").trim().slice(0, NAME_MAX) : "";
 
-export type ProfileError = "first_name_required" | "family_name_required" | "bad_phone" | "bad_avatar" | "bad_fields";
+export type ProfileError = "first_name_required" | "family_name_required" | "bad_phone" | "address_required" | "bad_address" | "bad_avatar" | "bad_fields";
 
 /**
  * Validates the body of POST /api/profile {action:"save", fields}.
- * mode "create": firstName, familyName and phone are all required (there is no row yet).
+ * mode "create": firstName, familyName, phone and address are all required (there is no row yet).
  * mode "update": every field is optional, but a field that is present must be valid. avatar: file name or null (= remove).
  * Unknown keys are ignored. Returns snake_case columns ready for the DB.
  */
@@ -130,6 +143,13 @@ export function parseProfileInput(
     if (!p) return { ok: false, error: "bad_phone" };
     v.phone = p;
   }
+  if (create || b.address !== undefined) {
+    const a = cleanAddress(b.address);
+    if (!a) return { ok: false, error: "address_required" };
+    const n = Array.from(a).length;
+    if (n < ADDRESS_MIN || n > ADDRESS_MAX) return { ok: false, error: "bad_address" };
+    v.address = a;
+  }
   if (b.showOnAds !== undefined) {
     if (typeof b.showOnAds !== "boolean") return { ok: false, error: "bad_fields" };
     v.show_on_ads = b.showOnAds;
@@ -141,8 +161,8 @@ export function parseProfileInput(
   return { ok: true, value: v };
 }
 
-/** A profile is complete when the row exists (first name, family name and phone are NOT NULL in the DB). */
-export const isComplete = (p: Profile | null | undefined): p is Profile => !!p && !!p.firstName && !!p.familyName && !!p.phone;
+/** A profile is complete when it has first name, family name, phone AND address. Posting needs a complete profile (older profiles without an address must add one). */
+export const isComplete = (p: Profile | null | undefined): p is Profile => !!p && !!p.firstName && !!p.familyName && !!p.phone && !!p.address;
 
 /** First letter for the initials circle (first name; Persian and Latin both work). */
 export const initialOf = (name: string): string => {

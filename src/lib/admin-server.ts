@@ -1,4 +1,4 @@
-import type { AdminListing, AdminPoster } from "@/lib/admin-types";
+import type { AdminListing, AdminPoster, AdminUser } from "@/lib/admin-types";
 import { publicRow } from "@/lib/listing-validation";
 import { toAsciiDigits } from "@/lib/profile";
 import { failure, json, readBody, requireAdmin, sbHeaders, UUID, type Row, type Sb } from "@/lib/server-guard";
@@ -58,16 +58,32 @@ export async function postersFor(sb: Sb, ownerIds: unknown[]): Promise<Map<strin
   const ids = [...new Set(ownerIds.filter((x): x is string => typeof x === "string" && UUID.test(x)))];
   const out = new Map<string, NonNullable<AdminPoster>>();
   if (!ids.length) return out;
-  const res = await fetch(`${sb.url}/rest/v1/profiles?select=user_id,first_name,family_name,phone&user_id=in.(${ids.join(",")})`, {
+  const res = await fetch(`${sb.url}/rest/v1/profiles?select=user_id,first_name,family_name,phone,verified&user_id=in.(${ids.join(",")})`, {
     headers: sbHeaders(sb),
     cache: "no-store",
   });
   if (!res.ok) return failure("admin_posters", res);
   for (const r of (await res.json()) as Row[]) {
     const userId = String(r.user_id);
-    out.set(userId, { userId, firstName: String(r.first_name ?? ""), familyName: String(r.family_name ?? ""), phone: String(r.phone ?? "") });
+    out.set(userId, { userId, firstName: String(r.first_name ?? ""), familyName: String(r.family_name ?? ""), phone: String(r.phone ?? ""), verified: r.verified === true });
   }
   return out;
+}
+
+/** One profiles row -> AdminUser (admins only: includes the private address). */
+export function adminUserFromRow(r: Row, listingCount: number): AdminUser {
+  return {
+    userId: String(r.user_id),
+    firstName: String(r.first_name ?? ""),
+    familyName: String(r.family_name ?? ""),
+    phone: String(r.phone ?? ""),
+    address: typeof r.address === "string" ? r.address : "",
+    verified: r.verified === true,
+    verifiedAt: typeof r.verified_at === "string" ? r.verified_at : null,
+    role: r.role === "admin" ? "admin" : "user",
+    createdAt: String(r.created_at ?? ""),
+    listingCount,
+  };
 }
 
 /** A listing row + its poster -> AdminListing. */

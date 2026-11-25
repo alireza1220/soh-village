@@ -3,11 +3,12 @@ import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } fr
 import { createPortal } from "react-dom";
 import type { Locale } from "@/lib/i18n";
 import { categoryLabel, factsOf, typeLabel, type BoardId } from "@/lib/boards";
-import { CONTACT_KINDS, type Listing } from "@/lib/market";
+import type { Listing } from "@/lib/market";
+import { useRevealContact } from "@/lib/use-reveal-contact";
 import { isAsk, Placeholder, PosterLine } from "./market-card";
-import { CatIcon, ChatI, ChevL, ChevR, CloseI, CopyI, HeartI, PhoneI, SendI, ShareI, ZoomI } from "./market-icons";
+import { CatIcon, ChevL, ChevR, CloseI, CopyI, HeartI, PhoneI, ShareI, ZoomI } from "./market-icons";
 import { T } from "./market-text";
-import { contactLink, copyText, fmtDate, num, relativeDay } from "./market-utils";
+import { copyText, telHref, fmtDate, num, relativeDay } from "./market-utils";
 
 type Props = {
   l: Listing; board: BoardId; lang: Locale; today: string; saved: boolean; pos: { index: number; total: number } | null;
@@ -27,6 +28,9 @@ export function MarketDetail({ l, board, lang, today, saved, pos, onToggleSave, 
   const i = cur.id === l.id ? Math.min(cur.i, Math.max(0, n - 1)) : 0;
   const [zoom, setZoom] = useState(false);
   const [msg, setMsg] = useState("");
+  const reveal = useRevealContact(l.id, lang);
+  const phoneRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => { if (reveal.state.status === "shown") phoneRef.current?.focus(); }, [reveal.state.status]);
   const touch = useRef<number | null>(null);
   const setI = useCallback((v: number) => setCur({ id: l.id, i: v }), [l.id]);
   const step = useCallback((d: number) => { if (n > 1) setI((i + d + n) % n); }, [i, n, setI]);
@@ -92,14 +96,13 @@ export function MarketDetail({ l, board, lang, today, saved, pos, onToggleSave, 
     }
     flash((await copyText(url)) ? T.linkCopied[lang] : url);
   };
-  const copyContact = async () => { if (l.contact) flash((await copyText(l.contact.value)) ? T.copied[lang] : l.contact.value); };
+  const copyContact = async () => { if (reveal.state.status === "shown") flash((await copyText(reveal.state.phone)) ? T.copied[lang] : reveal.state.phone); };
 
   const b = l.board ?? board;
   const typeName = typeLabel(b, l.type, lang);
   // Market keeps its big price; other boards name the price in their own words (pay, budget ...) as a fact.
   const facts = factsOf(b, b === "market" ? { quantity: l.quantity, area: l.area, available: l.available } : l, lang);
-  const kindName = l.contact ? (CONTACT_KINDS.find((k) => k.v === l.contact!.kind)?.[lang] ?? l.contact.kind) : "";
-  const link = l.contact ? contactLink(l.contact.kind, l.contact.value) : null;
+  const tel = reveal.state.status === "shown" ? telHref(reveal.state.phone) : null;
   const Prev = rtl ? ChevR : ChevL, Next = rtl ? ChevL : ChevR;
   const titleId = `${uid}-t`;
 
@@ -151,26 +154,33 @@ export function MarketDetail({ l, board, lang, today, saved, pos, onToggleSave, 
             <dl className="mkb-facts">
               {facts.map((f) => (<Fragment key={f.label}><dt>{f.label}</dt><dd><bdi dir="auto">{f.value}</bdi></dd></Fragment>))}
             </dl>
-            <PosterLine poster={l.poster} size={40} label={T.postedBy[lang]} />
+            <PosterLine poster={l.poster} size={40} label={T.postedBy[lang]} verified={l.verified} lang={lang} />
             {l.details && <p className="mkb-details" dir="auto">{l.details}</p>}
             <p className="mkb-dates">{T.posted[lang]} {fmtDate(l.postedAt, lang)} ({relativeDay(l.postedAt, today, lang)}) · {T.until[lang]} {fmtDate(l.expiresAt, lang)}</p>
 
             <div className="mkb-contact">
               <p className="mkb-contact__h">{T.contact[lang]}</p>
-              {l.contact ? (
+              {reveal.state.status === "shown" ? (
                 <>
-                  <p className="mkb-contact__v"><span>{kindName}: </span><bdi dir="ltr">{l.contact.value}</bdi></p>
+                  <p className="mkb-contact__v" ref={phoneRef} tabIndex={-1}><span>{T.phoneShown[lang]}: </span><bdi dir="ltr">{reveal.state.phone}</bdi></p>
                   <div className="mkb-actions">
-                    <button type="button" className="mkb-btn mkb-btn--solid" onClick={copyContact}><CopyI size={18} />{T.copy[lang]}</button>
-                    {link && (
-                      <a className="mkb-btn" href={link.href} {...(link.kind === "tel" ? {} : { target: "_blank", rel: "noopener noreferrer" })}>
-                        {link.kind === "tel" ? <PhoneI size={18} /> : link.kind === "telegram" ? <SendI size={18} /> : <ChatI size={18} />}
-                        {link.kind === "tel" ? T.call[lang] : link.kind === "telegram" ? T.openTelegram[lang] : T.openWhatsapp[lang]}
-                      </a>
-                    )}
+                    {tel && <a className="mkb-btn mkb-btn--solid" href={tel}><PhoneI size={18} />{T.call[lang]}</a>}
+                    <button type="button" className="mkb-btn" onClick={copyContact}><CopyI size={18} />{T.copy[lang]}</button>
                   </div>
                 </>
-              ) : <p className="mkb-contact__none">{T.noContact[lang]}</p>}
+              ) : (
+                <>
+                  <p className="mkb-contact__note">{T.phoneHidden[lang]}</p>
+                  <div className="mkb-actions">
+                    <button type="button" className="mkb-btn mkb-btn--solid" onClick={reveal.reveal} aria-disabled={reveal.state.status === "loading"} aria-describedby={`${uid}-ph`}>
+                      <PhoneI size={18} />{reveal.state.status === "loading" ? T.phoneLoading[lang] : reveal.state.status === "error" ? T.phoneRetry[lang] : T.showPhone[lang]}
+                    </button>
+                  </div>
+                </>
+              )}
+              <p id={`${uid}-ph`} className={reveal.state.status === "error" ? "mkb-contact__err" : "sr-only"} role="status" aria-live="polite">
+                {reveal.state.status === "error" ? reveal.state.message : reveal.state.status === "shown" ? `${T.phoneShown[lang]}: ${reveal.state.phone}` : reveal.state.status === "loading" ? T.phoneLoading[lang] : ""}
+              </p>
             </div>
 
             <div className="mkb-actions">

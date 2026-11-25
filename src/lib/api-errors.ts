@@ -7,7 +7,7 @@ export const API_ERRORS = {
   // ---- generic / API ----
   bad_json: { fa: "درخواست درست نبود. دوباره امتحان کنید.", en: "That request was not valid. Try again." },
   unauthorized: { fa: "مدت ورود شما تمام شده. دوباره وارد شوید.", en: "Your session ended. Log in again." },
-  profile_required: { fa: "اول مشخصات خود را کامل کنید.", en: "Complete your profile first." },
+  profile_required: { fa: "اول مشخصات خود را کامل کنید: شماره تلفن و نشانی (نشانی هرگز نمایش داده نمی‌شود).", en: "Complete your profile first: phone number and address (the address is never shown)." },
   not_found: { fa: "آگهی پیدا نشد.", en: "Listing not found." },
   not_editable: { fa: "این آگهی دیگر قابل ویرایش نیست.", en: "This listing can no longer be edited." },
   cannot_renew: { fa: "هنوز نمی‌شود تمدیدش کرد. آگهی تأییدشده را می‌توانید در هفته‌ی آخر اعتبار یا بعد از آن، تا ۴ بار تمدید کنید.", en: "You cannot renew this yet. An approved ad can be renewed in its last 7 days or after it expires, up to 4 times." },
@@ -48,6 +48,8 @@ export const API_ERRORS = {
   first_name_required: { fa: "نام را بنویسید.", en: "Write your first name." },
   family_name_required: { fa: "نام خانوادگی را بنویسید.", en: "Write your family name." },
   bad_phone: { fa: "شماره‌ی موبایل درست نیست. مثلاً ۰۹۱۲۱۲۳۴۵۶۷", en: "That mobile number does not look right. Example: 09121234567" },
+  address_required: { fa: "نشانی خود را بنویسید. برای گذاشتن آگهی لازم است و برای هیچ‌کس نمایش داده نمی‌شود.", en: "Write your address. It is needed to post and is never shown to anyone." },
+  bad_address: { fa: "نشانی درست نیست (دست‌کم ۵ و حداکثر ۲۰۰ حرف).", en: "That address does not look right (5 to 200 characters)." },
   bad_avatar: { fa: "عکس پروفایل ذخیره نشد. دوباره امتحان کنید.", en: "Your picture did not save. Try again." },
   avatar_too_big: { fa: "این عکس را نتوانستیم به اندازه‌ی کافی کوچک کنیم. عکس دیگری را امتحان کنید.", en: "We could not make this picture small enough. Try another." },
   // ---- login / password (client side, from Supabase Auth) ----

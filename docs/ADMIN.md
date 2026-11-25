@@ -39,7 +39,7 @@ From that moment the person is refused by every admin function.
 
 - **Listings:** see ads waiting for approval (or all ads), search them, filter by section, see who posted each one (name and phone, which the public never sees). Approve (30 days, a longer existing expiry is kept), reject, put back to pending, or remove (the photos are deleted too). Fix typos in an ad. Photos are not edited from here.
 - **News, blog and events:** write, edit, publish, unpublish and delete. A post can be a draft first. Events have a date, time and place. Persian and English text are separate; one language is enough.
-- **Users:** see everybody who has a profile, with phone, role and how many ads they have. Read only.
+- **Users:** see everybody who has a profile, with phone, home address, role, verified status and how many ads they have. Search by name or phone, filter verified or not, and switch **Verified seller** on or off per person (section 12). Roles are read only.
 - **Overview:** counts of ads by status, users, admins and posts.
 
 ## 5. What is NOT possible from the site
@@ -95,3 +95,23 @@ Same steps as migration 006, with `database/migrations/007-post-priority-cover.s
 ## 11. Checking it works
 
 `node scripts/test-admin.mjs` runs the whole admin area against a fake Supabase (takes 1-2 minutes, starts its own servers on ports 3224 and 54397). The mock lives in `scripts/mock-supabase.mjs`.
+
+## 12. Verified sellers, addresses and phone numbers (migration 008)
+
+**Run `database/migrations/008-address-verified-contact.sql` once** (Supabase, SQL Editor), AFTER 007 and BEFORE deploying this version. Safe to run again. It adds `profiles.address`, `profiles.verified` and `profiles.verified_at`, makes the public view stop carrying phone numbers, and adds `poster_verified` to it.
+
+**Rules the site now follows**
+- Posting needs a complete profile: first name, family name, **phone and home address**. Nobody can post without them.
+- The **address is never shown to the public**. It is stored only in `profiles`, never copied to an ad, and only the admin Users tab returns it. Use it to drive by and check the person is real.
+- The **phone is not on the ad**. A visitor taps "Show phone" and the site fetches the poster's current profile phone (changing the phone in the profile changes it for every ad). No phone, no way to contact: that is why it is mandatory.
+- Email addresses are not shown anywhere.
+
+**How to verify a seller**
+1. Visit the person, check them.
+2. Open the admin page, **Users** tab, find them (search by name or phone, or filter on not verified), and switch **Verified seller** on.
+3. Their ads now show a "Verified seller" badge, even if they hide their name. Switch it off the same way. The date is kept in `verified_at`.
+Only admins can change `verified` (the profile routes never write it, and an extra `verified` field in a request is ignored). The owner can also set it in Supabase, Table Editor, `profiles.verified`.
+
+**Existing users:** profiles made before migration 008 have no address. They keep their login, can read their profile and delete ads, but cannot post, edit or renew an ad until they add an address on the profile page (the site sends them there). Their existing ads stay public.
+
+**Limit to know:** "Show phone" limits copying (one tap per ad, a per-IP rate limit of 300 per hour), but it cannot fully prevent it: anyone who taps can write the number down, and a determined person with many IP addresses can collect numbers slowly.

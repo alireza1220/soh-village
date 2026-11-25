@@ -60,3 +60,38 @@
 .btn--quiet-danger { background: transparent; color: var(--ink); border: 1px solid var(--field-line); }
 .btn--quiet-danger:hover { background: var(--mist); }
 .mk-actions .btn--quiet-danger { margin-inline-start: auto; }
+
+/* "+" create button in the top bar (cm-). The bar is dark, so the popover wears the dark panel colours. */
+.ut-bar { position: relative; }
+.cm { display: inline-flex; align-items: center; }
+.cm__btn {
+  display: inline-flex; align-items: center; justify-content: center; inline-size: 44px; block-size: 44px; padding: 0;
+  background: transparent; border: 0; cursor: pointer; color: var(--on-panel);
+}
+.cm__btn > svg { inline-size: 30px; block-size: 30px; padding: 5px; background: var(--action); color: var(--on-action); box-sizing: border-box; }
+.cm__btn:hover > svg, .cm__btn[aria-expanded="true"] > svg { background: var(--action-hover); }
+.cm__btn:focus-visible, .cm__pop a:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.cm__pop {
+  position: absolute; z-index: 70; inset-block-start: 100%; inset-inline: var(--gutter, 16px);
+  display: flex; flex-direction: column; gap: 10px; padding: 16px; background: var(--panel); color: var(--on-panel);
+  border: 1px solid var(--panel-2); border-top: 3px solid var(--turq); box-shadow: var(--shadow-hover, 0 8px 24px rgb(0 0 0 / .3)); font-size: 15px;
+}
+@media (min-width: 640px) {
+  .cm { position: relative; }
+  .cm__pop { inset-inline: auto 0; inline-size: 300px; }
+}
+.cm__title { margin: 0; font-size: 17px; font-weight: 700; color: var(--on-panel); }
+.cm__text { margin: 0; line-height: 1.7; color: var(--on-panel); }
+.cm__cta { justify-content: center; min-block-size: 44px; }
+.cm__have { margin: 0; font-size: 14px; }
+.cm__link { color: var(--turq); text-decoration: underline; text-underline-offset: 3px; font-weight: 700; }
+.cm__list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.cm__item { display: flex; align-items: center; gap: 10px; min-block-size: 44px; padding-inline: 8px; color: var(--on-panel); font-weight: 500; }
+.cm__item:hover { background: var(--panel-2); color: var(--turq); }
+.cm__sep { margin-block: 4px; border-block-start: 1px solid var(--panel-2); }
+
+/* Verified seller badge (vb-) */
+.vb { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px 1px 6px; background: var(--mist); color: var(--accent-text); border: 1px solid var(--turq); font-size: 13px; font-weight: 700; line-height: 1.6; white-space: nowrap; }
+.vb__icon { flex: none; color: var(--accent-text); }
+.vb--compact { padding: 2px; }
+.vb__text--sr { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }

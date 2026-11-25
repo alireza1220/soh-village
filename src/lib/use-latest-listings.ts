@@ -5,7 +5,7 @@ import { imageUrl, isImageName } from "@/lib/listing-images";
 import { publicSupabase, keyHeaders } from "@/lib/supabase";
 import type { LiveStatus } from "@/lib/use-live-listings";
 
-/** What a home preview card needs from an ad. No contact, no poster name. */
+/** What a home preview card needs from an ad. No phone, no poster name. */
 export type LatestAd = {
   id: string;
   board: BoardId;
@@ -17,9 +17,11 @@ export type LatestAd = {
   /** thumbnail URL of the first photo */
   thumb?: string;
   createdAt: string;
+  /** the poster is a verified seller */
+  verified: boolean;
 };
 
-const COLUMNS = "id,type,category,title,price,area,images,created_at,expires_at,board";
+const COLUMNS = "id,type,category,title,price,area,images,created_at,expires_at,board,poster_verified";
 const PER_BOARD = 4;
 
 /**
@@ -50,7 +52,7 @@ export function useLatestListings(): { ads: Record<BoardId, LatestAd[]>; status:
                 id, board, type: String(r.type), category: String(r.category), title: String(r.title),
                 price: r.price ? String(r.price) : undefined, area: String(r.area ?? ""),
                 thumb: first ? imageUrl(sb.url, id, first, "thumb") : undefined,
-                createdAt: String(r.created_at),
+                createdAt: String(r.created_at), verified: r.poster_verified === true,
               };
             });
         });

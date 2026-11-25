@@ -30,16 +30,14 @@ export async function POST(req: Request) {
   }
 
   if (action !== "update" && action !== "renew" && action !== "delete") return json({ error: "bad_action" }, 400);
-  let profilePhone: string | undefined;
   if (action !== "delete") {
     const profile = await requireProfile(sb, user.id);
     if (profile instanceof Response) return profile;
-    profilePhone = profile.phone;
   }
   const id = typeof b.id === "string" ? b.id : "";
   if (!UUID.test(id)) return json({ error: "not_found" }, 404);
   const row = await findRow(sb, `id=eq.${id}&owner_id=eq.${user.id}`);
   if (row === "error") return json({ error: "store_failed" }, 502);
   if (!row) return json({ error: "not_found" }, 404);
-  return applyAction(sb, row, action as Action, b.fields, profilePhone);
+  return applyAction(sb, row, action as Action, b.fields);
 }

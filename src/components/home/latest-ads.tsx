@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Arrow } from "@/components/icons";
 import { BOARD_IDS, BOARDS, categoryLabel, typeLabel, type BoardId } from "@/lib/boards";
 import type { L, Locale } from "@/lib/i18n";
+import { VerifiedBadge } from "@/components/verified-badge";
 import { useLatestListings } from "@/lib/use-latest-listings";
 
 const T = {
@@ -74,6 +75,7 @@ export function LatestAds({ lang }: { lang: Locale }) {
                                 <span className="chip">{categoryLabel(b, a.category, lang, true)}</span>
                               </span>
                               <bdi dir="auto" className="hm-ad__title">{a.title}</bdi>
+                              {a.verified && <VerifiedBadge lang={lang} compact className="hm-ad__vb" />}
                               {meta && <bdi dir="auto" className="muted hm-ad__meta">{meta}</bdi>}
                             </span>
                           </Link>

@@ -51,3 +51,7 @@
 
 /* Email address: its own LTR run that wraps only when it must */
 .acc-email { display: inline-block; max-inline-size: 100%; overflow-wrap: anywhere; word-break: normal; }
+.acc-needs { padding: 12px; border: 2px solid var(--action); }
+.acc-needs .textarea { border-color: var(--action); }
+.acc-verify { display: flex; align-items: center; min-block-size: 24px; }
+.acc-verify .field-hint { margin: 0; }

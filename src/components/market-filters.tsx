@@ -1,14 +1,14 @@
 "use client";
 import type { Locale } from "@/lib/i18n";
 import { BOARDS, type BoardId } from "@/lib/boards";
-import { CameraI, CatIcon, CloseI, GridI, HeartI, ListI, SearchI } from "./market-icons";
+import { CameraI, CatIcon, CloseI, GridI, HeartI, ListI, SearchI, ShieldI } from "./market-icons";
 import { SEARCH_PH, T } from "./market-text";
 import { num } from "./market-utils";
 
 export type Sort = "new" | "old" | "end";
 export type View = "list" | "gallery";
-export type Filters = { q: string; type: string; cat: string; photos: boolean; saved: boolean; sort: Sort; view: View };
-export const DEFAULTS: Filters = { q: "", type: "all", cat: "all", photos: false, saved: false, sort: "new", view: "list" };
+export type Filters = { q: string; type: string; cat: string; photos: boolean; saved: boolean; verified: boolean; sort: Sort; view: View };
+export const DEFAULTS: Filters = { q: "", type: "all", cat: "all", photos: false, saved: false, verified: false, sort: "new", view: "list" };
 
 export function SearchBox({ lang, board, value, onChange }: { lang: Locale; board: BoardId; value: string; onChange: (v: string) => void }) {
   return (
@@ -56,6 +56,7 @@ export function FilterBar({ lang, board, f, set, catCounts, savedCount }: {
       </div>
       <div className="mkb-cats" role="group" aria-label={T.cats[lang]}>
         <button type="button" className="mkb-toggle" aria-pressed={f.photos} onClick={() => set({ photos: !f.photos })}><CameraI size={18} />{T.photosOnly[lang]}</button>
+        <button type="button" className="mkb-toggle" aria-pressed={f.verified} onClick={() => set({ verified: !f.verified })}><ShieldI size={18} />{T.verifiedOnly[lang]}</button>
         {board === "market" && <button type="button" className="mkb-toggle" aria-pressed={f.saved} onClick={() => set({ saved: !f.saved })}><HeartI size={18} filled={f.saved} />{T.saved[lang]}{savedCount > 0 && <span className="mkb-toggle__n">{num(savedCount, lang)}</span>}</button>}
         <span className="mkb-cats__sep" aria-hidden="true" />
         <button type="button" className="mkb-cat" aria-pressed={f.cat === "all"} onClick={() => set({ cat: "all" })}><CatIcon cat="all" size={20} />{T.all[lang]}</button>

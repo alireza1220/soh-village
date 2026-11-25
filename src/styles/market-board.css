@@ -206,7 +206,9 @@
 .mkb-contact__h { margin: 0; font-size: 15px; font-weight: 700; color: var(--muted); }
 .mkb-contact__v { margin: 0; font-size: 20px; font-weight: 700; color: var(--ink); overflow-wrap: anywhere; }
 .mkb-contact__v span { font-weight: 500; font-size: 16px; color: var(--muted); }
-.mkb-contact__none { margin: 0; }
+.mkb-contact__note { margin: 0; font-size: 16px; color: var(--muted); }
+.mkb-contact__err { margin: 0; font-size: 16px; font-weight: 600; color: var(--ink); }
+.mkb-contact .mkb-btn[aria-disabled="true"] { opacity: .7; cursor: progress; }
 .mkb-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .mkb-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 20px; border: 2px solid var(--action); border-radius: var(--radius-pill); background: var(--surface); color: var(--accent-text); font-size: 16px; font-weight: 700; text-decoration: none; transition: background-color .15s; }
 .mkb-btn:hover { background: var(--mist); }

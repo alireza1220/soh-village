@@ -15,8 +15,9 @@ const T = {
   my: { fa: "برای دیدن آگهی‌هایتان وارد شوید یا حساب بسازید.", en: "Log in or create an account to see your ads." },
   login: { fa: "ورود", en: "Log in" },
   signup: { fa: "ساخت حساب جدید", en: "Create an account" },
-  stepTitle: { fa: "یک قدم دیگر: نام و موبایل", en: "One more step: your name and mobile" },
-  step: { fa: "نام، نام خانوادگی و شماره‌ی موبایل‌تان را بنویسید تا بتوانید آگهی بگذارید.", en: "Add your name and mobile number, then you can post." },
+  stepTitle: { fa: "یک قدم دیگر: مشخصات و نشانی", en: "One more step: your details and address" },
+  step: { fa: "نام، شماره‌ی موبایل و نشانی‌تان لازم است تا بتوانید آگهی بگذارید. نشانی به کسی نمایش داده نمی‌شود و فقط مدیران سایت آن را می‌بینند.", en: "Your name, mobile number and address are needed to post. The address is never shown; only site admins can see it." },
+  stepOld: { fa: "یک چیز دیگر مانده: نشانی‌تان را اضافه کنید (خصوصی می‌ماند) تا بتوانید آگهی بگذارید.", en: "One more thing: add your address (it stays private) to keep posting." },
   stepBtn: { fa: "تکمیل مشخصات", en: "Complete profile" },
   retry: { fa: "مشخصات بارگذاری نشد. صفحه را تازه کنید.", en: "Could not load your profile. Refresh the page." },
 };
@@ -45,7 +46,7 @@ export function AuthGate({ lang, reason, next, requireProfile = true, children }
       return (
         <div className="gate-card">
           <h3>{T.stepTitle[lang]}</h3>
-          <p>{T.step[lang]}</p>
+          <p>{prof.profile ? T.stepOld[lang] : T.step[lang]}</p>
           <Link className="btn btn--primary" href={profileHref(lang, next)} onClick={() => rememberNext(next)}>{T.stepBtn[lang]}</Link>
         </div>
       );

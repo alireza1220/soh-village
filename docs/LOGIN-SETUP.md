@@ -6,7 +6,7 @@ People can log in two ways, both on `/fa/login` and `/en/login`:
 - **Email + password** (sign up, log in, forgot password).
 - **Email link** ("magic link"): no password needed. Someone who logged in by link can set a password later on their profile page.
 
-After the first login the site asks for a small profile: first name, family name, mobile number and, if they like, a tiny picture. Until the profile is complete nobody can post.
+After the first login the site asks for a small profile: first name, family name, mobile number, **home address** and, if they like, a tiny picture. Until the profile is complete (including phone and address) nobody can post.
 
 Labels in the Supabase dashboard change over time. Where unsure, this guide names the general area (for example "Authentication"); look for the closest match.
 
@@ -170,7 +170,19 @@ Approval is unchanged: new and edited ads are `pending` until you set `status` t
 
 If you **insert a row by hand** in the Table Editor it now needs an **`owner_id`** (any user id from Authentication, Users; any uuid works). A database trigger refuses rows without one, because every ad belongs to a logged-in user.
 
-Phone numbers and family names are stored only in `public.profiles`, which the browser can never read. The public view `public_listings` shows only the explicit columns listed in the SQL file.
+Phone numbers, home addresses and family names are stored only in `public.profiles`, which the browser can never read. The public view `public_listings` shows only the explicit columns listed in the SQL file.
+
+## 9b. Migration 008: address, verified sellers, phone on request
+
+Run `database/migrations/008-address-verified-contact.sql` in the SQL Editor (after 007, before deploying; safe to repeat). What changes:
+- `profiles.address` (5 to 200 characters, private: only admins see it), `profiles.verified` and `profiles.verified_at` ("Verified seller", set by admins in the admin Users tab, see `docs/ADMIN.md` section 12).
+- `public_listings` no longer returns any phone or contact (`contact_kind` and `contact_value` are always null) and gains `poster_verified`.
+- New route `POST /api/listings/contact` {id}: public, no login, returns the poster's current profile phone for an approved, unexpired ad; anything else answers 404. It is rate limited per hashed IP, kind `reveal`, 300 per hour (shared carrier IPs are common, so it is generous; it only stops bulk collecting). Response is `Cache-Control: no-store` and contains nothing but `{ok, contact:{kind, value}}`.
+- New ads always store the poster's profile phone as a private legacy contact; any contact a client sends is ignored.
+
+**Existing users** have no address. They can still log in and look at everything, but when they try to post, edit or renew, the site asks them to add an address first.
+
+Honest note: "Show phone" makes copying harder, it does not make it impossible. Anyone can tap it and write the number down.
 
 ## 10. Privacy note (for the login page or the site's privacy section)
 
@@ -178,7 +190,7 @@ Persian:
 > برای گذاشتن آگهی باید وارد شوید؛ دیدن آگهی‌ها نیازی به ورود ندارد. هنگام ساختن حساب نام، نام خانوادگی و شماره‌ی موبایل شما را می‌پرسیم و (اگر بخواهید) یک عکس کوچک. شماره‌ی موبایل با پیامک تأیید نمی‌شود؛ فقط شکل آن بررسی می‌شود. نام خانوادگی و شماره‌ی موبایل هرگز به‌طور خودکار نمایش داده نمی‌شوند. شماره‌ی تماس فقط وقتی روی آگهی دیده می‌شود که شما برای همان آگهی بزنید «راه تماس من در آگهی دیده شود». نام کوچک و عکس شما کنار آگهی‌هایتان دیده می‌شوند، مگر در صفحه‌ی مشخصات خاموش کنید. عکس پیش از فرستادن در دستگاه خودتان کوچک و بازنویسی می‌شود (۹۶ در ۹۶ نقطه) و اطلاعات پنهان آن، مثل مکان، پاک می‌شود. رمز عبور را فقط خود سرویس ورود نگه می‌دارد، آن هم به‌صورت رمزگذاری‌شده؛ ما آن را نمی‌بینیم و ذخیره نمی‌کنیم.
 
 English:
-> You must log in to post an ad; looking at ads needs no login. When you create an account we ask for your first name, family name and mobile number and, if you like, a tiny picture. The mobile number is not verified by SMS; only its format is checked. Your family name and mobile number are never shown automatically. A contact appears on an ad only if you tick "show my contact on this ad" for that ad. Your first name and picture appear next to your ads unless you switch that off on your profile. The picture is shrunk and re-encoded on your own device (96 by 96 pixels), which also removes hidden data such as location. Your password is held only by the login service, in encrypted form; we never see or store it.
+> You must log in to post an ad; looking at ads needs no login. When you create an account we ask for your first name, family name and mobile number and, if you like, a tiny picture. The mobile number is not verified by SMS; only its format is checked. Your family name and mobile number are never shown automatically. Your home address is never shown to the public (only the site team sees it, to verify sellers). Your phone number is not on the ad: a visitor must tap "Show phone" to see it. Your first name and picture appear next to your ads unless you switch that off on your profile. The picture is shrunk and re-encoded on your own device (96 by 96 pixels), which also removes hidden data such as location. Your password is held only by the login service, in encrypted form; we never see or store it.
 
 Notes for the owner:
 - The mobile number is **not** verified. Do not rely on it as proof of identity; the site team can see it in the database.

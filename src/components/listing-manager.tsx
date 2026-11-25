@@ -4,8 +4,9 @@ import "@/styles/market.css";
 import type { Locale } from "@/lib/i18n";
 import "@/styles/forms.css";
 import { BOARDS, categoryLabel, typeLabel } from "@/lib/boards";
-import { useProfile } from "@/lib/use-profile";
-import { ContactBlock, ListingFieldset, toFields, valuesReady, type FormValues } from "@/components/listing-form";
+import { ListingFieldset, toFields, valuesReady, type FormValues } from "@/components/listing-form";
+import Link from "next/link";
+import { profileHref } from "@/lib/return-to";
 import { errorText } from "@/lib/api-errors";
 import type { ManagedListing } from "@/components/listing-api";
 import { PhotoPicker } from "@/components/photo-picker";
@@ -35,6 +36,8 @@ const T = {
   savingPhotos: { fa: "عکس‌ها در حال ذخیره‌اند...", en: "Saving your photos..." },
   photoPartial: { fa: "تغییرها ذخیره شد، اما {k} عکس فرستاده نشد. دوباره «ذخیره» را بزنید.", en: "Changes saved, but {k} photo(s) did not go through. Press Save to retry." },
   keepOpen: { fa: "تا پایان ارسال این صفحه را نبندید.", en: "Keep this page open until sending ends." },
+  hiddenNote: { fa: "شماره‌ی شما پنهان می‌ماند. بازدیدکننده فقط پس از زدن «نمایش شماره» آن را می‌بیند. نشانی‌تان هرگز نمایش داده نمی‌شود.", en: "Your phone number stays hidden. Visitors see it only after tapping «Show phone». Your address is never shown." },
+  finish: { fa: "تکمیل مشخصات", en: "Complete profile" },
   board: { fa: "بخش", en: "Section" },
   photosOf: { fa: "عکس‌های آگهی", en: "Listing photos" },
 };
@@ -74,14 +77,12 @@ export type PhotoAuthFn = (id: string) => Promise<PhotoAuth | null>;
 function ListingCard({ lang, item, run, onChange, onRemoved, photoAuth }: { lang: Locale; item: ManagedListing; run: RunAction; onChange: (l: ManagedListing) => void; onRemoved: (id: string) => void; photoAuth?: PhotoAuthFn }) {
   const [mode, setMode] = useState<"view" | "edit" | "confirm">("view");
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [msg, setMsg] = useState<{ ok: boolean; text: string; code?: string } | null>(null);
   const board = item.board ?? "market";
   const bc = BOARDS[board];
-  const { profile } = useProfile();
   const [f, setF] = useState<FormValues>(() => ({
     type: item.type, category: item.category, title: item.title ?? "", quantity: item.quantity ?? "", price: item.price ?? "",
     area: item.area && item.area !== "—" ? item.area : "", available: item.available ?? "", details: item.details ?? "",
-    contactKind: item.contactKind ?? "phone", contactValue: item.contactValue ?? "", contactPublic: !!item.contactPublic,
   }));
   const [photos, setPhotos] = useState<PhotoItem[]>(() => storedFrom(item.id, namesOf(item)));
   const [prog, setProg] = useState<Progress | null>(null);
@@ -99,7 +100,7 @@ function ListingCard({ lang, item, run, onChange, onRemoved, photoAuth }: { lang
     setBusy(true); setMsg(null);
     const r = await run(action, item.id, fields);
     setBusy(false);
-    if (!r.ok) { setMsg({ ok: false, text: errorText(r.error, lang) }); return; }
+    if (!r.ok) { setMsg({ ok: false, text: errorText(r.error, lang), code: r.error }); return; }
     if (action === "delete") { setMsg({ ok: true, text: T.deleted[lang] }); setMode("view"); onRemoved(item.id); return; }
     if (r.listing) { onChange(r.listing); if (action === "update") setPhotos(storedFrom(item.id, namesOf(r.listing))); }
     setMode("view");
@@ -141,7 +142,7 @@ function ListingCard({ lang, item, run, onChange, onRemoved, photoAuth }: { lang
     }
     const why = res.finalizeError ?? res.failed[0]?.error ?? finalErr;
     const k = res.finalized ? res.failed.length : photos.filter((p) => p.kind === "new" && !!p.full).length || res.failed.length;
-    setMsg({ ok: false, text: `${res.finalized ? plural(fillN(T.photoPartial[lang], { k }, lang), k) : ""} ${errorText(why, lang)}`.trim() });
+    setMsg({ ok: false, text: `${res.finalized ? plural(fillN(T.photoPartial[lang], { k }, lang), k) : ""} ${errorText(why, lang)}`.trim(), code: why });
   };
 
   return (
@@ -178,7 +179,7 @@ function ListingCard({ lang, item, run, onChange, onRemoved, photoAuth }: { lang
             keepCategory={!bc.categories.some((o) => o.v === item.category) && <option value={item.category}>{categoryLabel(board, item.category, lang)}</option>}
             photos={<PhotoPicker lang={lang} items={photos} setItems={setPhotos} id={`${pre}-photos`} mode={busy ? "busy" : "edit"} />}
           />
-          <ContactBlock lang={lang} idp={pre} v={f} set={set} phone={profile?.phone} />
+          <p className="frm-contact__private">{T.hiddenNote[lang]}</p>
           {prog && (
             <div className="ph-progress">
               <p>{prog.phase === "saving" ? T.savingPhotos[lang] : fillN(T.sendingPhoto[lang], { i: prog.index, n: prog.total }, lang)}</p>
@@ -215,7 +216,7 @@ function ListingCard({ lang, item, run, onChange, onRemoved, photoAuth }: { lang
       )}
 
       <div aria-live="polite" role="status" className="mk-live">
-        {msg && <p className={`mk-msg ${msg.ok ? "mk-msg--ok" : "mk-msg--warn"}`}>{msg.text}</p>}
+        {msg && <p className={`mk-msg ${msg.ok ? "mk-msg--ok" : "mk-msg--warn"}`}>{msg.text}{msg.code === "profile_required" && <>{" "}<Link className="link mk-tap" href={profileHref(lang, `/${lang}/my`)}>{T.finish[lang]}</Link></>}</p>}
       </div>
     </li>
   );

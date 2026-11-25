@@ -35,11 +35,12 @@ const put = (next: Snap) => {
 };
 
 /** GET the profile with a given token (used right after login, before the hook has caught up). */
-export async function fetchProfile(token: string): Promise<{ ok: true; profile: Profile | null } | { ok: false }> {
+/** `profile` is the profile only when it is complete; `partial` is an existing but incomplete one (e.g. no address yet) so the profile page can prefill it. */
+export async function fetchProfile(token: string): Promise<{ ok: true; profile: Profile | null; partial?: Profile | null } | { ok: false }> {
   const r = await postJson("/api/profile", { action: "get" }, token);
   if (!r.ok) return { ok: false };
   const p = r.data.profile as Profile | null | undefined;
-  return { ok: true, profile: p && isComplete(p) ? p : null };
+  return { ok: true, profile: p && isComplete(p) ? p : null, partial: p && !isComplete(p) ? p : null };
 }
 
 function load(userId: string): Promise<void> {
@@ -53,7 +54,7 @@ function load(userId: string): Promise<void> {
     const r = await fetchProfile(token);
     if (snap.userId !== userId) return; // the person logged out or switched meanwhile
     if (!r.ok) put({ userId, status: "error", profile: snap.profile });
-    else put({ userId, status: r.profile ? "ready" : "none", profile: r.profile });
+    else put({ userId, status: r.profile ? "ready" : "none", profile: r.profile ?? r.partial ?? null });
   })().finally(() => {
     if (inflight && inflight.userId === userId) inflight = null;
   });
@@ -64,7 +65,7 @@ function load(userId: string): Promise<void> {
 export type UseProfile = {
   status: ProfileStatus;
   profile: Profile | null;
-  /** true when the profile exists and is complete */
+  /** true when the profile exists and is complete (name, phone AND address). status "none" may still carry an incomplete `profile` to prefill. */
   complete: boolean;
   reload: () => Promise<void>;
   /** put a freshly saved profile into the shared cache (null = none) */

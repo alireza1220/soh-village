@@ -106,10 +106,10 @@ const svcRest = (path, init = {}) => fetch(`${MOCK}/rest/v1/${path}`, { ...init,
 const anonView = (name, extra = "") => fetch(`${MOCK}/rest/v1/${name}?select=*${extra}`, { headers: { apikey: ANON, Authorization: `Bearer ${ANON}` } });
 
 let userSeq = 0;
-async function mkUser(label, { role = "user", profile = true } = {}) {
+async function mkUser(label, { role = "user", profile = true, address, verified } = {}) {
   const email = `${label}${++userSeq}@example.com`;
   let id;
-  if (profile) id = (await mock("mkprofile?" + qs({ email, first: "First" + label, family: "Family" + label, phone: "0912000" + String(1000 + userSeq), role }))).user_id;
+  if (profile) id = (await mock("mkprofile?" + qs({ email, first: "First" + label, family: "Family" + label, phone: "0912000" + String(1000 + userSeq), role, address: address ?? `Soh, Street ${userSeq} PrivateAddr${userSeq}`, verified: verified ? 1 : undefined }))).user_id;
   else id = (await mock("mkuser?" + qs({ email }))).id;
   return { email, id, token: `tok-${email}` };
 }
@@ -146,6 +146,7 @@ const SAMPLE_BODIES = [
   ["/api/admin/posts", { action: "update", id: "11111111-1111-4111-8111-111111111111", fields: { titleEn: "x" } }],
   ["/api/admin/posts", { action: "delete", id: "11111111-1111-4111-8111-111111111111" }],
   ["/api/admin/users", { action: "list" }],
+  ["/api/admin/users", { action: "set_verified", userId: "11111111-1111-4111-8111-111111111111", verified: true }],
 ];
 
 async function scenarioAccess() {
@@ -171,7 +172,7 @@ async function scenarioAccess() {
   check("every admin action: normal user and user without a profile -> 403 forbidden", all403, detail);
   check("a 403 carries no data, only the error code", noLeak);
   const nobody = await adm("/api/admin/users", { action: "list" }, normal);
-  check("users list for a non-admin exposes nothing (no users, no phone)", !("users" in nobody.data) && !JSON.stringify(nobody.data).includes("0912"), JSON.stringify(nobody.data));
+  check("users list for a non-admin exposes nothing (no users, no phone, no address)", !("users" in nobody.data) && !JSON.stringify(nobody.data).includes("0912") && !JSON.stringify(nobody.data).includes("PrivateAddr"), JSON.stringify(nobody.data));
   const d = await dump();
   check("the 403 calls changed nothing (no posts created)", d.posts.length === 0);
   const garbage = await api("/api/admin/posts", null, { token: boss.token, raw: "{not json" });
@@ -191,12 +192,12 @@ async function scenarioRole() {
   section("the role can not be changed from the site");
   await mock("reset");
   const u = await mkUser("sneaky", { profile: false });
-  const save = await api("/api/profile", { action: "save", fields: { firstName: "Sneaky", familyName: "One", phone: "09121234567", role: "admin" } }, { token: u.token });
+  const save = await api("/api/profile", { action: "save", fields: { firstName: "Sneaky", familyName: "One", phone: "09121234567", address: "Soh, Sneaky Street 1", role: "admin", verified: true } }, { token: u.token });
   check("profile save with an extra role field still works", save.status === 200 && save.data.ok === true, JSON.stringify(save));
   let row = (await dump()).profiles.find((p) => p.user_id === u.id);
-  check("a new profile is stored with role 'user'", row?.role === "user", JSON.stringify(row));
+  check("a new profile is stored with role 'user' and NOT verified (verified in the body is ignored)", row?.role === "user" && row.verified === false && row.verified_at === null, JSON.stringify(row));
   check("the API shows role 'user'", save.data.profile?.role === "user", JSON.stringify(save.data));
-  const upd = await api("/api/profile", { action: "save", fields: { firstName: "Sneaky2", role: "admin" } }, { token: u.token });
+  const upd = await api("/api/profile", { action: "save", fields: { firstName: "Sneaky2", role: "admin", verified: true } }, { token: u.token });
   row = (await dump()).profiles.find((p) => p.user_id === u.id);
   check("an update with {fields:{role:'admin'}} keeps role 'user'", upd.status === 200 && row.role === "user" && row.first_name === "Sneaky2", JSON.stringify(row));
   const top = await api("/api/profile", { action: "save", role: "admin", fields: { firstName: "Sneaky3" } }, { token: u.token });
@@ -475,6 +476,45 @@ async function scenarioUsers() {
   const writeTry2 = await adm("/api/admin/users", { action: "update", userId: reza.id, fields: { role: "admin" } }, boss);
   check("update on users -> 400 bad_action, and the role stays user", writeTry2.status === 400 && (await dump()).profiles.find((p) => p.user_id === reza.id).role === "user");
   check("no response contains an email address", !JSON.stringify(l.data).includes("@"));
+
+  section("admin: users: address (admins only) and verified sellers");
+  check("users list: the address is returned to admins, verified false by default", /PrivateAddr/.test(byId[maryam.id].address) && byId[maryam.id].verified === false && byId[maryam.id].verifiedAt === null, JSON.stringify(byId[maryam.id]));
+  const keys = JSON.stringify(Object.keys(byId[maryam.id]).sort());
+  check("users list: AdminUser shape", keys === JSON.stringify(["address", "createdAt", "familyName", "firstName", "listingCount", "phone", "role", "userId", "verified", "verifiedAt"]), keys);
+  const old = await mkUser("oldie", { address: "none" });
+  const lo = await adm("/api/admin/users", { action: "list", q: "familyoldie" }, boss);
+  check("users list: a profile without an address shows address \"\"", lo.data.users?.[0]?.address === "" && lo.data.users[0].userId === old.id, JSON.stringify(lo.data));
+  const on = await adm("/api/admin/users", { action: "set_verified", userId: maryam.id, verified: true }, boss);
+  const rowOn = (await dump()).profiles.find((p) => p.user_id === maryam.id);
+  check("set_verified on: 200, user returned with verified + verifiedAt, row updated", on.status === 200 && on.data.ok === true && on.data.user.userId === maryam.id && on.data.user.verified === true && !Number.isNaN(Date.parse(on.data.user.verifiedAt)) && rowOn.verified === true && !!rowOn.verified_at && on.data.user.listingCount === 2 && /PrivateAddr/.test(on.data.user.address), JSON.stringify(on.data));
+  check("set_verified leaves the other fields alone", rowOn.role === "user" && rowOn.first_name === "Firstmaryam" && rowOn.phone === byId[maryam.id].phone && rowOn.address === byId[maryam.id].address);
+  const vf = await adm("/api/admin/users", { action: "list", verified: true }, boss);
+  const nf = await adm("/api/admin/users", { action: "list", verified: false }, boss);
+  check("users list: verified filter true / false", vf.data.total === 1 && vf.data.users[0].userId === maryam.id && nf.data.users.every((u) => u.verified === false) && nf.data.total === 3, JSON.stringify([vf.data.total, nf.data.total]));
+  const bf = await adm("/api/admin/users", { action: "list", verified: "yes" }, boss);
+  check("users list: a non-boolean verified filter -> 400 bad_fields", bf.status === 400 && bf.data.error === "bad_fields", JSON.stringify(bf));
+  const pub = (await (await anonView("public_listings")).json());
+  await mkListing(maryam, { title: "verified-ad", status: "approved" });
+  const pub2 = await (await anonView("public_listings")).json();
+  check("public view: poster_verified true for the verified seller, false for others", pub2.find((r) => r.title === "verified-ad")?.poster_verified === true && pub2.every((r) => r.title === "verified-ad" || r.poster_verified === false), JSON.stringify(pub2.map((r) => [r.title, r.poster_verified])));
+  const pubTxt = JSON.stringify(pub2) + JSON.stringify(pub);
+  check("public view: no address and no phone anywhere", !pubTxt.includes("PrivateAddr") && !/0912000\d{4}/.test(pubTxt) && !pubTxt.includes("09121111111"));
+  const al = await adm("/api/admin/listings", { action: "list", status: "all" }, boss);
+  check("admin listings: poster.verified follows the profile; poster has no address", al.data.listings.find((x) => x.title === "verified-ad")?.poster?.verified === true && al.data.listings.find((x) => x.title === "one")?.poster?.verified === true && !JSON.stringify(al.data).includes("PrivateAddr"), JSON.stringify(al.data.listings.map((x) => [x.title, x.poster])).slice(0, 300));
+  const off = await adm("/api/admin/users", { action: "set_verified", userId: maryam.id, verified: false }, boss);
+  const rowOff = (await dump()).profiles.find((p) => p.user_id === maryam.id);
+  check("set_verified off: verified false, verifiedAt null, row cleared", off.status === 200 && off.data.user.verified === false && off.data.user.verifiedAt === null && rowOff.verified === false && rowOff.verified_at === null, JSON.stringify(off.data));
+  const again = await adm("/api/admin/users", { action: "set_verified", userId: maryam.id, verified: false }, boss);
+  check("set_verified off twice is harmless", again.status === 200 && again.data.user.verified === false);
+  const ghost = await adm("/api/admin/users", { action: "set_verified", userId: "33333333-3333-4333-8333-333333333333", verified: true }, boss);
+  const noUuid = await adm("/api/admin/users", { action: "set_verified", userId: "nope", verified: true }, boss);
+  const noBool = await adm("/api/admin/users", { action: "set_verified", userId: maryam.id, verified: "true" }, boss);
+  check("set_verified: unknown user 404, bad id 404, non-boolean 400 bad_fields", ghost.status === 404 && ghost.data.error === "not_found" && noUuid.status === 404 && noBool.status === 400 && noBool.data.error === "bad_fields", JSON.stringify([ghost, noUuid, noBool]));
+  const selfNormal = await adm("/api/admin/users", { action: "set_verified", userId: reza.id, verified: true }, reza);
+  check("set_verified: a normal user (even on themselves) -> 403, row unchanged", selfNormal.status === 403 && (await dump()).profiles.find((p) => p.user_id === reza.id).verified === false, JSON.stringify(selfNormal));
+  const adminAdr = await adm("/api/admin/listings", { action: "update", id: (await dump()).listings.find((x) => x.title === "one").id, fields: { contactValue: "0000", contactKind: "other", contactPublic: true } }, boss);
+  const oneRow = (await dump()).listings.find((x) => x.title === "one");
+  check("admin listing update ignores contact fields too", adminAdr.status === 200 && oneRow.contact_value === "09121111111" && oneRow.contact_public === false, JSON.stringify(oneRow));
 }
 
 async function scenarioRate() {

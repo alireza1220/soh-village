@@ -6,6 +6,7 @@ import type { Listing, ListingPoster } from "@/lib/market";
 import { Avatar } from "./avatar";
 import "@/styles/boards.css";
 import { CameraI, CatIcon, ChevL, ChevR, HeartI, hasCatIcon } from "./market-icons";
+import { VerifiedBadge } from "./verified-badge";
 import { highlight } from "./market-search";
 import { T } from "./market-text";
 import { num, relativeDay } from "./market-utils";
@@ -41,12 +42,15 @@ function PhotoBadge({ n, lang }: { n: number; lang: Locale }) {
 export const isAsk = (type: string) => type === "need" || type === "seeking";
 
 /** Poster's first name and picture, only when the poster allowed it (Listing.poster is set only then). Never a family name or phone. */
-export function PosterLine({ poster, size = 24, label }: { poster?: ListingPoster; size?: number; label?: string }) {
-  if (!poster) return null;
+export function PosterLine({ poster, size = 24, label, verified, lang, compact }: { poster?: ListingPoster; size?: number; label?: string; verified?: boolean; lang?: Locale; compact?: boolean }) {
+  const badge = verified && lang ? <VerifiedBadge lang={lang} compact={compact} /> : null;
+  // A poster who hides their name can still be a verified seller: show the badge alone (with a neutral "Seller" word on the detail page).
+  if (!poster) return badge ? <p className={`brd-poster${size > 30 ? " brd-poster--lg" : ""}`}>{!compact && lang && <span className="brd-poster__l">{T.seller[lang]}</span>}{badge}</p> : null;
   return (
     <p className={`brd-poster${size > 30 ? " brd-poster--lg" : ""}`}>
       <Avatar name={poster.firstName} src={poster.avatarUrl} size={size} />
       <span>{label && <span className="brd-poster__l">{label} </span>}<bdi dir="auto" className="brd-poster__n">{poster.firstName}</bdi></span>
+      {badge}
     </p>
   );
 }
@@ -88,7 +92,7 @@ function ListRowBase(p: CardProps) {
           {(p.board !== "market" || isAsk(l.type)) && <span className={`mkb-tag${isAsk(l.type) ? " mkb-tag--need" : ""}`}>{typeLabel(l.board ?? p.board, l.type, lang)}</span>}
           <span className="mkb-tag" data-cat={hasCatIcon(l.category) ? l.category : "other"}><CatIcon cat={l.category} size={14} />{categoryLabel(l.board ?? p.board, l.category, lang, true)}</span>
         </p>
-        <PosterLine poster={l.poster} />
+        <PosterLine poster={l.poster} verified={l.verified} lang={lang} compact />
       </div>
       <SaveBtn {...p} />
     </li>
@@ -147,7 +151,7 @@ function GalleryCardBase(p: CardProps) {
         </h3>
         <p className={`mkb-price${l.price ? "" : " mkb-price--ask"}`}><bdi dir="auto">{l.price ?? (l.type === "sell" ? T.noPrice[lang] : typeLabel(l.board ?? p.board, l.type, lang))}</bdi></p>
         <Meta l={l} lang={lang} today={p.today} />
-        <PosterLine poster={l.poster} />
+        <PosterLine poster={l.poster} verified={l.verified} lang={lang} compact />
       </div>
     </li>
   );
