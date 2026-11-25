@@ -7,7 +7,7 @@
 //   REST     tables listings, profiles (with role), posts, rate_events (service key only; the anon key gets 401) and the views public_listings + public_posts (anon allowed).
 //            Filters: eq neq gt gte lt lte in is like ilike and or=(...); order, limit, offset, Range, Prefer count=exact / return=representation.
 //            Unknown columns are refused like PostgREST does. Check constraints and the owner_id insert trigger are emulated.
-//   Storage  buckets "listing-images" (600 KB, webp/jpeg) and "avatars" (20 KB, webp/jpeg): signed upload, public GET, list, remove.
+//   Storage  buckets "listing-images" and "post-images" (600 KB, webp/jpeg) and "avatars" (20 KB, webp/jpeg): signed upload, public GET, list, remove.
 // Admin helpers (GET, test only): /__admin/dump, seed, reset, clear-rate, approve, set, put-object, mkuser, link, set-confirm, confirm,
 //   mkprofile, set-profile, auth-fail. See the handler at the bottom.
 import http from "node:http";
@@ -22,6 +22,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const MIMES = ["image/webp", "image/jpeg"];
 const BUCKETS = {
   "listing-images": { limit: 614400, store: new Map() }, // "<listing id>/<file>" -> { buf, type, at }
+  "post-images": { limit: 614400, store: new Map() }, //    "<post id>/<file>"    -> { buf, type, at }
   avatars: { limit: 20480, store: new Map() }, //          "<user id>/<file>"    -> { buf, type, at }
 };
 const storage = BUCKETS["listing-images"].store; // kept for the listing-photo seed and the dump
@@ -43,12 +44,12 @@ const authState = { confirm: false, fail: null }; // confirm = "Confirm email" s
 const COLUMNS = {
   listings: ["id", "board", "type", "category", "title", "quantity", "price", "area", "available", "details", "contact_kind", "contact_value", "contact_public", "ip_hash", "owner_id", "status", "renewals", "images", "created_at", "updated_at", "approved_at", "expires_at"],
   profiles: ["user_id", "first_name", "family_name", "phone", "avatar", "show_on_ads", "role", "created_at", "updated_at"],
-  posts: ["id", "kind", "title_fa", "title_en", "body_fa", "body_en", "event_at", "place_fa", "place_en", "published", "published_at", "author_id", "created_at", "updated_at"],
+  posts: ["id", "kind", "title_fa", "title_en", "body_fa", "body_en", "event_at", "place_fa", "place_en", "published", "published_at", "author_id", "created_at", "updated_at", "priority", "cover"],
   rate_events: ["id", "ip_hash", "user_id", "kind", "created_at"],
 };
 const PUBLIC_COLS = ["id", "type", "category", "title", "quantity", "price", "area", "available", "details", "contact_kind", "contact_value", "created_at", "expires_at", "images", "board", "poster_first_name", "poster_avatar"];
 COLUMNS.public_listings = PUBLIC_COLS;
-const PUBLIC_POST_COLS = ["id", "kind", "title_fa", "title_en", "body_fa", "body_en", "event_at", "place_fa", "place_en", "published_at", "created_at"];
+const PUBLIC_POST_COLS = ["id", "kind", "title_fa", "title_en", "body_fa", "body_en", "event_at", "place_fa", "place_en", "published_at", "created_at", "priority", "cover"];
 COLUMNS.public_posts = PUBLIC_POST_COLS; // the view: no author_id, no published flag, published rows only
 const TYPES = ["sell", "need", "service", "seeking", "hiring", "offer", "rent"];
 const BOARD_IDS = ["market", "careers", "needs", "property"];
@@ -212,6 +213,8 @@ const validPost = (r) => {
   if (r.kind === "event" && !r.event_at) return "posts_event_needs_date";
   if (r.event_at != null && Number.isNaN(Date.parse(r.event_at))) return "event_at";
   if (typeof r.published !== "boolean") return "published";
+  if (!["normal", "featured", "urgent"].includes(r.priority)) return "posts_priority_check";
+  if (r.cover != null && !(typeof r.cover === "string" && /^[a-z0-9]{10,16}\.(webp|jpg)$/.test(r.cover))) return "posts_cover_check";
   if (r.author_id != null && !(typeof r.author_id === "string" && UUID_RE.test(r.author_id))) return "author_id";
   return null;
 };
@@ -304,7 +307,7 @@ async function rest(req, res, url) {
         out.push(row);
       } else if (table === "posts") {
         const row = {
-          title_fa: "", title_en: "", body_fa: "", body_en: "", event_at: null, place_fa: null, place_en: null, published: false, published_at: null, author_id: null,
+          title_fa: "", title_en: "", body_fa: "", body_en: "", event_at: null, place_fa: null, place_en: null, published: false, published_at: null, author_id: null, priority: "normal", cover: null,
           ...Object.fromEntries(Object.entries(it).filter(([k]) => k !== "id")), id: randomUUID(), created_at: now, updated_at: now,
         };
         const bad = validPost(row);
@@ -667,7 +670,7 @@ function admin(req, res, url) {
       listings: db.listings, rate_events: db.rate_events, profiles: db.profiles, posts: db.posts,
       users: [...users.values()].map((u) => ({ id: u.id, email: u.email, has_password: !!u.password, confirmed: u.confirmed })),
       otp: otpLog, mails, confirm_email: authState.confirm,
-      storage: [...BUCKETS["listing-images"].store.keys()], avatars: [...BUCKETS.avatars.store.keys()],
+      storage: [...BUCKETS["listing-images"].store.keys()], avatars: [...BUCKETS.avatars.store.keys()], post_images: [...BUCKETS["post-images"].store.keys()],
     });
   }
   if (p === "/__admin/seed") { seed(); return send(res, 200, { ok: true, listings: db.listings.length }); }

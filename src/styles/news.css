@@ -34,3 +34,13 @@
   .nw-date { flex-direction: row; gap: 8px; width: auto; min-height: 44px; padding-inline: 12px; align-self: flex-start; }
 }
 @media (prefers-reduced-motion: reduce) { .nw-mini, .nw-chip { transition: none; } }
+
+/* Priority flags (icon + label) and post covers */
+.nw-prio { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding-inline: 10px; border: 1px solid currentColor; border-radius: var(--radius-sm); font-weight: 700; font-size: 14px; }
+.nw-prio[data-priority="urgent"] { color: var(--apple); }
+.nw-prio[data-priority="featured"] { color: var(--amber); }
+.nw-card[data-priority="urgent"] { border-inline-start: 6px solid var(--apple); }
+.nw-card[data-priority="featured"] { border-inline-start: 6px solid var(--amber); }
+.nw-cover { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; margin-block-end: 12px; background: var(--mist); }
+.nw-thumb { flex: none; align-self: flex-start; width: 120px; height: 90px; object-fit: cover; background: var(--mist); }
+@media (max-width: 479px) { .nw-thumb { order: -1; width: 100%; height: auto; aspect-ratio: 16 / 9; } }

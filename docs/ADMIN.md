@@ -59,6 +59,39 @@ From that moment the person is refused by every admin function.
 7. The public sees posts only through the view `public_posts`: published rows, fixed columns, no drafts, no author.
 8. Admin calls are rate limited per person and per IP, and the author and publish date of a post are set by the server, never by the browser.
 
-## 7. Checking it works
+## 7. Writing posts in Markdown
+
+Post text (news, blog, events) is written in Markdown. Cheat sheet:
+
+```
+# Big heading        ## Smaller heading
+**bold**             *italic*
+[link text](https://example.com)
+- a bullet           1. a numbered item
+> a quote
+`code`               a blank line starts a new paragraph
+```
+
+NOT allowed: raw HTML (it is shown as plain text, never run) and images inside the text. A post has exactly one image, the cover (see below). Only `http`, `https`, `mailto` and `tel` links work. Persian and English texts are written separately; one language is enough.
+
+## 8. Priority: urgent vs featured
+
+Any post (news, blog or event) has a priority, each with its own icon:
+
+- **Normal:** only in the news list.
+- **Featured** (star icon): second priority. Shown lower on the home page as a highlighted band (Black Friday or Nowruz offers, a blog post worth reading).
+- **Urgent** (warning-triangle icon): main news. Shown as a banner at the very top of the home page (a flood, an emergency). Use it rarely and switch it back to Normal when it is over.
+
+Only published posts show on the site. Drafts never do, whatever their priority.
+
+## 9. Cover image
+
+Each post can have one cover image. The editor resizes it in the browser (1280 px and a 400 px thumbnail, webp or jpeg, at most 600 KB / 150 KB) and uploads it to the public bucket `post-images` with a signed link that only admins can get. Saving the post then attaches it. Replacing or removing the cover, or deleting the post, deletes the old files too. Only admins can upload there.
+
+## 10. Run migration 007 (once)
+
+Same steps as migration 006, with `database/migrations/007-post-priority-cover.sql`, AFTER 006 and BEFORE deploying this version. It adds `posts.priority` and `posts.cover`, creates the `post-images` bucket (public, 600 KB, webp/jpeg only) and adds both columns to the `public_posts` view. Safe to run again.
+
+## 11. Checking it works
 
 `node scripts/test-admin.mjs` runs the whole admin area against a fake Supabase (takes 1-2 minutes, starts its own servers on ports 3224 and 54397). The mock lives in `scripts/mock-supabase.mjs`.

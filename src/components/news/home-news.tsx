@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Arrow } from "@/components/icons";
 import type { L, Locale } from "@/lib/i18n";
 import { isUpcoming, postText, type PublicPost } from "@/lib/posts";
-import { useLivePosts } from "@/lib/use-live-posts";
+import { featuredPosts, urgentPosts, useLivePosts } from "@/lib/use-live-posts";
 import { dateBlock, fmtPostDate, fmtPostTime, nt, postWhen, sortUpcoming } from "./news-common";
 
 const T = {
@@ -21,10 +21,15 @@ export function HomeNews({ lang }: { lang: Locale }) {
   const [now, setNow] = useState<number | null>(null);
   // eslint-disable-next-line react-hooks/set-state-in-effect -- the clock is only known in the browser
   useEffect(() => { setNow(Date.now()); }, []);
-  const { latest, upcoming } = useMemo(() => ({
-    latest: posts.filter((p) => p.kind !== "event").slice(0, 3),
-    upcoming: now === null ? [] : posts.filter((p) => isUpcoming(p, now)).sort(sortUpcoming).slice(0, 2),
-  }), [posts, now]);
+  const { latest, upcoming } = useMemo(() => {
+    // Posts already shown in the urgent banner or the featured band are not repeated here.
+    const shown = new Set([...urgentPosts(posts), ...featuredPosts(posts)].map((p) => p.id));
+    const rest = posts.filter((p) => !shown.has(p.id));
+    return {
+      latest: rest.filter((p) => p.kind !== "event").slice(0, 3),
+      upcoming: now === null ? [] : rest.filter((p) => isUpcoming(p, now)).sort(sortUpcoming).slice(0, 2),
+    };
+  }, [posts, now]);
 
   if (latest.length === 0 && upcoming.length === 0) return null;
   const href = `/${lang}/news`;

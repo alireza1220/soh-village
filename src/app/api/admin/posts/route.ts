@@ -1,4 +1,6 @@
 import { adminGate } from "@/lib/admin-server";
+import { IMAGE_EXTS, type ImageExt } from "@/lib/listing-images";
+import { checkCover, cleanCoverFolder, purgePostImages, signCover } from "@/lib/post-images";
 import { adminPostFromRow, isPostKind, parsePostInput } from "@/lib/posts";
 import { failure, json, sbHeaders, UUID, type Row } from "@/lib/server-guard";
 
@@ -36,6 +38,17 @@ export async function POST(req: Request) {
       return json({ ok: true, post: adminPostFromRow(rows[0]) });
     }
 
+    if (b.action === "cover_sign") {
+      const id = typeof b.id === "string" ? b.id : "";
+      if (!UUID.test(id)) return json({ error: "not_found" }, 404);
+      if (typeof b.ext !== "string" || !(IMAGE_EXTS as readonly string[]).includes(b.ext)) return json({ error: "bad_cover" }, 400);
+      const cur = await fetch(`${base}?select=id,cover&id=eq.${id}&limit=1`, { headers, cache: "no-store" });
+      if (!cur.ok) return failure("admin_posts_find", cur);
+      const found = ((await cur.json()) as Row[])[0];
+      if (!found) return json({ error: "not_found" }, 404);
+      return signCover(sb, id, typeof found.cover === "string" ? found.cover : null, b.ext as ImageExt);
+    }
+
     if (b.action === "update" || b.action === "delete") {
       const id = typeof b.id === "string" ? b.id : "";
       if (!UUID.test(id)) return json({ error: "not_found" }, 404);
@@ -44,6 +57,7 @@ export async function POST(req: Request) {
         const res = await fetch(`${base}?id=eq.${id}`, { method: "DELETE", headers: { ...headers, Prefer: "return=representation" }, cache: "no-store" });
         if (!res.ok) return failure("admin_posts_delete", res);
         if (!((await res.json()) as Row[]).length) return json({ error: "not_found" }, 404);
+        await purgePostImages(sb, id); // best effort: a leftover object is harmless, the row is already gone
         return json({ ok: true });
       }
 
@@ -63,11 +77,20 @@ export async function POST(req: Request) {
       if ((parsed.value.kind ?? current.kind) !== "event" && current.event_at != null) patch.event_at = null;
       // published_at is set the first time the post goes public, and never moves after that.
       if (parsed.value.published === true && current.published_at == null) patch.published_at = new Date().toISOString();
+      // A new cover must exist in storage (both files, sane size and type) before the row may point at it.
+      const previousCover = typeof current.cover === "string" ? current.cover : null;
+      let present;
+      if (typeof parsed.value.cover === "string" && parsed.value.cover !== previousCover) {
+        const checked = await checkCover(sb, id, parsed.value.cover);
+        if (checked instanceof Response) return checked;
+        present = checked;
+      }
       if (Object.keys(patch).length === 0) return json({ ok: true, post: adminPostFromRow(current) });
       const res = await fetch(`${base}?id=eq.${id}`, { method: "PATCH", headers: writeHeaders(headers), body: JSON.stringify(patch), cache: "no-store" });
       if (!res.ok) return failure("admin_posts_update", res);
       const row = ((await res.json()) as Row[])[0];
       if (!row) return json({ error: "not_found" }, 404);
+      if (parsed.value.cover !== undefined && parsed.value.cover !== previousCover) await cleanCoverFolder(sb, id, parsed.value.cover, previousCover, present);
       return json({ ok: true, post: adminPostFromRow(row) });
     }
 

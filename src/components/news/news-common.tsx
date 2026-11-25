@@ -1,5 +1,6 @@
 import type { L, Locale } from "@/lib/i18n";
-import { SITE_TZ, type PublicPost } from "@/lib/posts";
+import { SITE_TZ, postImageUrl, type PostPriority, type PublicPost } from "@/lib/posts";
+import { publicSupabase } from "@/lib/supabase";
 
 export const nt = {
   event: { fa: "رویداد", en: "Event" },
@@ -38,3 +39,39 @@ export function dateBlock(iso: string, lang: Locale): { day: string; month: stri
 
 export const sortUpcoming = (a: PublicPost, b: PublicPost) => Date.parse(a.eventAt ?? "") - Date.parse(b.eventAt ?? "");
 export const postWhen = (p: PublicPost) => p.publishedAt ?? p.createdAt;
+
+/** Small label next to the priority icon. Only urgent and featured are shown. */
+export const priorityLabel = {
+  urgent: { fa: "فوری", en: "Urgent" },
+  featured: { fa: "ویژه", en: "Featured" },
+} satisfies Record<Exclude<PostPriority, "normal">, L>;
+
+/** Cover URLs (thumbnail for lists, full for the open card) or null when the post has no cover or Supabase is not configured. */
+export function coverUrls(p: PublicPost): { thumb: string; full: string } | null {
+  const sb = p.cover ? publicSupabase() : null;
+  if (!sb || !p.cover) return null;
+  return { thumb: postImageUrl(sb.url, p.id, p.cover, "thumb"), full: postImageUrl(sb.url, p.id, p.cover, "full") };
+}
+
+/** Markdown -> one plain line: headings, emphasis, list marks, quotes, code and link syntax removed; links keep their text; images dropped. */
+export function stripMarkdown(md: string): string {
+  return md
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/^\s{0,3}(#{1,6}|>|[-*+]|\d+[.)])\s+/gm, "")
+    .replace(/^\s*([-*_]\s*){3,}$/gm, " ")
+    .replace(/(\*\*|__|~~|[*_`])/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** One-line excerpt of a Markdown body, cut at a word edge with an ellipsis. */
+export function excerptOf(md: string, max = 140): string {
+  const t = stripMarkdown(md);
+  if (t.length <= max) return t;
+  const cut = t.slice(0, max);
+  const sp = cut.lastIndexOf(" ");
+  return `${(sp > max * 0.6 ? cut.slice(0, sp) : cut).replace(/[\s,.;:!?،؛]+$/, "")}…`;
+}

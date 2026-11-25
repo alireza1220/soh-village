@@ -23,6 +23,9 @@ export const API_ERRORS = {
   bad_kind: { fa: "نوع مطلب را انتخاب کنید (خبر، یادداشت یا رویداد).", en: "Pick the kind of post (news, blog or event)." },
   bad_date: { fa: "تاریخ و ساعت درست نیست.", en: "That date and time are not valid." },
   event_date_required: { fa: "برای رویداد، تاریخ و ساعت را بنویسید.", en: "An event needs a date and time." },
+  bad_priority: { fa: "اولویت مطلب درست نیست.", en: "That priority is not valid." },
+  cover_busy: { fa: "تلاش‌های اخیر برای فرستادن عکس زیاد بوده. چند دقیقه صبر کنید و دوباره امتحان کنید.", en: "Too many recent upload attempts. Wait a few minutes and try again." },
+  bad_cover: { fa: "عکس مطلب ذخیره نشد. دوباره امتحان کنید.", en: "The post image did not save. Try again." },
   too_long: { fa: "متن از حد مجاز بلندتر است.", en: "That text is longer than allowed." },
   // ---- listing fields ----
   bad_board: { fa: "این بخش درست نیست.", en: "That section is not valid." },

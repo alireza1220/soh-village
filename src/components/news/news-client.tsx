@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import type { L, Locale } from "@/lib/i18n";
-import { isUpcoming } from "@/lib/posts";
+import { byPriorityThenNewest, isUpcoming, PRIORITY_RANK } from "@/lib/posts";
 import { useLivePosts } from "@/lib/use-live-posts";
 import { sortUpcoming } from "./news-common";
 import { PostCard } from "./post-card";
@@ -42,9 +42,9 @@ export function NewsClient({ lang }: { lang: Locale }) {
     const n = now ?? 0;
     const events = posts.filter((p) => p.kind === "event");
     return {
-      upcoming: now === null ? [] : events.filter((p) => isUpcoming(p, n)).sort(sortUpcoming),
+      upcoming: now === null ? [] : events.filter((p) => isUpcoming(p, n)).sort((a, b) => PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority] || sortUpcoming(a, b)),
       past: now === null ? events : events.filter((p) => !isUpcoming(p, n)).sort((a, b) => sortUpcoming(b, a)),
-      written: posts.filter((p) => p.kind !== "event"),
+      written: posts.filter((p) => p.kind !== "event").sort(byPriorityThenNewest),
     };
   }, [posts, now]);
 

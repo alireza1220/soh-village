@@ -346,7 +346,7 @@ async function scenarioPosts() {
   const firstAt = row.published_at;
   const pub1 = await (await anonView("public_posts")).json();
   check("a published post is in the public view", pub1.length === 1 && pub1[0].id === id);
-  check("the public view has no author_id, no published flag, no updated_at", !("author_id" in pub1[0]) && !("published" in pub1[0]) && !("updated_at" in pub1[0]) && Object.keys(pub1[0]).sort().join() === "body_en,body_fa,created_at,event_at,id,kind,place_en,place_fa,published_at,title_en,title_fa", Object.keys(pub1[0]).join());
+  check("the public view has no author_id, no published flag, no updated_at", !("author_id" in pub1[0]) && !("published" in pub1[0]) && !("updated_at" in pub1[0]) && Object.keys(pub1[0]).sort().join() === "body_en,body_fa,cover,created_at,event_at,id,kind,place_en,place_fa,priority,published_at,title_en,title_fa", Object.keys(pub1[0]).join());
   const hide = await anonView("public_posts", "&author_id=eq." + boss.id);
   check("the public view refuses to be filtered on author_id (column does not exist)", hide.status === 400);
   const unp = await post({ action: "update", id, fields: { published: false } });
@@ -506,6 +506,130 @@ async function scenarioRate() {
   check("admin calls do not use up the 'manage' budget of normal routes", manage.status === 200, JSON.stringify(manage));
 }
 
+async function scenarioCovers() {
+  section("admin: post priority and cover image");
+  await mock("reset");
+  const boss = await mkUser("boss", { role: "admin" });
+  const normal = await mkUser("plain");
+  const post = (body, u = boss) => adm("/api/admin/posts", body, u);
+  const keys = async (id) => (await dump()).post_images.filter((k) => k.startsWith(id + "/"));
+  const put = async (id, name, { thumb = false, size = 10, type = "image/jpeg", age = 0 } = {}) =>
+    mock("put-object?" + qs({ bucket: "post-images", path: `${id}/${thumb ? name.replace(/\.(webp|jpg)$/, "-t.$1") : name}`, size, type, age_min: age }));
+  const putPair = async (id, name, o = {}) => { await put(id, name, o); await put(id, name, { ...o, thumb: true }); };
+
+  // priority
+  const def = await post({ action: "create", fields: { kind: "blog", titleEn: "Default", published: true } });
+  check("priority defaults to normal", def.status === 200 && def.data.post.priority === "normal" && def.data.post.cover === null, JSON.stringify(def.data).slice(0, 200));
+  const urg = await post({ action: "create", fields: { kind: "news", titleEn: "Flood", priority: "urgent", published: true } });
+  check("create with priority urgent", urg.status === 200 && urg.data.post.priority === "urgent");
+  const feat = await post({ action: "create", fields: { kind: "event", titleEn: "Nowruz fair", priority: "featured", eventAt: new Date(Date.now() + DAY).toISOString(), published: false } });
+  check("any kind can be featured (event)", feat.status === 200 && feat.data.post.priority === "featured");
+  const fid = feat.data.post.id;
+  const upd = await post({ action: "update", id: fid, fields: { priority: "urgent" } });
+  check("update priority", upd.status === 200 && upd.data.post.priority === "urgent" && (await postRow(fid)).priority === "urgent");
+  const badP = await post({ action: "create", fields: { kind: "news", titleEn: "x", priority: "critical" } });
+  check("create with an invalid priority -> 400 bad_priority", badP.status === 400 && badP.data.error === "bad_priority", JSON.stringify(badP.data));
+  const badP2 = await post({ action: "update", id: fid, fields: { priority: 5 } });
+  check("update with an invalid priority -> 400 bad_priority", badP2.status === 400 && badP2.data.error === "bad_priority" && (await postRow(fid)).priority === "urgent");
+
+  // visibility in the public view
+  let view = await (await anonView("public_posts")).json();
+  check("view: published posts carry priority and cover, drafts are absent", view.length === 2 && view.some((r) => r.priority === "urgent" && r.cover === null) && !view.some((r) => r.id === fid), JSON.stringify(view).slice(0, 200));
+
+  // markdown / HTML stored verbatim
+  const md = "# Title\n\n**bold** [x](https://a.example) <script>alert(1)</script> ![i](http://e/i.png)\n\n> quote";
+  const mdp = await post({ action: "create", fields: { kind: "blog", titleEn: "MD", bodyEn: md } });
+  check("markdown and HTML text are stored verbatim (never rendered by the API)", mdp.status === 200 && mdp.data.post.bodyEn === md && (await postRow(mdp.data.post.id)).body_en === md, JSON.stringify(mdp.data).slice(0, 200));
+
+  // cover_sign
+  const id = (await post({ action: "create", fields: { kind: "blog", titleEn: "With cover", published: true } })).data.post.id;
+  const ns = await post({ action: "cover_sign", id, ext: "webp" }, normal);
+  check("cover_sign by a non-admin -> 403", ns.status === 403 && (await dump()).post_images.length === 0);
+  const anon = await api("/api/admin/posts", { action: "cover_sign", id, ext: "webp" });
+  check("cover_sign without a login -> 401", anon.status === 401);
+  const unk = await post({ action: "cover_sign", id: "66666666-6666-4666-8666-666666666666", ext: "webp" });
+  check("cover_sign for an unknown post -> 404", unk.status === 404 && unk.data.error === "not_found");
+  const badExt = await post({ action: "cover_sign", id, ext: "png" });
+  check("cover_sign with a bad extension -> 400", badExt.status === 400);
+  const sg = await post({ action: "cover_sign", id, ext: "jpg" });
+  check("cover_sign -> name + two signed PUT urls", sg.status === 200 && /^[a-z0-9]{12}\.jpg$/.test(sg.data.name) && sg.data.full?.method === "PUT" && sg.data.thumb?.method === "PUT" && sg.data.full.url.includes("/post-images/" + id + "/") && sg.data.thumb.url.includes("-t.jpg"), JSON.stringify(sg.data).slice(0, 300));
+  const upload = async (url, bytes, type) => {
+    const fd = new FormData();
+    fd.append("cacheControl", "3600");
+    fd.append("", new Blob([new Uint8Array(bytes)], { type }), "f");
+    return (await fetch(url, { method: "PUT", body: fd })).status;
+  };
+  const stF = await upload(sg.data.full.url, 5000, "image/jpeg");
+  const stT = await upload(sg.data.thumb.url, 2000, "image/jpeg");
+  check("both signed uploads are accepted", stF === 200 && stT === 200, `${stF} ${stT}`);
+  const fin = await post({ action: "update", id, fields: { cover: sg.data.name } });
+  check("update cover finalises it", fin.status === 200 && fin.data.post.cover === sg.data.name && (await postRow(id)).cover === sg.data.name, JSON.stringify(fin.data).slice(0, 200));
+  view = await (await anonView("public_posts", "&id=eq." + id)).json();
+  check("view shows the cover of a published post", view[0]?.cover === sg.data.name);
+  const pubFile = await fetch(`${MOCK}/storage/v1/object/public/post-images/${id}/${sg.data.name}`);
+  check("the cover file is publicly readable", pubFile.status === 200);
+
+  // replace
+  const sg2 = await post({ action: "cover_sign", id, ext: "webp" });
+  await upload(sg2.data.full.url, 4000, "image/webp");
+  await upload(sg2.data.thumb.url, 1000, "image/webp");
+  const rep = await post({ action: "update", id, fields: { cover: sg2.data.name } });
+  const k2 = await keys(id);
+  check("replacing the cover removes the old two objects", rep.status === 200 && k2.length === 2 && k2.every((k) => k.includes(sg2.data.name.split(".")[0])), JSON.stringify(k2));
+
+  // bad names and missing objects
+  const badName = await post({ action: "update", id, fields: { cover: "../etc/passwd" } });
+  check("bad cover name -> 400 bad_cover", badName.status === 400 && badName.data.error === "bad_cover");
+  const missing = await post({ action: "update", id, fields: { cover: "zzzzzzzzzzzz.webp" } });
+  check("cover pointing to missing objects -> 400 bad_cover, old cover kept", missing.status === 400 && missing.data.error === "bad_cover" && (await postRow(id)).cover === sg2.data.name);
+  await put(id, "onlyfullxxxx.webp", { type: "image/webp", age: 60 });
+  const half = await post({ action: "update", id, fields: { cover: "onlyfullxxxx.webp" } });
+  check("only the full file uploaded -> 400 bad_cover", half.status === 400 && half.data.error === "bad_cover");
+  await putPair(id, "bigfilexxxxx.jpg", { size: 700 * 1024, age: 60 });
+  const big = await post({ action: "update", id, fields: { cover: "bigfilexxxxx.jpg" } });
+  check("oversize full image -> 400 bad_cover", big.status === 400 && big.data.error === "bad_cover");
+  await put(id, "bigthumbxxxx.jpg", { size: 1000, age: 60 });
+  await put(id, "bigthumbxxxx.jpg", { thumb: true, size: 200 * 1024, age: 60 });
+  const bigT = await post({ action: "update", id, fields: { cover: "bigthumbxxxx.jpg" } });
+  check("oversize thumbnail -> 400 bad_cover", bigT.status === 400 && bigT.data.error === "bad_cover");
+  await putPair(id, "wrongmimexxx.jpg", { type: "image/gif", age: 60 });
+  const gif = await post({ action: "update", id, fields: { cover: "wrongmimexxx.jpg" } });
+  check("wrong mime type -> 400 bad_cover", gif.status === 400 && gif.data.error === "bad_cover" && (await postRow(id)).cover === sg2.data.name);
+
+  // fresh strays survive a finalise, old ones go
+  await putPair(id, "oldstrayxxxx.jpg", { age: 60 });
+  await putPair(id, "freshstrayxx.jpg", { age: 0 });
+  const sg3 = await post({ action: "cover_sign", id, ext: "jpg" });
+  await upload(sg3.data.full.url, 3000, "image/jpeg");
+  await upload(sg3.data.thumb.url, 900, "image/jpeg");
+  await post({ action: "update", id, fields: { cover: sg3.data.name } });
+  const k3 = await keys(id);
+  check("finalising removes old leftovers but keeps fresh uploads in progress", !k3.some((k) => k.includes("oldstray")) && k3.some((k) => k.includes("freshstray")) && !k3.some((k) => k.includes(sg2.data.name.split(".")[0])) && k3.some((k) => k.includes(sg3.data.name.split(".")[0])), JSON.stringify(k3));
+
+  // null removes
+  const nul = await post({ action: "update", id, fields: { cover: null } });
+  const k4 = await keys(id);
+  check("cover null clears the column and removes the cover objects", nul.status === 200 && nul.data.post.cover === null && !k4.some((k) => k.includes(sg3.data.name.split(".")[0])), JSON.stringify(k4));
+
+  // draft + cover never public; delete removes objects
+  const dr = (await post({ action: "create", fields: { kind: "news", titleEn: "Draft with cover" } })).data.post.id;
+  await putPair(dr, "draftcoverxx.webp", { type: "image/webp" });
+  const dfin = await post({ action: "update", id: dr, fields: { cover: "draftcoverxx.webp", priority: "urgent" } });
+  view = await (await anonView("public_posts")).json();
+  check("a draft with cover + urgent priority is never in the view", dfin.status === 200 && !view.some((r) => r.id === dr));
+  await post({ action: "update", id: dr, fields: { published: true } });
+  view = await (await anonView("public_posts", "&id=eq." + dr)).json();
+  check("once published, priority and cover show in the view", view[0]?.priority === "urgent" && view[0]?.cover === "draftcoverxx.webp");
+  const del = await post({ action: "delete", id: dr });
+  check("delete removes the post's objects", del.status === 200 && (await keys(dr)).length === 0 && !(await postRow(dr)));
+
+  // folder cap
+  const capId = (await post({ action: "create", fields: { kind: "news", titleEn: "Cap" } })).data.post.id;
+  for (let i = 0; i < 3; i++) await putPair(capId, `capstrayxxx${i}.jpg`, { age: 0 });
+  const capped = await post({ action: "cover_sign", id: capId, ext: "jpg" });
+  check("a folder full of fresh strays refuses another sign (cover_busy)", capped.status === 400 && capped.data.error === "cover_busy", JSON.stringify(capped.data));
+}
+
 // ---------- main ----------
 async function main() {
   const m = start("node", ["scripts/mock-supabase.mjs"], { MOCK_PORT: String(MOCK_PORT) }, "mock");
@@ -519,6 +643,7 @@ async function main() {
     await scenarioRole();
     await scenarioListings();
     await scenarioPosts();
+    await scenarioCovers();
     await scenarioUsers();
     await scenarioRate();
     const log = dev.getLog();

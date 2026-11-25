@@ -40,6 +40,10 @@ export type AdminCounts = {
 //   body { action: "create", fields: PostFields }                           -> { ok: true, post: AdminPost }
 //   body { action: "update", id, fields: PostFields }                       -> { ok: true, post: AdminPost }
 //   body { action: "delete", id }                                           -> { ok: true }
+//   body { action: "cover_sign", id, ext: "webp"|"jpg" } -> { ok: true, name, full: SignedUpload, thumb: SignedUpload }  (admin only; signed PUT URLs for <id>/<name> and <id>/<name-t>, bucket post-images)
+//   Then update { fields: { cover: name } } finalises: the server checks both objects exist (size <= 600 KB full / 150 KB thumb, webp or jpeg),
+//   removes the previous cover's objects and any leftovers; { cover: null } removes the cover. delete also removes the cover objects.
+//   fields.priority: "normal" | "featured" | "urgent" (any kind of post). The home page shows urgent posts as a top banner and featured ones as a lower band.
 //   Publishing (published: true) sets published_at the first time only. author_id = the admin's user id on create.
 
 // POST /api/admin/users

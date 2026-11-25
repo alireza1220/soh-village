@@ -9,7 +9,10 @@ import { MarketTeaser } from "@/components/home/market-teaser";
 import { YearList } from "@/components/home/year-list";
 import { Arrow } from "@/components/icons";
 import { VillageMap } from "@/components/map";
+import { LatestAds } from "@/components/home/latest-ads";
+import { HomeFeatured } from "@/components/news/home-featured";
 import { HomeNews } from "@/components/news/home-news";
+import { HomeUrgent } from "@/components/news/home-urgent";
 import { SectionMark } from "@/components/section-mark";
 import {
   entriesLabel, entryCount, findCard, hc, heroFiles, photoOf, planCards, statusLabel, yearRows,
@@ -79,6 +82,9 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
   return (
     <>
       <h1 className="sr-only">{siteName[lang]}</h1>
+
+      {/* URGENT NEWS: main priority, very top (renders nothing when none) */}
+      <HomeUrgent lang={lang} />
 
       {slides.length > 0 && (
         <HeroSlideshow
@@ -154,6 +160,9 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
         </div>
       </section>
 
+      {/* FEATURED POSTS: second priority band (renders nothing when none) */}
+      <HomeFeatured lang={lang} />
+
       {/* NEWS AND EVENTS (renders nothing when nothing is published) */}
       <HomeNews lang={lang} />
 
@@ -224,6 +233,9 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
           </div>
         </div>
       </section>
+
+      {/* WHAT IS NEW: newest ads of the four boards */}
+      <LatestAds lang={lang} />
 
       {/* FROM THE GUIDE */}
       <section className="section section--mist" aria-labelledby="hm-guide-title">
