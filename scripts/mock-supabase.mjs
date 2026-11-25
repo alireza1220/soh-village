@@ -1,7 +1,18 @@
 // Test-only Supabase mock: just enough PostgREST + GoTrue for scripts/test-market.mjs. No dependencies.
-// Usage: MOCK_PORT=54399 node scripts/mock-supabase.mjs
+// Usage: MOCK_PORT=54399 node scripts/mock-supabase.mjs        (MOCK_SEED=1 also seeds approved sample listings with photos)
+// Also mocks the bits of Supabase Storage the photo flow uses (signed upload, public GET, list, remove), in memory.
 import http from "node:http";
-import { createHash, randomUUID } from "node:crypto";
+import { createHash, randomUUID, randomBytes } from "node:crypto";
+import { readFileSync, existsSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+const BUCKET = "listing-images";
+const MAX_OBJECT = 614400;
+const MIMES = ["image/webp", "image/jpeg"];
+const storage = new Map(); // "<listing id>/<file>" -> { buf, type }
+const tokens = new Map(); // token -> object path
 
 const PORT = Number(process.env.MOCK_PORT || process.env.PORT || 54399);
 const SVC = "svc-key";
@@ -12,7 +23,7 @@ const db = { listings: [], rate_events: [] };
 let rateSeq = 0;
 const otpLog = [];
 
-const PUBLIC_COLS = ["id", "type", "category", "title", "quantity", "price", "area", "available", "details", "contact_kind", "contact_value", "created_at", "expires_at"];
+const PUBLIC_COLS = ["id", "type", "category", "title", "quantity", "price", "area", "available", "details", "contact_kind", "contact_value", "created_at", "expires_at", "images"];
 
 const uuidFor = (email) => {
   const h = createHash("sha1").update(email).digest("hex");
@@ -22,7 +33,7 @@ const uuidFor = (email) => {
 const cors = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "*",
-  "Access-Control-Allow-Methods": "GET,POST,PATCH,DELETE,OPTIONS",
+  "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
   "Access-Control-Expose-Headers": "Content-Range",
 };
 const send = (res, status, body, extra = {}) => {
@@ -59,7 +70,9 @@ function matches(row, filters) {
     const op = expr.slice(0, dot);
     const val = expr.slice(dot + 1);
     const v = row[col];
-    if (op === "eq") {
+    if (op === "neq" && Array.isArray(v)) {
+      if ((val === "{}") === (v.length === 0)) return false;
+    } else if (op === "eq") {
       if (String(v) !== val) return false;
     } else if (op === "neq") {
       if (String(v) === val) return false;
@@ -71,6 +84,8 @@ function matches(row, filters) {
       if (!(cmp(v, val) <= 0)) return false;
     } else if (op === "lt") {
       if (!(cmp(v, val) < 0)) return false;
+    } else if (op === "in") {
+      if (!val.replace(/^\(|\)$/g, "").split(",").includes(String(v))) return false;
     } else if (op === "is") {
       if (val === "null" ? v != null : v == null) return false;
     }
@@ -103,6 +118,7 @@ const validListing = (r) => {
   if (typeof r.title !== "string" || r.title.length < 1 || r.title.length > 120) return "title";
   if (typeof r.area !== "string" || r.area.length > 80) return "area";
   if (r.details && r.details.length > 800) return "details";
+  if (r.images !== undefined && (!Array.isArray(r.images) || r.images.length > 10)) return "images";
   return null;
 };
 
@@ -171,7 +187,7 @@ async function rest(req, res, url) {
         }
         const now = new Date().toISOString();
         out.push({
-          id: randomUUID(), status: "pending", renewals: 0, contact_public: false, created_at: now, updated_at: now,
+          id: randomUUID(), status: "pending", renewals: 0, images: [], contact_public: false, created_at: now, updated_at: now,
           approved_at: null, expires_at: null, manage_hash: null, owner_id: null, ip_hash: null,
           quantity: null, price: null, available: null, details: null, poster_name: null, contact_kind: null, contact_value: null,
           ...Object.fromEntries(Object.entries(it).filter(([k]) => k !== "id" || false)),
@@ -202,6 +218,125 @@ async function rest(req, res, url) {
   }
   return send(res, 405, { message: "method not allowed" });
 }
+
+
+// ---------- storage ----------
+const svcOk = (req) => req.headers["apikey"] === SVC;
+const readRaw = (req) => new Promise((resolve) => { const c = []; req.on("data", (d) => c.push(d)); req.on("end", () => resolve(Buffer.concat(c))); });
+const storErr = (res, status, message) => send(res, status, { statusCode: String(status), error: message, message });
+
+// Minimal multipart parser: returns [{ name, filename, type, data }]
+function parseMultipart(buf, contentType) {
+  const m = /boundary=(?:"([^"]+)"|([^;]+))/i.exec(contentType || "");
+  if (!m) return null;
+  const delim = Buffer.from("--" + (m[1] || m[2]));
+  const parts = [];
+  let pos = buf.indexOf(delim);
+  while (pos !== -1) {
+    const next = buf.indexOf(delim, pos + delim.length);
+    if (next === -1) break;
+    let chunk = buf.subarray(pos + delim.length, next);
+    if (chunk.subarray(0, 2).toString() === "\r\n") chunk = chunk.subarray(2);
+    if (chunk.subarray(-2).toString() === "\r\n") chunk = chunk.subarray(0, chunk.length - 2);
+    const sep = chunk.indexOf("\r\n\r\n");
+    if (sep !== -1) {
+      const head = chunk.subarray(0, sep).toString("utf8");
+      const nm = /name="([^"]*)"/i.exec(head);
+      const fn = /filename="([^"]*)"/i.exec(head);
+      const ct = /content-type:\s*([^\r\n]+)/i.exec(head);
+      parts.push({ name: nm ? nm[1] : null, filename: fn ? fn[1] : null, type: ct ? ct[1].trim() : null, data: chunk.subarray(sep + 4) });
+    }
+    pos = next;
+  }
+  return parts;
+}
+
+async function storageRoute(req, res, url) {
+  const rel = url.pathname.slice("/storage/v1".length);
+  const signRe = new RegExp(`^/object/upload/sign/${BUCKET}/(.+)$`);
+  const pubRe = new RegExp(`^/object/public/${BUCKET}/(.+)$`);
+  let m;
+  if ((m = signRe.exec(rel))) {
+    const path = decodeURIComponent(m[1]);
+    if (req.method === "POST") {
+      if (!svcOk(req)) return storErr(res, 401, "Unauthorized");
+      if (!/^[0-9a-f-]{36}\/[a-z0-9-]+\.(webp|jpg)$/.test(path)) return storErr(res, 400, "Invalid path");
+      const token = randomBytes(16).toString("hex");
+      tokens.set(token, path);
+      return send(res, 200, { url: `/object/upload/sign/${BUCKET}/${m[1]}?token=${token}` });
+    }
+    if (req.method === "PUT") {
+      const token = url.searchParams.get("token");
+      if (!token || tokens.get(token) !== path) return storErr(res, 403, "Invalid token");
+      if ((req.headers["content-type"] || "").indexOf("multipart/form-data") === -1) return storErr(res, 400, "Expected multipart/form-data");
+      const parts = parseMultipart(await readRaw(req), req.headers["content-type"]);
+      const file = parts?.find((x) => x.name === "" && x.filename !== null);
+      const cc = parts?.find((x) => x.name === "cacheControl");
+      if (!file || !cc) return storErr(res, 400, "Missing file or cacheControl");
+      if (file.data.length > MAX_OBJECT) return storErr(res, 413, "The object exceeded the maximum allowed size");
+      if (!MIMES.includes(file.type)) return storErr(res, 415, "mime type " + file.type + " is not supported");
+      if (storage.has(path)) return storErr(res, 409, "The resource already exists");
+      storage.set(path, { buf: file.data, type: file.type, at: Date.now() });
+      tokens.delete(token);
+      return send(res, 200, { Key: `${BUCKET}/${path}` });
+    }
+  }
+  if ((m = pubRe.exec(rel)) && (req.method === "GET" || req.method === "HEAD")) {
+    const o = storage.get(decodeURIComponent(m[1]));
+    if (!o) return storErr(res, 404, "Object not found");
+    res.writeHead(200, { "Content-Type": o.type, "Content-Length": o.buf.length, "Cache-Control": "public, max-age=3600", ...cors });
+    return res.end(req.method === "HEAD" ? undefined : o.buf);
+  }
+  if (rel === `/object/list/${BUCKET}` && req.method === "POST") {
+    if (!svcOk(req)) return storErr(res, 401, "Unauthorized");
+    const body = await readBody(req);
+    const prefix = String(body?.prefix || "").replace(/\/?$/, "/");
+    const limit = Number(body?.limit ?? 100), offset = Number(body?.offset ?? 0);
+    const names = [...storage.keys()].filter((k) => k.startsWith(prefix) && !k.slice(prefix.length).includes("/")).map((k) => k.slice(prefix.length)).sort();
+    return send(res, 200, names.slice(offset, offset + limit).map((name) => ({ name, id: name, created_at: storage.get(prefix + name).at ? new Date(storage.get(prefix + name).at).toISOString() : undefined, metadata: { size: storage.get(prefix + name).buf.length, mimetype: storage.get(prefix + name).type } })));
+  }
+  if (rel === `/object/${BUCKET}` && req.method === "DELETE") {
+    if (!svcOk(req)) return storErr(res, 401, "Unauthorized");
+    const body = await readBody(req);
+    if (!Array.isArray(body?.prefixes)) return storErr(res, 400, "prefixes required");
+    const gone = body.prefixes.filter((p) => storage.delete(p));
+    return send(res, 200, gone.map((name) => ({ name })));
+  }
+  return storErr(res, 404, "not found");
+}
+
+// ---------- sample data (MOCK_SEED=1 or /__admin/seed): approved listings with photos for visual checks ----------
+const ALNUM = "abcdefghijklmnopqrstuvwxyz0123456789";
+const rid = () => Array.from(randomBytes(12), (b) => ALNUM[b % 36]).join("");
+function seed() {
+  const pics = ["market", "shop", "needs", "resources", "traditions", "tourism", "people", "stay", "history", "words"]
+    .map((n) => join(ROOT, "public/illustrations", n + ".jpg")).filter(existsSync).map((f) => readFileSync(f));
+  if (!pics.length) pics.push(Buffer.alloc(100, 1));
+  const add = (o, n) => {
+    const id = randomUUID();
+    const images = [];
+    for (let i = 0; i < n; i++) {
+      const name = rid() + ".jpg", buf = pics[(i + db.listings.length) % pics.length];
+      storage.set(`${id}/${name}`, { buf, type: "image/jpeg" });
+      storage.set(`${id}/${name.replace(".jpg", "-t.jpg")}`, { buf, type: "image/jpeg" });
+      images.push(name);
+    }
+    const now = Date.now();
+    db.listings.push({
+      id, status: "approved", renewals: 0, contact_public: true, poster_name: null, manage_hash: null, owner_id: null, ip_hash: null,
+      quantity: null, price: null, available: null, details: null, contact_kind: "phone", contact_value: "09121234567",
+      created_at: new Date(now - (db.listings.length + 1) * 3600_000).toISOString(), updated_at: new Date(now).toISOString(),
+      approved_at: new Date(now).toISOString(), expires_at: new Date(now + 25 * DAY).toISOString(), images, ...o,
+    });
+  };
+  add({ type: "sell", category: "fruit", title: "گیلاس تازه از باغ سه", quantity: "۲۰۰ کیلو", price: "۱۲۰٬۰۰۰ تومان هر کیلو", area: "سه، باغ بالا", available: "تا آخر خرداد", details: "گیلاس درشت و شیرین، خودتان بچینید یا ما می‌چینیم." }, 6);
+  add({ type: "sell", category: "nuts", title: "Walnuts, 2025 harvest", quantity: "50 kg", price: "450,000 toman per kg", area: "Soh", details: "Dry, hand-cracked on request." }, 3);
+  add({ type: "need", category: "labour", title: "دنبال دو نفر برای چیدن سیب", quantity: "۲ نفر", price: "روزی ۸۰۰٬۰۰۰ تومان", area: "سه", available: "از اول مهر", details: "ناهار با ماست." }, 0);
+  add({ type: "sell", category: "crafts", title: "قالی دستباف کاشان", quantity: "۱", price: "توافقی", area: "اصفهان", details: "شش متری، رنگ‌های سنتی." , contact_public: false }, 10);
+  add({ type: "sell", category: "bread", title: "نان محلی تنوری", quantity: "هر روز", price: "۱۵٬۰۰۰ تومان", area: "سه، مرکز" }, 1);
+  add({ type: "need", category: "other", title: "Looking for a used wheelbarrow", area: "Soh" }, 0);
+}
+if (process.env.MOCK_SEED) seed();
 
 async function auth(req, res, url) {
   const key = req.headers["apikey"];
@@ -239,9 +374,14 @@ async function auth(req, res, url) {
 function admin(req, res, url) {
   const p = url.pathname;
   const sp = url.searchParams;
-  if (p === "/__admin/dump") return send(res, 200, { listings: db.listings, rate_events: db.rate_events, otp: otpLog });
+  if (p === "/__admin/dump") return send(res, 200, { listings: db.listings, rate_events: db.rate_events, otp: otpLog, storage: [...storage.keys()] });
+  if (p === "/__admin/seed") { seed(); return send(res, 200, { ok: true, listings: db.listings.length }); }
+  if (p === "/__admin/put-object") { // test helper: store an object directly (path, type, size)
+    storage.set(sp.get("path"), { buf: Buffer.alloc(Number(sp.get("size") || 10), 1), type: sp.get("type") || "image/jpeg", at: Date.now() - Number(sp.get("age_min") || 0) * 60_000 });
+    return send(res, 200, { ok: true });
+  }
   if (p === "/__admin/reset") {
-    db.listings.length = 0; db.rate_events.length = 0; otpLog.length = 0;
+    db.listings.length = 0; db.rate_events.length = 0; otpLog.length = 0; storage.clear(); tokens.clear();
     return send(res, 200, { ok: true });
   }
   if (p === "/__admin/clear-rate") {
@@ -278,6 +418,7 @@ http
       if (url.pathname === "/__health") return send(res, 200, { ok: true });
       if (url.pathname.startsWith("/rest/v1/")) return await rest(req, res, url);
       if (url.pathname.startsWith("/auth/v1/")) return await auth(req, res, url);
+      if (url.pathname.startsWith("/storage/v1/")) return await storageRoute(req, res, url);
       return send(res, 404, { message: "not found" });
     } catch (e) {
       return send(res, 500, { message: String(e) });

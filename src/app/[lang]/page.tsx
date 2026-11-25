@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import "@/styles/home.css";
 import { Credit } from "@/components/credit";
-import { ExploreTabs, type ExploreTab } from "@/components/home/explore-tabs";
 import { HeroSlideshow, type HeroSlide } from "@/components/home/hero-slideshow";
 import { MarketTeaser } from "@/components/home/market-teaser";
 import { YearList } from "@/components/home/year-list";
@@ -36,20 +35,16 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
   const mountain = photoOf("karkas-mountain.jpg");
   const traditionsPhoto = photoOf("nakhl-gardani-mehriz.jpg", "karkas-peak.jpg");
 
-  // Explore tabs: History, Sights, Traditions.
-  const tabDefs: { id: string; label: string; slug: string; photo?: typeof opening }[] = [
-    { id: "history", label: hc.tabHistory[lang], slug: "history", photo: opening },
-    { id: "sights", label: hc.tabSights[lang], slug: "tourism", photo: mountain },
-    { id: "traditions", label: hc.tabTraditions[lang], slug: "traditions", photo: traditionsPhoto },
+  // Big picture cards: History, Sights, Traditions.
+  const cardDefs: { slug: string; photo?: typeof opening }[] = [
+    { slug: "history", photo: opening },
+    { slug: "tourism", photo: mountain },
+    { slug: "traditions", photo: traditionsPhoto },
   ];
-  const exploreTabs: ExploreTab[] = tabDefs.flatMap((d) => {
+  const exploreCards = cardDefs.flatMap((d) => {
     const s = sec(d.slug);
     if (!s || !d.photo) return [];
-    return [{
-      id: d.id, label: d.label, count: entriesLabel(entryCount(d.slug), lang), title: s.title[lang], intro: s.intro[lang], href: href(d.slug),
-      linkLabel: `${hc.openSection[lang]} ${s.title[lang]}`, image: d.photo.file, alt: d.photo.alt[lang],
-      ar: "16 / 9", credit: <Credit p={d.photo} lang={lang} />,
-    }];
+    return [{ slug: d.slug, title: s.title[lang], count: entriesLabel(entryCount(d.slug), lang), photo: d.photo }];
   });
 
   // Village-year rows and featured cards (text restated from existing sourced entries in site.ts).
@@ -115,40 +110,46 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
         </div>
       </section>
 
-      {/* EXPLORE + PLAN YOUR VISIT */}
+      {/* EXPLORE + PLAN YOUR VISIT: picture cards */}
       <section className="section" aria-labelledby="hm-explore-title">
-        <div className="wrap split hm-explore">
-          <div>
-            <p className="eyebrow">{hc.exploreEyebrow[lang]}</p>
-            <h2 id="hm-explore-title" className="hm-display hm-section-h">{hc.exploreTitle[lang]}</h2>
-            {exploreTabs.length > 0 && <ExploreTabs tabs={exploreTabs} dir={dir} label={hc.exploreLabel[lang]} />}
-          </div>
-          <aside aria-labelledby="hm-plan-title" className="hm-plan">
-            <h3 id="hm-plan-title" className="eyebrow hm-plan__title">{hc.planEyebrow[lang]}</h3>
-            <ul className="hm-plan__list">
-              {planCards.map((c) => (
+        <div className="wrap hm-explore">
+          <h2 id="hm-explore-title" className="sr-only">{hc.exploreEyebrow[lang]}</h2>
+          <ul className="hm-explore__main">
+            {exploreCards.map((c) => (
+              <li key={c.slug}>
+                <Link href={href(c.slug)} className="hm-tile hm-tile--big">
+                  <Image src={`/photos/${c.photo.file}`} alt={c.photo.alt[lang]} fill sizes="(max-width: 767px) 100vw, 400px" className="hm-tile__img" />
+                  <span className="hm-tile__text">
+                    <span className="hm-tile__title">{c.title}</span>
+                    <span className="hm-tile__meta">{c.count}</span>
+                  </span>
+                </Link>
+                <p className="hm-credit"><Credit p={c.photo} lang={lang} /></p>
+              </li>
+            ))}
+          </ul>
+          <h3 id="hm-plan-title" className="eyebrow hm-plan__title">{hc.planEyebrow[lang]}</h3>
+          <ul className="hm-explore__plan" aria-labelledby="hm-plan-title">
+            {planCards.map((c) => {
+              const ill = c.ill ? illustrationFor(c.ill) : undefined;
+              return (
                 <li key={c.slug}>
-                  <Link href={href(c.slug)} className="navy-card">
-                    <span className="navy-card__thumb hm-thumb">
-                      {c.ill && illustrationFor(c.ill) ? (
-                        <>
-                          <Image src={illustrationSrc(illustrationFor(c.ill)!)} alt="" width={144} height={96} sizes="96px" />
-                          <IllustrationLabel lang={lang} overlay small />
-                        </>
-                      ) : (
-                        <span aria-hidden="true"><SectionMark slug={c.mark ?? c.slug} /></span>
-                      )}
-                    </span>
-                    <span className="navy-card__body">
-                      <span className="navy-card__title">{c.title[lang]}</span>
-                      <span className="navy-card__meta">{c.text[lang]}</span>
+                  <Link href={href(c.slug)} className="hm-tile">
+                    {ill ? (
+                      <Image src={illustrationSrc(ill)} alt="" fill sizes="(max-width: 767px) 50vw, 240px" className="hm-tile__img" />
+                    ) : (
+                      <span className="hm-tile__mark" aria-hidden="true"><SectionMark slug={c.mark ?? c.slug} /></span>
+                    )}
+                    <span className="hm-tile__text">
+                      <span className="hm-tile__title">{c.title[lang]}</span>
+                      <span className="hm-tile__meta">{c.text[lang]}</span>
                     </span>
                   </Link>
                 </li>
-              ))}
-            </ul>
-            <Link href={href("tourism")} className="link-arrow">{hc.planViewAll[lang]} <Arrow /></Link>
-          </aside>
+              );
+            })}
+          </ul>
+          <Link href={href("tourism")} className="link-arrow">{hc.planViewAll[lang]} <Arrow /></Link>
         </div>
       </section>
 

@@ -21,6 +21,7 @@ const ENV = {
   SUPABASE_SERVICE_ROLE_KEY: SVC,
   IP_HASH_SALT: "t",
   MANAGE_CODE_SALT: "t",
+  CRON_SECRET: "cron-t",
 };
 const CODE_RE = /^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{4}-[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{4}-[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{4}$/;
 
@@ -431,7 +432,265 @@ async function scenarioPublicView() {
   check("sql: rate_events RLS + revoke", /alter table public\.rate_events enable row level security/i.test(sql) && /revoke all on public\.rate_events from anon, authenticated/i.test(sql));
   check("sql: listings RLS + revoke", /alter table public\.listings enable row level security/i.test(sql) && /revoke all on public\.listings from anon, authenticated/i.test(sql));
   check("sql: new columns present", ["manage_hash", "owner_id", "renewals", "updated_at"].every((c) => new RegExp(`${c}\\b`).test(sql)));
+  check("sql: images column, cap 10, view exposes images", /images\s+text\[\]\s+not null default '\{\}'/.test(sql) && /cardinality\(images\)\s*<=\s*10/.test(sql) && /expires_at, images\s*\n\s*from public\.listings/.test(sql));
+  const mig = readFileSync(join(ROOT, "database/migrations/003-listing-images.sql"), "utf8");
+  check("sql: migration 003 adds column, view, public bucket without storage.objects policies", /add column if not exists images/.test(mig) && /expires_at, images/.test(mig) && /'listing-images', 'listing-images', true/.test(mig) && /614400/.test(mig) && !/create policy/i.test(mig + sql));
   check("sql: no raw manage_code column", !/manage_code\s/i.test(sql));
+}
+
+
+// ---------- photos ----------
+// Same wire format as supabase-js uploadToSignedUrl: PUT, FormData with cacheControl + a file under the empty field name.
+async function putPhoto(url, { type = "image/jpeg", size = 2000 } = {}) {
+  const fd = new FormData();
+  fd.append("cacheControl", "31536000");
+  fd.append("", new Blob([new Uint8Array(size).fill(7)], { type }));
+  const res = await fetch(url, { method: "PUT", body: fd });
+  return { status: res.status, data: await res.json().catch(() => null) };
+}
+const NAME_RE = /^[a-z0-9]{10,16}\.(webp|jpg)$/;
+const stored = async () => (await dump()).storage;
+async function signAndUpload(auth, n, ext = "jpg") {
+  const sign = await post("/api/listings/images", { ...auth.body, items: Array.from({ length: n }, () => ({ ext })) }, { token: auth.token, ip: auth.ip });
+  const names = [];
+  if (sign.status === 200) {
+    for (const f of sign.data.files) {
+      const a = await putPhoto(f.full.url);
+      const b = await putPhoto(f.thumb.url);
+      if (a.status === 200 && b.status === 200) names.push(f.name);
+    }
+  }
+  return { sign, names };
+}
+
+async function scenarioPhotos() {
+  section("photos: sign, upload, finalise, view");
+  const c = await create({ title: "Photo listing", contactPublic: true });
+  const code = c.data.manageCode, id = c.data.id;
+  const A = { body: { code } };
+  const r = await signAndUpload(A, 3);
+  check("images: sign 200 with 3 files", r.sign.status === 200 && r.sign.data.ok && r.sign.data.files.length === 3, JSON.stringify(r.sign));
+  const f0 = r.sign.data.files?.[0];
+  check("images: names match contract and differ", r.sign.data.files.every((f) => NAME_RE.test(f.name)) && new Set(r.sign.data.files.map((f) => f.name)).size === 3, JSON.stringify(r.sign.data.files?.map((f) => f.name)));
+  check("images: signed URLs absolute, PUT, token in URL, full and thumb differ", f0 && f0.full.method === "PUT" && f0.thumb.method === "PUT" && f0.full.url.startsWith(MOCK + "/storage/v1/object/upload/sign/listing-images/" + id + "/") && f0.full.url.includes("token=") && f0.thumb.url.includes(`/${f0.name.replace(".jpg", "-t.jpg")}?`) , JSON.stringify(f0));
+  check("images: all 3 photos uploaded via the FormData protocol", r.names.length === 3);
+  const keys = (await stored()).filter((k) => k.startsWith(id + "/"));
+  check("images: six objects in storage (full + thumb)", keys.length === 6, keys.join());
+  check("images: nothing in DB before finalise", (await rowOf(id)).images.length === 0);
+
+  const reuse = await putPhoto(f0.full.url);
+  check("images: signed URL cannot overwrite (409)", reuse.status !== 200, JSON.stringify(reuse));
+  const fin = await post("/api/listings/manage", { code, action: "update", fields: { images: r.names } });
+  check("images: finalise ok, order kept, names in response", fin.status === 200 && JSON.stringify(fin.data.listing?.images) === JSON.stringify(r.names), JSON.stringify(fin));
+  check("images: DB row has the names", JSON.stringify((await rowOf(id)).images) === JSON.stringify(r.names));
+  const g = await post("/api/listings/manage", { code, action: "get" });
+  check("images: manage get returns images array", Array.isArray(g.data.listing?.images) && g.data.listing.images.length === 3 && leaks(g.data).length === 0);
+  const reorder = [r.names[2], r.names[0], r.names[1]];
+  const ro = await post("/api/listings/manage", { code, action: "update", fields: { images: reorder } });
+  check("images: reorder (new cover) ok", ro.status === 200 && ro.data.listing.images[0] === r.names[2], JSON.stringify(ro.data));
+
+  await admin(`approve?id=${id}`);
+  const pubRows = await (await fetch(`${MOCK}/rest/v1/public_listings?select=*`, { headers: { apikey: ANON, Authorization: `Bearer ${ANON}` } })).json();
+  const pub = pubRows.find((x) => x.id === id);
+  check("images: public view shows images in order", JSON.stringify(pub?.images) === JSON.stringify(reorder), JSON.stringify(pub));
+  const obj = await fetch(`${MOCK}/storage/v1/object/public/listing-images/${id}/${reorder[0]}`);
+  const thumb = await fetch(`${MOCK}/storage/v1/object/public/listing-images/${id}/${reorder[0].replace(".jpg", "-t.jpg")}`);
+  check("images: public object and thumb readable without a key", obj.status === 200 && thumb.status === 200 && obj.headers.get("content-type") === "image/jpeg");
+  const anonList = await fetch(`${MOCK}/storage/v1/object/list/listing-images`, { method: "POST", headers: { apikey: ANON, "Content-Type": "application/json" }, body: JSON.stringify({ prefix: id }) });
+  const anonDel = await fetch(`${MOCK}/storage/v1/object/listing-images`, { method: "DELETE", headers: { apikey: ANON, "Content-Type": "application/json" }, body: JSON.stringify({ prefixes: [`${id}/${reorder[0]}`] }) });
+  const anonSign = await fetch(`${MOCK}/storage/v1/object/upload/sign/listing-images/${id}/aaaaaaaaaaaa.jpg`, { method: "POST", headers: { apikey: ANON } });
+  check("images: anon key cannot list, delete or sign (mock mirrors no-policy bucket)", anonList.status === 401 && anonDel.status === 401 && anonSign.status === 401);
+
+  const drop = await post("/api/listings/manage", { code, action: "update", fields: { images: [reorder[0]] } });
+  check("images: images change on approved listing -> pending", drop.status === 200 && drop.data.listing.status === "pending", JSON.stringify(drop.data));
+  const left = (await stored()).filter((k) => k.startsWith(id + "/"));
+  check("images: dropped photos removed from storage (both files)", left.length === 2 && left.every((k) => k.includes(reorder[0].split(".")[0])), left.join());
+  const clear = await post("/api/listings/manage", { code, action: "update", fields: { images: [] } });
+  check("images: empty list clears photos", clear.status === 200 && clear.data.listing.images.length === 0 && (await stored()).filter((k) => k.startsWith(id + "/")).length === 0, JSON.stringify(clear.data));
+
+  section("photos: limits and validation");
+  const lim = await create({ title: "Limit listing" });
+  const L = { body: { code: lim.data.manageCode } };
+  const s11 = await post("/api/listings/images", { ...L.body, items: Array.from({ length: 11 }, () => ({ ext: "webp" })) });
+  check("images: 11 in one call -> 400 too_many_images", s11.status === 400 && s11.data.error === "too_many_images", JSON.stringify(s11));
+  const eight = await signAndUpload(L, 8, "webp");
+  check("images: 8 webp uploaded", eight.names.length === 8 && eight.names.every((n) => n.endsWith(".webp")));
+  const fin8 = await post("/api/listings/manage", { code: L.body.code, action: "update", fields: { images: eight.names } });
+  check("images: 8 saved", fin8.status === 200 && fin8.data.listing.images.length === 8);
+  const s3 = await post("/api/listings/images", { ...L.body, items: [{ ext: "jpg" }, { ext: "jpg" }, { ext: "jpg" }] });
+  check("images: 8 existing + 3 new -> too_many_images", s3.status === 400 && s3.data.error === "too_many_images", JSON.stringify(s3));
+  const two = await signAndUpload(L, 2);
+  check("images: 8 + 2 = 10 allowed", two.names.length === 2);
+  const all10 = [...eight.names, ...two.names];
+  const fin10 = await post("/api/listings/manage", { code: L.body.code, action: "update", fields: { images: all10 } });
+  check("images: exactly 10 saved", fin10.status === 200 && fin10.data.listing.images.length === 10, JSON.stringify(fin10.data));
+  const over = await post("/api/listings/manage", { code: L.body.code, action: "update", fields: { images: [...all10, "abcdefghijkl.jpg"] } });
+  check("images: finalise with 11 names -> 400 too_many_images", over.status === 400 && over.data.error === "too_many_images", JSON.stringify(over));
+  const dup = await post("/api/listings/manage", { code: L.body.code, action: "update", fields: { images: [all10[0], all10[0]] } });
+  check("images: duplicate names -> 400 bad_images", dup.status === 400 && dup.data.error === "bad_images", JSON.stringify(dup));
+  for (const bad of ["x.png", "../etc/passwd", "ABCDEFGHIJKL.jpg", "short.jpg", `${all10[0]}/../x.jpg`, 5, null]) {
+    const rr = await post("/api/listings/manage", { code: L.body.code, action: "update", fields: { images: [bad] } });
+    check(`images: bad name ${JSON.stringify(bad)} -> 400 bad_images`, rr.status === 400 && rr.data.error === "bad_images", JSON.stringify(rr));
+  }
+  const notArr = await post("/api/listings/manage", { code: L.body.code, action: "update", fields: { images: "abc" } });
+  check("images: non-array -> 400 bad_images", notArr.status === 400 && notArr.data.error === "bad_images", JSON.stringify(notArr));
+  const ghost = await post("/api/listings/manage", { code: L.body.code, action: "update", fields: { images: ["zzzzzzzzzzzz.jpg"] } });
+  check("images: name with no object in storage -> 400 bad_images", ghost.status === 400 && ghost.data.error === "bad_images", JSON.stringify(ghost));
+  const half = await post("/api/listings/images", { ...L.body, items: [{ ext: "jpg" }] }).then(async (x) => (x.status === 200 ? (await putPhoto(x.data.files[0].full.url), x.data.files[0].name) : null));
+  const hr = await post("/api/listings/manage", { code: L.body.code, action: "update", fields: { images: [half] } });
+  check("images: full uploaded but thumb missing -> 400 bad_images", hr.status === 400 && hr.data.error === "bad_images", JSON.stringify(hr));
+  check("images: failed finalise left the saved list alone", (await rowOf(lim.data.id)).images.length === 10);
+  const badExt = await post("/api/listings/images", { ...L.body, items: [{ ext: "png" }] });
+  const noItems = await post("/api/listings/images", { ...L.body, items: [] });
+  const badItems = await post("/api/listings/images", { ...L.body, items: "x" });
+  check("images: bad ext / empty / non-array items -> 400 bad_images", [badExt, noItems, badItems].every((x) => x.status === 400 && x.data.error === "bad_images"), JSON.stringify([badExt.data, noItems.data, badItems.data]));
+
+  section("photos: storage limits (mock mirrors the bucket)");
+  const lone = await create({ title: "Limits" });
+  const sg = await post("/api/listings/images", { code: lone.data.manageCode, items: [{ ext: "jpg" }, { ext: "jpg" }] });
+  const big = await putPhoto(sg.data.files[0].full.url, { size: 650 * 1024 });
+  const wrongType = await putPhoto(sg.data.files[1].full.url, { type: "image/png" });
+  const edge = await putPhoto(sg.data.files[1].thumb.url, { size: 600 * 1024 });
+  check("storage: > 600 KB refused (413)", big.status === 413, JSON.stringify(big));
+  check("storage: image/png refused (415)", wrongType.status === 415, JSON.stringify(wrongType));
+  check("storage: exactly 600 KB accepted", edge.status === 200, JSON.stringify(edge));
+  const badTok = await putPhoto(sg.data.files[0].full.url.replace(/token=.*/, "token=nope"));
+  check("storage: bad token refused", badTok.status === 403, JSON.stringify(badTok));
+
+  section("photos: isolation, owner path, errors");
+  const other = await create({ title: "Other listing" });
+  const oth = await signAndUpload({ body: { code: other.data.manageCode } }, 1);
+  const steal = await post("/api/listings/manage", { code: lim.data.manageCode, action: "update", fields: { images: [oth.names[0]] } });
+  check("isolation: code A cannot use B's photo names (bad_images)", steal.status === 400 && steal.data.error === "bad_images", JSON.stringify(steal));
+  const sign = await post("/api/listings/images", { code: lim.data.manageCode, listingId: other.data.id, items: [{ ext: "jpg" }] });
+  const signedPaths = (sign.data.files ?? []).map((f) => f.full.url);
+  check("isolation: listingId in body is ignored when a code is used (URLs are for A's folder)", sign.status !== 200 || signedPaths.every((u) => u.includes(`/${lim.data.id}/`)) , JSON.stringify(sign));
+  const wrong = await post("/api/listings/images", { code: "AAAA-AAAA-AAAA", items: [{ ext: "jpg" }] });
+  const mal = await post("/api/listings/images", { code: "zz", items: [{ ext: "jpg" }] });
+  check("images: wrong and malformed code -> identical 404 not_found", wrong.status === 404 && mal.status === 404 && JSON.stringify(wrong.data) === JSON.stringify(mal.data) && wrong.data.error === "not_found", JSON.stringify([wrong, mal]));
+  const noAuth = await post("/api/listings/images", { items: [{ ext: "jpg" }], listingId: other.data.id });
+  check("images: no code and no token -> 401", noAuth.status === 401, JSON.stringify(noAuth));
+  const badJ = await post("/api/listings/images", null, { raw: "{nope" });
+  check("images: bad json 400", badJ.status === 400 && badJ.data.error === "bad_json");
+
+  const ta = emailTok("alice-photos@example.com"), tb = emailTok("bob-photos@example.com");
+  const mine = await create({ title: "Owner photos" }, { token: ta });
+  const O = { body: { listingId: mine.data.id }, token: ta };
+  const ow = await signAndUpload(O, 2);
+  check("owner: sign + upload with login token", ow.sign.status === 200 && ow.names.length === 2, JSON.stringify(ow.sign));
+  const fo = await post("/api/my/listings", { action: "update", id: mine.data.id, fields: { images: ow.names } }, { token: ta });
+  check("owner: finalise via /api/my/listings", fo.status === 200 && fo.data.listing.images.length === 2, JSON.stringify(fo));
+  const lst = await post("/api/my/listings", { action: "list" }, { token: ta });
+  check("owner: my list carries images", lst.data.listings.find((l) => l.id === mine.data.id)?.images.length === 2 && leaks(lst.data).length === 0);
+  const bobSign = await post("/api/listings/images", { listingId: mine.data.id, items: [{ ext: "jpg" }] }, { token: tb });
+  check("owner: another user cannot sign for my listing (404)", bobSign.status === 404 && bobSign.data.error === "not_found", JSON.stringify(bobSign));
+  const bobFin = await post("/api/my/listings", { action: "update", id: mine.data.id, fields: { images: [] } }, { token: tb });
+  check("owner: another user cannot change my photos (404)", bobFin.status === 404 && (await rowOf(mine.data.id)).images.length === 2, JSON.stringify(bobFin));
+  const junk = await post("/api/listings/images", { listingId: mine.data.id, items: [{ ext: "jpg" }] }, { token: "garbage" });
+  check("owner: garbage token 401", junk.status === 401);
+  const badId = await post("/api/listings/images", { listingId: "nope", items: [{ ext: "jpg" }] }, { token: ta });
+  check("owner: malformed listingId 404", badId.status === 404);
+
+  for (const st of ["removed", "rejected"]) {
+    const x = await create({ title: "NE photo " + st });
+    await admin(`set?id=${x.data.id}&field=status&value=${st}`);
+    const rr = await post("/api/listings/images", { code: x.data.manageCode, items: [{ ext: "jpg" }] });
+    check(`images: ${st} listing -> 409 not_editable`, rr.status === 409 && rr.data.error === "not_editable", JSON.stringify(rr));
+  }
+
+  section("photos: rate limit");
+  const rl = await create({ title: "Rate photos" });
+  const ip = "8.8.4.4";
+  await admin("clear-rate");
+  const sts = [];
+  for (let i = 0; i < 12; i++) sts.push((await post("/api/listings/images", { code: rl.data.manageCode, items: [{ ext: "jpg" }] }, { ip })).status);
+  const r41 = await post("/api/listings/images", { code: rl.data.manageCode, items: [{ ext: "jpg" }] }, { ip });
+  check("images rate: first 12 per hour answered", sts.every((x) => x === 200), sts.join());
+  check("images rate: 13th -> 429 rate_limited", r41.status === 429 && r41.data.error === "rate_limited", JSON.stringify(r41));
+  const mg = await post("/api/listings/manage", { code: rl.data.manageCode, action: "get" }, { ip });
+  check("images rate: separate from the manage limiter", mg.status === 200, JSON.stringify(mg));
+
+  section("photos: folder cap, size and type checks, renew cut-off");
+  const fc = await create({ title: "Folder cap" });
+  const fcId = fc.data.id, fcCode = fc.data.manageCode;
+  await admin("clear-rate");
+  const fcSign = await post("/api/listings/images", { code: fcCode, items: Array.from({ length: 10 }, () => ({ ext: "jpg" })) }, { ip: "9.9.9.1" });
+  for (const f of fcSign.data.files) { await putPhoto(f.full.url); await putPhoto(f.thumb.url); }
+  const fcMore = await post("/api/listings/images", { code: fcCode, items: [{ ext: "jpg" }, { ext: "jpg" }, { ext: "jpg" }] }, { ip: "9.9.9.1" });
+  check("folder cap: 20 fresh unsaved files + 3 more photos -> 400 too_many_images", fcMore.status === 400 && fcMore.data.error === "too_many_images", JSON.stringify(fcMore));
+  const fcOne = await post("/api/listings/images", { code: fcCode, items: [{ ext: "jpg" }] }, { ip: "9.9.9.1" });
+  check("folder cap: 1 more photo still fits (20 + 2 <= 24)", fcOne.status === 200, JSON.stringify(fcOne));
+  for (const f of fcSign.data.files.slice(0, 2)) await admin(`put-object?path=${encodeURIComponent(fcId + "/" + f.name)}&age_min=60`);
+  for (const f of fcSign.data.files.slice(2)) { await admin(`put-object?path=${encodeURIComponent(fcId + "/" + f.name)}&age_min=60`); await admin(`put-object?path=${encodeURIComponent(fcId + "/" + f.name.replace(".jpg", "-t.jpg"))}&age_min=60`); }
+  for (const f of fcSign.data.files.slice(0, 2)) await admin(`put-object?path=${encodeURIComponent(fcId + "/" + f.name.replace(".jpg", "-t.jpg"))}&age_min=60`);
+  const fcStale = await post("/api/listings/images", { code: fcCode, items: [{ ext: "jpg" }, { ext: "jpg" }, { ext: "jpg" }] }, { ip: "9.9.9.1" });
+  check("folder cap: old unsaved files are cleaned up so a real retry fits", fcStale.status === 200 && (await stored()).filter((k) => k.startsWith(fcId + "/")).length === 0, JSON.stringify(fcStale) + (await stored()).filter((k) => k.startsWith(fcId + "/")).length);
+
+  const sz = await create({ title: "Size checks" });
+  const szS = await post("/api/listings/images", { code: sz.data.manageCode, items: [{ ext: "jpg" }, { ext: "jpg" }, { ext: "jpg" }] }, { ip: "9.9.9.2" });
+  const [g0, g1, g2] = szS.data.files;
+  await putPhoto(g0.full.url); await putPhoto(g0.thumb.url, { size: 200_000 });
+  await putPhoto(g1.full.url, { type: "image/png" }); await putPhoto(g1.thumb.url);
+  await putPhoto(g2.full.url, { size: 90_000 }); await putPhoto(g2.thumb.url, { size: 20_000 });
+  const fz = (n) => post("/api/listings/manage", { code: sz.data.manageCode, action: "update", fields: { images: [n] } });
+  const z0 = await fz(g0.name), z1 = await fz(g1.name), z2 = await fz(g2.name);
+  check("finalise: thumbnail over 150 KB -> 400 bad_images", z0.status === 400 && z0.data.error === "bad_images", JSON.stringify(z0));
+  check("finalise: not webp/jpeg -> 400 bad_images", z1.status === 400 && z1.data.error === "bad_images", JSON.stringify(z1));
+  check("finalise: normal sizes ok", z2.status === 200, JSON.stringify(z2));
+  check("finalise: leftover files of unsaved uploads removed once old (young ones kept)", (await stored()).filter((k) => k.startsWith(sz.data.id + "/")).length >= 2);
+
+  const old = await create({ title: "Renew too late" });
+  await admin(`approve?id=${old.data.id}&expires_in_days=-20`);
+  const rOld = await post("/api/listings/manage", { code: old.data.manageCode, action: "renew" });
+  check("renew: 20 days after expiry -> 409 cannot_renew (photos are swept at 14)", rOld.status === 409 && rOld.data.error === "cannot_renew", JSON.stringify(rOld));
+
+  section("photos: delete cleanup + keepalive sweep");
+  const dl = await create({ title: "Delete with photos" });
+  const dd = await signAndUpload({ body: { code: dl.data.manageCode } }, 2);
+  await post("/api/listings/manage", { code: dl.data.manageCode, action: "update", fields: { images: dd.names } });
+  check("delete: photos exist before", (await stored()).filter((k) => k.startsWith(dl.data.id + "/")).length === 4);
+  const del = await post("/api/listings/manage", { code: dl.data.manageCode, action: "delete" });
+  check("delete: ok", del.status === 200 && del.data.ok === true);
+  check("delete: storage folder emptied and images cleared", (await stored()).filter((k) => k.startsWith(dl.data.id + "/")).length === 0 && (await rowOf(dl.data.id)).images.length === 0);
+
+  const mkPhoto = async (title) => {
+    const x = await create({ title });
+    const u = await signAndUpload({ body: { code: x.data.manageCode } }, 1);
+    await post("/api/listings/manage", { code: x.data.manageCode, action: "update", fields: { images: u.names } });
+    return x.data.id;
+  };
+  const has = async (id) => (await stored()).some((k) => k.startsWith(id + "/"));
+  const active = await mkPhoto("sweep active");
+  await admin(`approve?id=${active}`);
+  const pendingP = await mkPhoto("sweep pending");
+  const rejected = await mkPhoto("sweep rejected");
+  await admin(`set?id=${rejected}&field=status&value=rejected`);
+  const removed = await mkPhoto("sweep removed");
+  await admin(`set?id=${removed}&field=status&value=removed`);
+  const longGone = await mkPhoto("sweep expired 20d");
+  await admin(`approve?id=${longGone}&expires_in_days=-20`);
+  const justGone = await mkPhoto("sweep expired 5d");
+  await admin(`approve?id=${justGone}&expires_in_days=-5`);
+  const noAuthKa = await fetch(`${APP}/api/keepalive`);
+  const wrongKa = await fetch(`${APP}/api/keepalive`, { headers: { Authorization: "Bearer nope" } });
+  check("keepalive: 401 without / with wrong secret", noAuthKa.status === 401 && wrongKa.status === 401, `${noAuthKa.status}/${wrongKa.status}`);
+  check("keepalive: 401 sweeps nothing", await has(removed));
+  const ka = await fetch(`${APP}/api/keepalive`, { headers: { Authorization: "Bearer cron-t" } });
+  check("keepalive: 200 with secret", ka.status === 200 && (await ka.json()).ok === true);
+  check("sweep: removed listing's photos deleted + images cleared", !(await has(removed)) && (await rowOf(removed)).images.length === 0);
+  check("sweep: rejected listing's photos deleted", !(await has(rejected)) && (await rowOf(rejected)).images.length === 0);
+  check("sweep: expired > 14 days ago deleted", !(await has(longGone)) && (await rowOf(longGone)).images.length === 0);
+  check("sweep: expired only 5 days ago kept (grace)", (await has(justGone)) && (await rowOf(justGone)).images.length === 1);
+  check("sweep: active approved listing untouched", (await has(active)) && (await rowOf(active)).images.length === 1);
+  check("sweep: pending listing untouched", (await has(pendingP)) && (await rowOf(pendingP)).images.length === 1);
+
+  const many = [];
+  for (let i = 0; i < 23; i++) { const x = await create({ title: "bulk " + i }); const u = await signAndUpload({ body: { code: x.data.manageCode } }, 1); await post("/api/listings/manage", { code: x.data.manageCode, action: "update", fields: { images: u.names } }); await admin(`set?id=${x.data.id}&field=status&value=removed`); many.push(x.data.id); }
+  await fetch(`${APP}/api/keepalive`, { headers: { Authorization: "Bearer cron-t" } });
+  const clearedN = (await dump()).listings.filter((r) => many.includes(r.id) && r.images.length === 0).length;
+  check("sweep: bounded to 20 listings per run", clearedN === 20, String(clearedN));
+  await fetch(`${APP}/api/keepalive`, { headers: { Authorization: "Bearer cron-t" } });
+  check("sweep: next run finishes the rest", (await dump()).listings.filter((r) => many.includes(r.id) && r.images.length === 0).length === 23);
 }
 
 async function scenarioPages() {
@@ -500,6 +759,7 @@ async function main() {
     await scenarioRateLimit();
     await scenarioOwner();
     await scenarioPublicView();
+    await scenarioPhotos();
     await scenarioAuthLib();
     await scenarioPages();
     const devLog = dev.getLog();

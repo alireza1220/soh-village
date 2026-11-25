@@ -8,12 +8,12 @@ import { PhotoStrip } from "@/components/photo-strip";
 import { MarketBoard } from "@/components/market-board";
 import { MarketForm } from "@/components/market-form";
 import { PostForm } from "@/components/post-form";
-import { SocialForSection } from "@/components/social-embeds";
-import { YoutubeForSection } from "@/components/youtube-list";
+import { MediaBlock } from "@/components/media-block";
 import { Arrow } from "@/components/icons";
 import { illustrationFor } from "@/lib/illustrations";
 import { photos } from "@/lib/photos";
 import { hasLocale, locales } from "@/lib/i18n";
+import { mediaFor, withoutPreviewed } from "@/lib/media";
 import { sectionBySlug, sections } from "@/lib/site";
 
 export function generateStaticParams() {
@@ -28,8 +28,12 @@ async function Content({ params }: { params: PageProps<"/[lang]/[section]">["par
   const index = sections.findIndex((item) => item.slug === s.slug);
   const prev = index > 0 ? sections[index - 1] : undefined;
   const next = index >= 0 && index < sections.length - 1 ? sections[index + 1] : undefined;
+  // Videos and posts as previews; a link in this section's own link list that is now a preview is not shown twice.
+  const media = mediaFor(s.slug, lang, s.blocks);
+  const blocks = withoutPreviewed(s.blocks, media);
   const anchors = cardAnchors(s.blocks);
   const hasToc = anchors.length >= 4;
+  const tocAnchors = media.length > 0 ? [...anchors, { id: `media-${s.slug}`, title: { fa: "ویدیوها و پست‌ها", en: "Videos and posts" } }] : anchors;
   // A real photo of the section wins; else its illustration (labelled); else the region fallback photo.
   const hasOwnPhoto = photos.some((p) => p.section === s.slug);
   const illustration = hasOwnPhoto ? undefined : illustrationFor(s.slug);
@@ -53,7 +57,7 @@ async function Content({ params }: { params: PageProps<"/[lang]/[section]">["par
             <nav className="pg-toc" aria-labelledby="pg-toc-title">
               <p id="pg-toc-title" className="eyebrow pg-eyebrow">{lang === "fa" ? "در این صفحه" : "On this page"}</p>
               <ul className="pg-toc__list">
-                {anchors.map((a) => <li key={a.id}><a href={`#${a.id}`}>{a.title[lang]}</a></li>)}
+                {tocAnchors.map((a) => <li key={a.id}><a href={`#${a.id}`}>{a.title[lang]}</a></li>)}
               </ul>
             </nav>
           )}
@@ -66,9 +70,8 @@ async function Content({ params }: { params: PageProps<"/[lang]/[section]">["par
                 </Link>
               </p>
             )}
-            <Blocks blocks={s.blocks} lang={lang} />
-            <YoutubeForSection section={s.slug} lang={lang} />
-            <SocialForSection section={s.slug} lang={lang} />
+            <Blocks blocks={blocks} lang={lang} />
+            <MediaBlock section={s.slug} lang={lang} items={media} />
             {s.slug === "market" && (
               <section className="pg-form" aria-labelledby="pg-form-title">
                 <h2 id="pg-form-title" className="pg-form__title">{lang === "fa" ? "آگهی خود را بنویسید" : "Write your listing"}</h2>

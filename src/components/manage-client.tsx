@@ -57,7 +57,7 @@ export function ManageClient({ lang }: { lang: Locale }) {
       </div>
       {item && (
         <>
-          <ListingManager lang={lang} items={[item]} run={run} onRemoved={() => { setItem(null); setDone(T.deleted[lang]); }} />
+          <ListingManager lang={lang} items={[item]} run={run} photoAuth={async () => ({ code: code.trim() })} onRemoved={() => { setItem(null); setDone(T.deleted[lang]); }} />
           <div><button type="button" className="btn btn--ghost" onClick={reset}>{T.other[lang]}</button></div>
         </>
       )}

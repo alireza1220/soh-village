@@ -9,7 +9,7 @@ export type NavDef = { slug: string; label?: L };
 export type NavGroupDef = { id: string; label: L; description: L; items: NavDef[] };
 
 const routeLabels: Record<string, L> = {
-  photos: { fa: "عکس‌ها", en: "Photos" },
+  photos: { fa: "عکس‌ها و ویدیوها", en: "Photos and videos" },
   map: { fa: "نقشه", en: "Map" },
   references: { fa: "راهنما و منابع", en: "Guide and sources" },
   credits: { fa: "منبع عکس‌ها", en: "Photo credits" },
@@ -22,7 +22,7 @@ export const navGroups: NavGroupDef[] = [
   {
     id: "explore",
     label: { fa: "کاوش", en: "Explore" },
-    description: { fa: "تاریخ، مردم، آیین‌ها و عکس‌ها.", en: "History, people, traditions, photos." },
+    description: { fa: "تاریخ، مردم، آیین‌ها، عکس‌ها و ویدیوها.", en: "History, people, traditions, photos and videos." },
     items: [{ slug: "history" }, { slug: "tourism" }, { slug: "people" }, { slug: "traditions" }, { slug: "photos" }, { slug: "map" }],
   },
   {

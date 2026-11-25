@@ -2,12 +2,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { MsBanner } from "@/components/ms-banner";
 import { ReferenceBrowser } from "@/components/reference-browser";
-import { SocialList } from "@/components/social-embeds";
-import { YoutubeList } from "@/components/youtube-list";
+import { MediaList } from "@/components/media-block";
 import { hasLocale, locales } from "@/lib/i18n";
 import { loadResearchLinks } from "@/lib/reference-list";
-import { socialPosts } from "@/lib/social-embeds";
-import { youtubeSearched, youtubeVideos } from "@/lib/youtube";
+import { allMedia } from "@/lib/media";
+import { youtubeSearched } from "@/lib/youtube";
 
 export function generateStaticParams() {
   return locales.map((lang) => ({ lang }));
@@ -31,6 +30,7 @@ export default async function ReferencesPage({ params }: PageProps<"/[lang]/refe
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
   const groups = loadResearchLinks();
+  const media = allMedia(lang);
   const fa = lang === "fa";
   const sec = (id: string, eyebrow: string, title: string, text: string, body: React.ReactNode) => (
     <section className="ms-block" aria-labelledby={id}>
@@ -65,21 +65,21 @@ export default async function ReferencesPage({ params }: PageProps<"/[lang]/refe
           fa
             ? `جستجو در ${youtubeSearched.fa}. فقط فیلم‌های همین سُهِ میمه. SohiranTube همنام صفحه‌ی فیسبوک روستاست. شرح‌ها از روی عنوان است.`
             : `Searched ${youtubeSearched.en}. Only this Soh, near Meymeh. SohiranTube shares the village Facebook page's name. Notes follow titles.`,
-          <YoutubeList videos={youtubeVideos} lang={lang} />,
+          <MediaList items={media.filter((m) => m.platform === "youtube")} lang={lang} />,
         )}
         {sec(
           "facebook", fa ? "شبکه‌های اجتماعی" : "Social", fa ? "فیسبوک" : "Facebook",
           fa
             ? "صفحه‌ی «روستای تاریخی سُه» و ویدیوهای عنوان‌دار. شرح‌ها از روی عنوان است."
             : "The “historic village of Soh” page and its titled videos. Notes follow titles.",
-          <SocialList posts={socialPosts.filter((p) => p.platform === "facebook")} lang={lang} />,
+          <MediaList items={media.filter((m) => m.platform === "facebook")} lang={lang} />,
         )}
         {sec(
           "instagram", fa ? "شبکه‌های اجتماعی" : "Social", fa ? "اینستاگرام" : "Instagram",
           fa
             ? "پست‌ها و ریل‌های \u2066@soh_village\u2069 درباره‌ی همین روستا. تصویر بازسازی‌شده یا ساخته‌ی هوش مصنوعی عکس تاریخی حساب نشده."
             : "Posts and reels from @soh_village about this village. Reconstructed or AI images are not treated as historical photos.",
-          <SocialList posts={socialPosts.filter((p) => p.platform === "instagram")} lang={lang} />,
+          <MediaList items={media.filter((m) => m.platform === "instagram")} lang={lang} />,
         )}
         <section className="ms-block" aria-labelledby="links-all">
           <div className="ms-head">

@@ -1,9 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Gallery } from "@/components/gallery";
+import { Gallery, type GalleryGroup } from "@/components/gallery";
 import { Arrow } from "@/components/icons";
 import { MsBanner } from "@/components/ms-banner";
 import { hasLocale, locales } from "@/lib/i18n";
+import { allMedia, mediaSectionTitle } from "@/lib/media";
 import { photos, shots } from "@/lib/photos";
 import { freeAreaPhotoLinks, ownedPhotoLinks, possiblySohLinks } from "@/lib/photo-links";
 import { sectionBySlug } from "@/lib/site";
@@ -12,34 +14,51 @@ export function generateStaticParams() {
   return locales.map((lang) => ({ lang }));
 }
 
+export async function generateMetadata({ params }: PageProps<"/[lang]/photos">): Promise<Metadata> {
+  const { lang } = await params;
+  if (!hasLocale(lang)) return {};
+  return { title: lang === "fa" ? "عکس‌ها و ویدیوها · روستای سُه" : "Photos and videos · Soh Village" };
+}
+
 export default async function Photos({ params }: PageProps<"/[lang]/photos">) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
   const fa = lang === "fa";
-  const groups = [...new Set(photos.map((p) => p.section))];
-  const name = (slug: string) => (slug === "village" ? (fa ? "روستا" : "The village") : sectionBySlug(slug)?.title[lang] ?? slug);
+  const photoGroups = [...new Set(photos.map((p) => p.section))];
+  const name = (slug: string) => (slug === "village" ? (fa ? "روستا" : "The village") : sectionBySlug(slug)?.title[lang] ?? mediaSectionTitle(slug)[lang]);
+  // Each video or post joins the first of its sections that already has photos; if none has, a group named by its first section is added.
+  const media = allMedia(lang);
+  const ids = [...photoGroups];
+  const mediaOf = new Map<string, typeof media>();
+  for (const m of media) {
+    const g = m.sections.find((slug) => photoGroups.includes(slug)) ?? m.sections[0];
+    if (!ids.includes(g)) ids.push(g);
+    mediaOf.set(g, [...(mediaOf.get(g) ?? []), m]);
+  }
+  const kindOrder = (m: (typeof media)[number]) => (m.kind === "video" ? 0 : 1);
+  const groups: GalleryGroup[] = ids.map((g) => ({
+    id: g,
+    title: name(g),
+    photos: photos.filter((p) => p.section === g),
+    media: [...(mediaOf.get(g) ?? [])].sort((a, b) => kindOrder(a) - kindOrder(b)),
+  }));
+  // Pages shown as previews above are not listed again as plain links.
+  const previewed = new Set(media.map((m) => m.href.replace(/^https?:\/\/(www\.)?/, "").replace(/\/+$/, "").toLowerCase()));
+  const notPreviewed = <T extends { url: string }>(ls: T[]) => ls.filter((l) => !previewed.has(l.url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/+$/, "").toLowerCase()));
   const missing = shots.filter((s) => !photos.some((p) => p.section === s.section && p.file.startsWith(s.id))).sort((a, b) => a.priority - b.priority);
-  const newTab = fa ? "(در تب تازه باز می‌شود)" : "(opens in a new tab)";
+  const newTab = fa ? "(در زبانه‌ی جدید باز می‌شود)" : "(opens in a new tab)";
   return (
     <article className="ms-page">
       <MsBanner
         lang={lang}
         file="opening.jpg"
-        title={fa ? "عکس‌ها" : "Photos"}
+        title={fa ? "عکس‌ها و ویدیوها" : "Photos and videos"}
         intro={fa
-          ? "عکس صفحه‌ی اول برای این سایت فرستاده شده. بقیه از منطقه‌اند و برچسب «نه سُه» دارند."
-          : "The opening photo was sent for this site. The rest show the region and are labelled “not Soh”."}
+          ? "عکس صفحه‌ی اول برای این سایت فرستاده شده. عکس‌های دیگر از منطقه‌اند و برچسب «نه سُه» دارند. ویدیوها و پست‌ها از دیگران است؛ فقط نمایش داده می‌شود، نه کپی."
+          : "The opening photo was sent for this site. Other photos show the region and are labelled “not Soh”. Videos and posts are by others; shown, not copied."}
       />
       <div className="wrap ms-body">
-        {groups.map((g) => (
-          <section key={g} className="ms-block" aria-labelledby={`g-${g}`}>
-            <div className="ms-head">
-              <p className="eyebrow">{fa ? "گالری" : "Gallery"}</p>
-              <h2 id={`g-${g}`}>{name(g)}</h2>
-            </div>
-            <Gallery photos={photos.filter((p) => p.section === g)} lang={lang} />
-          </section>
-        ))}
+        <Gallery groups={groups} lang={lang} />
 
         <section className="ms-block" aria-labelledby="owned">
           <div className="ms-head">
@@ -48,7 +67,7 @@ export default async function Photos({ params }: PageProps<"/[lang]/photos">) {
             <p>{fa ? "فقط پیوند است؛ عکس‌ها مال صاحبانشان است. برای استفاده اجازه بگیرید." : "Linked only; the photos belong to their owners. Ask before using one."}</p>
           </div>
           <ul className="ms-links">
-            {ownedPhotoLinks.map((l) => (
+            {notPreviewed(ownedPhotoLinks).map((l) => (
               <li key={l.url + l.label.en}>
                 <a className="navy-card" href={l.url} target="_blank" rel="noopener noreferrer">
                   <span className="navy-card__body"><span className="navy-card__title">{l.label[lang]}<span className="sr-only"> {newTab}</span></span></span>
@@ -65,7 +84,7 @@ export default async function Photos({ params }: PageProps<"/[lang]/photos">) {
             <h2 id="possibly">{fa ? "شاید از سُه باشد" : "Possibly Soh"}</h2>
           </div>
           <ul className="ms-links">
-            {possiblySohLinks.map((l) => (
+            {notPreviewed(possiblySohLinks).map((l) => (
               <li key={l.url}>
                 <a className="navy-card" href={l.url} target="_blank" rel="noopener noreferrer">
                   <span className="navy-card__body">

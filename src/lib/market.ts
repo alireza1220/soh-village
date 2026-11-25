@@ -1,4 +1,5 @@
 import type { L } from "./i18n";
+import type { ListingImage } from "./listing-images";
 
 // Village market: buying and selling. No payments happen on the site.
 // Older rows may still be service, seeking or hiring; those are not offered when writing a listing.
@@ -52,6 +53,7 @@ export type Listing = {
   contact?: { kind: string; value: string }; // only with the poster's permission to publish it
   postedAt: string; // YYYY-MM-DD
   expiresAt: string; // YYYY-MM-DD, 30 days after approval unless renewed
+  images?: ListingImage[]; // up to 10 photos, first = cover (see listing-images.ts)
 };
 
 // Approved listings. Add one object per approved post (see README, "Approving posts").
@@ -61,4 +63,18 @@ export const listings: Listing[] = [];
 export const marketNote: L = {
   fa: "آگهی‌ها فقط پس از بررسی منتشر می‌شوند و بعد از ۳۰ روز برداشته می‌شوند.",
   en: "Listings are published only after a check and removed after 30 days.",
+};
+
+// Short category names for filter chips (the full names above stay for forms and detail pages).
+export const CATEGORY_SHORT: Record<string, L> = {
+  fruit: { fa: "میوه", en: "Fruit" },
+  nuts: { fa: "گردو و خشکبار", en: "Nuts" },
+  bread: { fa: "نان و شیرینی", en: "Baking" },
+  dairy: { fa: "لبنیات", en: "Dairy" },
+  crafts: { fa: "صنایع دستی", en: "Crafts" },
+  garden: { fa: "نگهداری باغ", en: "Garden care" },
+  labour: { fa: "کار کشاورزی", en: "Farm work" },
+  building: { fa: "ساخت و تعمیر", en: "Building" },
+  driving: { fa: "حمل و نقل", en: "Transport" },
+  other: { fa: "دیگر", en: "Other" },
 };

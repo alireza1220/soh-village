@@ -88,5 +88,6 @@ export function publicRow(row: Record<string, unknown>) {
     createdAt: row.created_at,
     expiresAt: row.expires_at ?? null,
     renewals: typeof row.renewals === "number" ? row.renewals : 0,
+    images: Array.isArray(row.images) ? row.images.filter((x): x is string => typeof x === "string") : [],
   };
 }

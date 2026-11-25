@@ -27,6 +27,7 @@ create table if not exists public.listings (
   manage_hash    text unique,                                   -- HMAC-SHA256 of the manage code with a server secret; the code itself is never stored; never public
   owner_id       uuid,                                          -- auth.users id of a logged-in poster (no FK on purpose); never public
   renewals       int not null default 0,                        -- how many times the poster renewed the 30 days
+  images         text[] not null default '{}',  -- ordered photo file names "<id>.<webp|jpg>", first = cover (see Photos in README)
   updated_at     timestamptz not null default now()             -- maintained by the listing_touch trigger
 );
 
@@ -35,6 +36,12 @@ alter table public.listings add column if not exists manage_hash text;
 alter table public.listings add column if not exists owner_id    uuid;
 alter table public.listings add column if not exists renewals    int not null default 0;
 alter table public.listings add column if not exists updated_at  timestamptz not null default now();
+alter table public.listings add column if not exists images text[] not null default '{}';
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'listings_images_max10') then
+    alter table public.listings add constraint listings_images_max10 check (cardinality(images) <= 10);
+  end if;
+end $$;
 create unique index if not exists listings_manage_hash_key on public.listings (manage_hash);
 create index if not exists listings_owner_idx on public.listings (owner_id, created_at desc);
 
@@ -93,9 +100,21 @@ create or replace view public.public_listings as
   select id, type, category, title, quantity, price, area, available, details,
          case when contact_public then contact_kind  end as contact_kind,
          case when contact_public then contact_value end as contact_value,
-         created_at, expires_at
+         created_at, expires_at, images
   from public.listings
   where status = 'approved' and (expires_at is null or expires_at > now());
 
 revoke all on public.public_listings from anon, authenticated;
 grant select on public.public_listings to anon, authenticated;
+
+-- Photos: one PUBLIC bucket. Objects are written only through short-lived signed upload URLs that the site's server
+-- hands out; there are deliberately NO policies on storage.objects, so anon cannot write, delete or list anything.
+-- Public buckets still serve a file to anyone who knows its (unguessable) URL.
+insert into storage.buckets (id, name, public) values ('listing-images', 'listing-images', true)
+  on conflict (id) do update set public = true;
+do $$ begin
+  if exists (select 1 from information_schema.columns where table_schema = 'storage' and table_name = 'buckets' and column_name = 'file_size_limit')
+     and exists (select 1 from information_schema.columns where table_schema = 'storage' and table_name = 'buckets' and column_name = 'allowed_mime_types') then
+    update storage.buckets set file_size_limit = 614400, allowed_mime_types = array['image/webp','image/jpeg'] where id = 'listing-images';
+  end if;
+end $$;

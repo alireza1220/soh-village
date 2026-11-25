@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import "@/styles/market.css";
 import type { Locale } from "@/lib/i18n";
 import { useSession } from "@/components/use-session";
-import { signOut } from "@/lib/auth";
+import { getSession, refreshSession, signOut } from "@/lib/auth";
 import { ListingManager, type RunAction } from "@/components/listing-manager";
 import { errorText, postJson, type ManagedListing } from "@/components/listing-api";
 
@@ -36,9 +36,16 @@ export function MyListingsClient({ lang }: { lang: Locale }) {
   useEffect(() => { void load(); }, [load]);
 
   const run: RunAction = async (action, id, fields) => {
-    const r = await postJson("/api/my/listings", { action, id, fields }, token);
+    // Photo uploads can take minutes: use the session as it is now, not the one this render started with.
+    const live = getSession() ?? (await refreshSession());
+    const r = await postJson("/api/my/listings", { action, id, fields }, live?.accessToken ?? token);
     if (r.ok) return { ok: true, listing: r.data.listing as ManagedListing | undefined };
     return { ok: false, error: (r.data.error as string) || "error" };
+  };
+
+  const photoAuth = async (id: string) => {
+    const live = getSession() ?? (await refreshSession());
+    return live ? { token: live.accessToken, listingId: id } : null;
   };
 
   if (!ready) return <p className="muted" aria-live="polite">{T.loading[lang]}</p>;
@@ -67,7 +74,7 @@ export function MyListingsClient({ lang }: { lang: Locale }) {
       {items === null && !err ? (
         <p className="muted">{T.loading[lang]}</p>
       ) : items ? (
-        <ListingManager lang={lang} items={items} run={run} empty={T.empty[lang]} onRemoved={() => setNote(T.deleted[lang])} />
+        <ListingManager lang={lang} items={items} run={run} photoAuth={photoAuth} empty={T.empty[lang]} onRemoved={() => setNote(T.deleted[lang])} />
       ) : null}
     </div>
   );

@@ -1,5 +1,7 @@
 import type { L, Locale } from "./i18n";
 import { photos } from "./photos";
+import { socialPosts } from "./social-embeds";
+import { youtubeVideos } from "./youtube";
 import { contact, contribute, mapApproaches, mapInfo, mapRoad, mapServices, sections, siteName, sources, tagline } from "./site";
 import type { Block } from "./site";
 
@@ -85,6 +87,8 @@ const kinds = {
   page: { fa: "صفحه", en: "Page" },
   source: { fa: "منبع", en: "Source" },
   photo: { fa: "عکس", en: "Photo" },
+  video: { fa: "ویدیو", en: "Video" },
+  post: { fa: "پست", en: "Post" },
   word: { fa: "واژه", en: "Word" },
   note: { fa: "یادداشت", en: "Note" },
   table: { fa: "جدول", en: "Table row" },
@@ -190,8 +194,8 @@ function buildDrafts(): Draft[] {
 
   d.push({
     group: "sections", path: "photos", kind: kinds.page, boost: 8,
-    title: { fa: "عکس‌ها", en: "Photos" },
-    text: { fa: "عکس‌های سُه و منطقه، با نام عکاس و مجوز. عکس‌های منطقه برچسب دارند.", en: "Photos of Soh and the region, with photographer and licence. Region photos are labelled." },
+    title: { fa: "عکس‌ها و ویدیوها", en: "Photos and videos" },
+    text: { fa: "عکس‌های سُه و منطقه، با نام عکاس و مجوز، و ویدیوها و پست‌های یوتیوب، فیسبوک و اینستاگرام. عکس‌های منطقه برچسب دارند.", en: "Photos of Soh and the region, with photographer and licence, plus YouTube, Facebook and Instagram videos and posts. Region photos are labelled." },
   });
   const seen = new Set<string>();
   for (const p of photos) {
@@ -199,8 +203,12 @@ function buildDrafts(): Draft[] {
     if (seen.has(key)) continue;
     seen.add(key);
     const label: L = p.scope === "region" ? { fa: "عکس منطقه، نه سُه", en: "Region photo, not Soh" } : { fa: "", en: "" };
-    d.push({ group: "sections", path: "photos", kind: kinds.photo, parent: { fa: "عکس‌ها", en: "Photos" }, title: p.alt, text: join([label, p.caption, p.credit]) });
+    d.push({ group: "sections", path: "photos", kind: kinds.photo, parent: { fa: "عکس‌ها و ویدیوها", en: "Photos and videos" }, title: p.alt, text: join([label, p.caption, p.credit]) });
   }
+
+  const gallery: L = { fa: "عکس‌ها و ویدیوها", en: "Photos and videos" };
+  for (const v of youtubeVideos) d.push({ group: "sections", path: "photos", kind: kinds.video, parent: gallery, title: v.title, text: join([v.note, v.channel]) });
+  for (const x of socialPosts) d.push({ group: "sections", path: "photos", kind: kinds.post, parent: gallery, title: x.title, text: join([x.note, x.account]) });
 
   // Guide and sources group
   for (const g of guidePages) d.push({ group: "guide", path: g.path, kind: kinds.page, title: g.title, text: g.text, boost: 8 });

@@ -128,3 +128,35 @@
 @media (prefers-reduced-motion: reduce) {
   .hm-hero .hero__slide { transition: none; }
 }
+
+/* Plan-your-visit tiles: the picture fills the card, the words sit on it. */
+.hm-tile { position: relative; display: block; min-height: 190px; height: 100%; overflow: hidden; background: var(--panel); color: #fff; isolation: isolate; }
+.hm-tile__img { object-fit: cover; z-index: -2; transition: transform .5s ease; }
+.hm-tile::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(to top, rgb(5 28 33 / .82) 0%, rgb(5 28 33 / .35) 45%, rgb(5 28 33 / 0) 75%); }
+.hm-tile__text { position: absolute; inset-inline: 0; bottom: 0; display: flex; flex-direction: column; gap: 2px; padding: 18px 20px; }
+.hm-tile__title { font-family: var(--font-serif), var(--font-fa), serif; font-size: 24px; font-weight: 600; line-height: 1.2; text-shadow: 0 1px 8px rgb(0 0 0 / .45); }
+.hm-tile:lang(fa) .hm-tile__title, :lang(fa) .hm-tile__title { font-family: var(--font-fa), Tahoma, sans-serif; font-weight: 700; }
+.hm-tile__meta { font-size: 15px; opacity: .92; text-shadow: 0 1px 6px rgb(0 0 0 / .45); }
+.hm-tile__mark { position: absolute; inset: 0; display: grid; place-items: center; z-index: -2; color: var(--turq); }
+.hm-tile:hover .hm-tile__img, .hm-tile:focus-visible .hm-tile__img { transform: scale(1.05); }
+.hm-tile:focus-visible { outline: 3px solid var(--focus-on-dark); outline-offset: -3px; }
+@media (prefers-reduced-motion: reduce) { .hm-tile__img { transition: none; } .hm-tile:hover .hm-tile__img { transform: none; } }
+@media (min-width: 1024px) { .hm-plan__list > li { flex: 1; display: flex; } .hm-plan__list .hm-tile { flex: 1; } }
+
+/* Explore section: big photo cards, then the plan tiles in a row. */
+.hm-explore { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.hm-explore .hm-plan__title { margin-top: 12px; }
+.hm-explore .hm-credit { overflow-wrap: anywhere; }
+.hm-explore ul { list-style: none; margin: 0; padding: 0; }
+.hm-explore__main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+.hm-explore li { min-width: 0; }
+.hm-explore__plan { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.hm-tile--big, .hm-explore__plan .hm-tile { height: auto; }
+.hm-tile--big { min-height: 0; aspect-ratio: 4 / 5; }
+.hm-tile--big .hm-tile__title { font-size: 30px; }
+.hm-explore__plan .hm-tile { min-height: 0; aspect-ratio: 4 / 3; }
+.hm-explore__plan .hm-tile__title { font-size: 20px; }
+.hm-explore__plan .hm-tile__text { padding: 12px 14px; }
+.hm-explore__plan .hm-tile__meta { font-size: 14px; }
+@media (min-width: 768px) { .hm-explore__main { grid-template-columns: repeat(3, minmax(0, 1fr)); } .hm-explore__plan { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .hm-explore__plan { grid-template-columns: repeat(5, minmax(0, 1fr)); } }

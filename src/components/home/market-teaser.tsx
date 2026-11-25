@@ -10,7 +10,7 @@ type Labels = { empty: string; example: string; exampleTitle: string; exampleMet
 
 /** Three newest approved, unexpired listings. Contact details are never shown here; the market page decides that. */
 export function MarketTeaser({ lang, href, labels }: { lang: Locale; href: string; labels: Labels }) {
-  const remote = useLiveListings();
+  const { listings: remote } = useLiveListings();
   const [today, setToday] = useState("");
   useEffect(() => { setToday(new Date().toISOString().slice(0, 10)); }, []);
   const latest = useMemo(() => {

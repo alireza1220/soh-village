@@ -19,6 +19,8 @@ export type ManagedListing = {
   createdAt?: string | null;
   expiresAt?: string | null;
   renewals?: number;
+  /** ordered photo file names (first = cover); see src/lib/listing-images.ts */
+  images?: string[];
 };
 
 const ERRORS: Record<string, { fa: string; en: string }> = {
@@ -31,6 +33,13 @@ const ERRORS: Record<string, { fa: string; en: string }> = {
   network: { fa: "اتصال برقرار نشد. اینترنت را بررسی کنید.", en: "Could not connect. Check your internet." },
   contact_required: { fa: "راه تماس لازم است.", en: "A contact method is required." },
   bad_email: { fa: "نشانی ایمیل درست نیست.", en: "Invalid email address." },
+  too_many_images: { fa: "حداکثر ۱۰ عکس می‌شود گذاشت.", en: "You can add up to 10 photos." },
+  bad_images: { fa: "بعضی عکس‌ها ذخیره نشدند. دوباره امتحان کنید.", en: "Some photos did not save. Try again." },
+  upload_failed: { fa: "عکس فرستاده نشد. دوباره امتحان کنید.", en: "A photo did not upload. Try again." },
+  not_image: { fa: "این فایل عکس نیست.", en: "This file is not a photo." },
+  unreadable: { fa: "این عکس باز نشد. یک عکس JPG یا PNG انتخاب کنید یا دوباره عکس بگیرید.", en: "Could not open this photo. Pick a JPG or PNG, or take a new one." },
+  too_big_original: { fa: "این عکس خیلی بزرگ است (بیشتر از ۳۰ مگابایت).", en: "This photo is too big (over 30 MB)." },
+  encode_failed: { fa: "عکس آماده نشد. عکس دیگری را امتحان کنید.", en: "Could not prepare this photo. Try another." },
   send_failed: { fa: "لینک ورود ارسال نشد. بعداً امتحان کنید.", en: "Could not send the link. Try later." },
 };
 const GENERIC = { fa: "مشکلی پیش آمد. دوباره امتحان کنید.", en: "Something went wrong. Try again." };

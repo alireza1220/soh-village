@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { MapFrame, VillageMap } from "@/components/map";
 import { MsBanner } from "@/components/ms-banner";
 import { Arrow } from "@/components/icons";
-import { SocialForSection } from "@/components/social-embeds";
+import { MediaBlock } from "@/components/media-block";
 import { hasLocale, locales } from "@/lib/i18n";
 import { mapApproaches, mapRoad, mapServices } from "@/lib/site";
 
@@ -61,7 +61,7 @@ export default async function MapPage({ params }: PageProps<"/[lang]/map">) {
           </div>
         </section>
 
-        <SocialForSection section="map" lang={lang} />
+        <MediaBlock section="map" lang={lang} />
 
         <section className="ms-block ms-read" aria-labelledby="services">
           <div className="ms-head">

@@ -1,9 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "@/styles/market.css";
 import type { Locale } from "@/lib/i18n";
 import { CONTACT_KINDS, LISTING_CATEGORIES, LISTING_TYPE_LABELS, LISTING_TYPES } from "@/lib/market";
 import { errorText, type ManagedListing } from "@/components/listing-api";
+import { PhotoPicker } from "@/components/photo-picker";
+import { imageUrl, isImageName } from "@/lib/listing-images";
+import { pendingUploads, plural, savePhotos, type NewPhoto, type PhotoAuth, type PhotoItem, type Progress } from "@/lib/photo-upload";
 
 export type RunResult = { ok: boolean; listing?: ManagedListing; error?: string };
 export type RunAction = (action: "update" | "renew" | "delete", id: string, fields?: Record<string, unknown>) => Promise<RunResult>;
@@ -22,7 +25,13 @@ const T = {
   deleted: { fa: "آگهی حذف شد.", en: "Listing deleted." },
   expires: { fa: "انقضا", en: "Expires" },
   renewals: { fa: "تمدیدها", en: "Renewals" },
-  editNote: { fa: "ویرایش، آگهی تأییدشده را دوباره به بررسی می‌برد.", en: "Editing sends an approved listing back for review." },
+  editNote: { fa: "با هر ویرایش، حتی فقط تغییر عکس، آگهی دوباره بررسی می‌شود.", en: "Editing (even just photos) sends an approved listing back for review." },
+  waitPhotos: { fa: "عکس‌ها هنوز آماده می‌شوند...", en: "Photos are still getting ready..." },
+  sendingPhoto: { fa: "عکس {i} از {n} در حال ارسال...", en: "Sending photo {i} of {n}..." },
+  savingPhotos: { fa: "عکس‌ها در حال ذخیره‌اند...", en: "Saving your photos..." },
+  photoPartial: { fa: "تغییرها ذخیره شد، اما {k} عکس فرستاده نشد. دوباره «ذخیره» را بزنید.", en: "Changes saved, but {k} photo(s) did not go through. Press Save to retry." },
+  keepOpen: { fa: "تا پایان ارسال این صفحه را نبندید.", en: "Keep this page open until sending ends." },
+  photosOf: { fa: "عکس‌های آگهی", en: "Listing photos" },
   type: { fa: "نوع آگهی", en: "Type" },
   cat: { fa: "دسته", en: "Category" },
   title: { fa: "عنوان", en: "Title" },
@@ -63,7 +72,15 @@ function fmtDate(iso: string | null | undefined, lang: Locale): string {
   try { return d.toLocaleDateString(lang === "fa" ? "fa-IR" : "en-GB", { year: "numeric", month: "short", day: "numeric" }); } catch { return iso.slice(0, 10); }
 }
 
-function ListingCard({ lang, item, run, onChange, onRemoved }: { lang: Locale; item: ManagedListing; run: RunAction; onChange: (l: ManagedListing) => void; onRemoved: (id: string) => void }) {
+const SB = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").replace(/\/$/, "");
+const namesOf = (l: { images?: string[] }) => (l.images ?? []).filter(isImageName);
+const storedFrom = (id: string, names: string[]): PhotoItem[] =>
+  names.map((name) => ({ kind: "stored", key: `s-${name}`, name, thumbUrl: imageUrl(SB, id, name, "thumb") }));
+const fillN = (s: string, o: Record<string, number>, lang: Locale) =>
+  s.replace(/\{(\w+)\}/g, (_, k: string) => (o[k] ?? 0).toLocaleString(lang === "fa" ? "fa-IR" : "en"));
+export type PhotoAuthFn = (id: string) => Promise<PhotoAuth | null>;
+
+function ListingCard({ lang, item, run, onChange, onRemoved, photoAuth }: { lang: Locale; item: ManagedListing; run: RunAction; onChange: (l: ManagedListing) => void; onRemoved: (id: string) => void; photoAuth?: PhotoAuthFn }) {
   const [mode, setMode] = useState<"view" | "edit" | "confirm">("view");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
@@ -72,6 +89,11 @@ function ListingCard({ lang, item, run, onChange, onRemoved }: { lang: Locale; i
     area: item.area && item.area !== "—" ? item.area : "", available: item.available ?? "", details: item.details ?? "",
     posterName: item.posterName ?? "", contactKind: item.contactKind ?? CONTACT_KINDS[0].v, contactValue: item.contactValue ?? "", contactPublic: !!item.contactPublic,
   }));
+  const [photos, setPhotos] = useState<PhotoItem[]>(() => storedFrom(item.id, namesOf(item)));
+  const [prog, setProg] = useState<Progress | null>(null);
+  const photosRef = useRef(photos);
+  useEffect(() => { photosRef.current = photos; });
+  const preparing = photos.some((p) => p.kind === "new" && p.state === "preparing");
   const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((p) => ({ ...p, [k]: v }));
   const st = effectiveStatus(item);
   const locked = item.status === "removed" || item.status === "rejected";
@@ -83,15 +105,48 @@ function ListingCard({ lang, item, run, onChange, onRemoved }: { lang: Locale; i
     setBusy(false);
     if (!r.ok) { setMsg({ ok: false, text: errorText(r.error, lang) }); return; }
     if (action === "delete") { setMsg({ ok: true, text: T.deleted[lang] }); setMode("view"); onRemoved(item.id); return; }
-    if (r.listing) onChange(r.listing);
+    if (r.listing) { onChange(r.listing); if (action === "update") setPhotos(storedFrom(item.id, namesOf(r.listing))); }
     setMode("view");
     setMsg({ ok: true, text: action === "renew" ? T.renewed[lang] : T.saved[lang] });
   };
 
-  const save = () => {
-    const fields: Record<string, unknown> = { ...f };
-    if (!String(f.contactValue).trim()) delete fields.contactValue;
-    return doRun("update", fields);
+  const save = async () => {
+    const base: Record<string, unknown> = { ...f };
+    if (!String(f.contactValue).trim()) delete base.contactValue;
+    const names = photos.map((p) => (p.kind === "stored" ? p.name : p.uploadedName)).filter((n): n is string => !!n);
+    const cur = namesOf(item);
+    const changed = names.length !== cur.length || names.some((n, i) => n !== cur[i]);
+    if (!pendingUploads(photos).length) return doRun("update", changed ? { ...base, images: names } : base);
+
+    // New photos: send them first, then save the ordered list together with the other fields in one update.
+    setBusy(true); setMsg(null); setProg({ phase: "sending", index: 1, total: 1, fraction: 0 });
+    const auth = photoAuth ? await photoAuth(item.id) : null;
+    let serverCount = cur.length;
+    let latest: ManagedListing | undefined;
+    let finalErr = "";
+    const res = await savePhotos({
+      auth,
+      items: photosRef.current,
+      serverCount,
+      finalizeCarriesEdits: true,
+      finalize: async (list) => {
+        const r = await run("update", item.id, { ...base, images: list });
+        if (r.ok) { serverCount = list.length; if (r.listing) { latest = r.listing; onChange(r.listing); } } else finalErr = r.error ?? "";
+        return { ok: r.ok, error: r.error };
+      },
+      onItem: (key, patch) => setPhotos((prev) => prev.map((i) => (i.key === key && i.kind === "new" ? ({ ...i, ...patch } as NewPhoto) : i))),
+      onProgress: setProg,
+    });
+    setProg(null); setBusy(false);
+    if (res.finalized && !res.failed.length) {
+      setPhotos(storedFrom(item.id, latest ? namesOf(latest) : res.names));
+      setMode("view");
+      setMsg({ ok: true, text: T.saved[lang] });
+      return;
+    }
+    const why = res.finalizeError ?? res.failed[0]?.error ?? finalErr;
+    const k = res.finalized ? res.failed.length : photos.filter((p) => p.kind === "new" && !!p.full).length || res.failed.length;
+    setMsg({ ok: false, text: `${res.finalized ? plural(fillN(T.photoPartial[lang], { k }, lang), k) : ""} ${errorText(why, lang)}`.trim() });
   };
 
   const FF = (id: string, label: string, el: React.ReactNode) => (
@@ -108,6 +163,16 @@ function ListingCard({ lang, item, run, onChange, onRemoved }: { lang: Locale; i
       <p className="mk-expiry">
         {T.expires[lang]}: {fmtDate(item.expiresAt, lang)} · {T.renewals[lang]}: {(item.renewals ?? 0).toLocaleString(lang === "fa" ? "fa-IR" : "en")}
       </p>
+
+      {mode !== "edit" && namesOf(item).length > 0 && (
+        <ul className="ph-strip" aria-label={T.photosOf[lang]}>
+          {namesOf(item).map((n, i) => (
+            <li key={n}>
+              {/* eslint-disable-next-line @next/next/no-img-element -- small remote thumbnail */}
+              <img src={imageUrl(SB, item.id, n, "thumb")} alt={`${lang === "fa" ? "عکس" : "Photo"} ${(i + 1).toLocaleString(lang === "fa" ? "fa-IR" : "en")}`} loading="lazy" decoding="async" /></li>
+          ))}
+        </ul>
+      )}
 
       {mode === "edit" && (
         <form className="mk-editform" onSubmit={(e) => { e.preventDefault(); void save(); }} aria-label={T.edit[lang]}>
@@ -138,13 +203,24 @@ function ListingCard({ lang, item, run, onChange, onRemoved }: { lang: Locale; i
               </select>)}
             {FF(`${pre}-cval`, T.cval[lang], <input id={`${pre}-cval`} dir="ltr" className="input" value={f.contactValue} maxLength={60} onChange={(e) => set("contactValue", e.target.value)} />)}
           </div>
+          <PhotoPicker lang={lang} items={photos} setItems={setPhotos} id={`${pre}-photos`} mode={busy ? "busy" : "edit"} />
           <label className="mk-check" htmlFor={`${pre}-cpub`}>
             <input id={`${pre}-cpub`} type="checkbox" checked={f.contactPublic} onChange={(e) => set("contactPublic", e.target.checked)} />
             <span>{T.cpub[lang]}</span>
           </label>
+          {prog && (
+            <div className="ph-progress">
+              <p>{prog.phase === "saving" ? T.savingPhotos[lang] : fillN(T.sendingPhoto[lang], { i: prog.index, n: prog.total }, lang)}</p>
+              <div className="ph-progress__bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(prog.fraction * 100)} aria-label={T.savingPhotos[lang]}>
+                <span style={{ inlineSize: `${Math.round(prog.fraction * 100)}%` }} />
+              </div>
+              <p className="ph-tips">{T.keepOpen[lang]}</p>
+            </div>
+          )}
           <div className="mk-actions">
-            <button type="submit" className="btn btn--primary" disabled={busy || !f.title.trim()}>{busy ? T.saving[lang] : T.save[lang]}</button>
-            <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => setMode("view")}>{T.cancel[lang]}</button>
+            <button type="submit" className="btn btn--primary" disabled={busy || preparing || !f.title.trim()}>{busy ? T.saving[lang] : T.save[lang]}</button>
+            <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => { setPhotos(storedFrom(item.id, namesOf(item))); setMode("view"); }}>{T.cancel[lang]}</button>
+            {preparing && <span className="mk-session">{T.waitPhotos[lang]}</span>}
           </div>
         </form>
       )}
@@ -174,7 +250,7 @@ function ListingCard({ lang, item, run, onChange, onRemoved }: { lang: Locale; i
   );
 }
 
-export function ListingManager({ lang, items, run, onRemoved, empty }: { lang: Locale; items: ManagedListing[]; run: RunAction; onRemoved?: (id: string) => void; empty?: string }) {
+export function ListingManager({ lang, items, run, onRemoved, empty, photoAuth }: { lang: Locale; items: ManagedListing[]; run: RunAction; onRemoved?: (id: string) => void; empty?: string; photoAuth?: PhotoAuthFn }) {
   // Local copy so edits show at once; parents re-key this component when they reload the list.
   const [list, setList] = useState(items);
   const [gone, setGone] = useState<string[]>([]);
@@ -188,6 +264,7 @@ export function ListingManager({ lang, items, run, onRemoved, empty }: { lang: L
           lang={lang}
           item={l}
           run={run}
+          photoAuth={photoAuth}
           onChange={(n) => setList((p) => p.map((x) => (x.id === n.id ? n : x)))}
           onRemoved={(id) => { setGone((g) => [...g, id]); onRemoved?.(id); }}
         />
