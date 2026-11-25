@@ -80,7 +80,7 @@ alter table public.listings drop constraint if exists listings_type_check;
 alter table public.listings add constraint listings_type_check
   check (type in ('sell','need','service','seeking','hiring','offer','rent'));
 -- Manage codes are retired: ownership is the logged-in user. The poster's name lives in profiles now.
-drop index if exists public.listings_manage_hash_key;
+-- Dropping the column also drops its unique constraint and index (listings_manage_hash_key).
 alter table public.listings drop column if exists manage_hash;
 alter table public.listings drop column if exists poster_name;
 

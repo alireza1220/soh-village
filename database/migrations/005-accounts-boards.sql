@@ -81,7 +81,7 @@ create trigger listing_require_owner before insert on public.listings
 
 -- 6. Manage codes retired ---------------------------------------------------------------------------------------------
 -- The view below does not use these columns, so they can go. poster_name was never public.
-drop index if exists public.listings_manage_hash_key;
+-- Dropping the column also drops its unique constraint and index (listings_manage_hash_key).
 alter table public.listings drop column if exists manage_hash;
 alter table public.listings drop column if exists poster_name;
 
