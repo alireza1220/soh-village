@@ -1,38 +1,44 @@
 import Link from "next/link";
 import type { Locale } from "@/lib/i18n";
+import "@/styles/misc.css";
 import { socialFor, socialSectionTitle, type SocialPost } from "@/lib/social-embeds";
 
 export function SocialList({ posts, lang }: { posts: SocialPost[]; lang: Locale }) {
   return (
-    <ul className="flex flex-col gap-8 list-none p-0 m-0">
-      {posts.map((p) => (
-        <li key={p.id} id={p.id} className="card overflow-hidden scroll-mt-24">
-          <div className="p-4 flex flex-col gap-2">
-            <h3 className="text-xl">{p.title[lang]}</h3>
-            <p className="text-sm muted">{p.account}</p>
-            <p className="text-sm">{p.note[lang]}</p>
-            <p className="text-sm flex flex-wrap gap-x-4 gap-y-1">
-              {p.sections.map((slug) => (
-                <Link key={slug} className="link" href={`/${lang}/${slug}`}>{socialSectionTitle(slug)[lang]}</Link>
-              ))}
-              <a className="link" href={p.href} target="_blank" rel="noopener noreferrer">{p.platform === "facebook" ? "Facebook" : "Instagram"}</a>
-            </p>
-          </div>
-          <iframe
-            src={p.embed}
-            title={p.title[lang]}
-            width={p.width}
-            height={p.height}
-            loading={p.platform === "facebook" ? "eager" : "lazy"}
-            scrolling={p.platform === "facebook" ? "no" : undefined}
-            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-            referrerPolicy={p.platform === "facebook" ? undefined : "strict-origin-when-cross-origin"}
-            allowFullScreen
-            className={p.platform === "facebook" ? "mx-auto block max-w-full border-0 bg-white" : "block w-full border-0 bg-white"}
-            style={p.width && p.height ? { width: p.width, height: p.height } : { height: p.tall ? 640 : 460 }}
-          />
-        </li>
-      ))}
+    <ul className="ms-embeds">
+      {posts.map((p) => {
+        const fb = p.platform === "facebook";
+        return (
+          <li key={p.id} id={p.id} className="ms-embed">
+            <div className="ms-embed__body" style={{ borderBlockStart: 0 }}>
+              <h3>{p.title[lang]}</h3>
+              <p className="ms-sub">{p.account}</p>
+              <p>{p.note[lang]}</p>
+              <p className="ms-embed__links">
+                {p.sections.map((slug) => (
+                  <Link key={slug} href={`/${lang}/${slug}`}>{socialSectionTitle(slug)[lang]}</Link>
+                ))}
+                <a href={p.href} target="_blank" rel="noopener noreferrer">{fb ? "Facebook" : "Instagram"}</a>
+              </p>
+            </div>
+            <div className="ms-embed__scroll" style={{ borderBlockStart: "3px solid var(--turq)" }}>
+              <iframe
+                src={p.embed}
+                title={p.title[lang]}
+                width={p.width}
+                height={p.height}
+                loading={fb ? "eager" : "lazy"}
+                scrolling={fb ? "no" : undefined}
+                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                referrerPolicy={fb ? undefined : "strict-origin-when-cross-origin"}
+                allowFullScreen
+                className={fb ? "ms-embed__frame" : "ms-embed__frame ms-embed__frame--fluid"}
+                style={p.width && p.height ? { width: p.width, height: p.height } : { height: p.tall ? 640 : 460 }}
+              />
+            </div>
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -41,13 +47,13 @@ export function SocialForSection({ section, lang }: { section: string; lang: Loc
   const posts = socialFor(section);
   if (posts.length === 0) return null;
   return (
-    <section className="flex flex-col gap-3" aria-labelledby={`social-${section}`}>
-      <h2 id={`social-${section}`} className="text-2xl">{lang === "fa" ? "فیسبوک و اینستاگرام" : "Facebook and Instagram"}</h2>
-      <ul className="flex flex-col gap-2 list-none p-0 m-0">
+    <section className="ms-block" aria-labelledby={`social-${section}`}>
+      <div className="ms-head"><h2 id={`social-${section}`}>{lang === "fa" ? "فیسبوک و اینستاگرام" : "Facebook and Instagram"}</h2></div>
+      <ul className="ms-list">
         {posts.map((p) => (
           <li key={p.id}>
-            <Link className="link font-semibold" href={`/${lang}/references#${p.id}`}>{p.title[lang]}</Link>
-            <span className="text-sm muted"> · {p.account}</span>
+            <Link className="link" href={`/${lang}/references#${p.id}`}>{p.title[lang]}</Link>
+            <span className="ms-sub"> · {p.account}</span>
           </li>
         ))}
       </ul>

@@ -1,7 +1,7 @@
 /** Quiet line drawing for a section that has no photograph yet. */
 export function SectionMark({ slug }: { slug: string }) {
   return (
-    <div className="absolute inset-0 grid place-items-center" style={{ color: "var(--accent)" }} aria-hidden>
+    <div className="absolute inset-0 grid place-items-center" style={{ color: "var(--action)" }} aria-hidden>
       <span lang="fa" className="fa-display absolute text-7xl font-bold" style={{ opacity: 0.1 }}>سُه</span>
       <svg className="relative" width="64" height="64" viewBox="0 0 72 72" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
         <Mark slug={slug} />

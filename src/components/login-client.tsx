@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import "@/styles/market.css";
 import type { Locale } from "@/lib/i18n";
 import { consumeSessionFromUrl, sendMagicLink, signOut } from "@/lib/auth";
 import { publicSupabase } from "@/lib/supabase";
@@ -39,33 +40,34 @@ export function LoginClient({ lang }: { lang: Locale }) {
     setMsg(r.ok ? { ok: true, text: T.sent[lang] } : { ok: false, text: errorText(r.error, lang) });
   };
 
-  const field = "w-full rounded-xl border px-3 py-2 bg-[var(--surface)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]";
-
   return (
-    <div className="flex flex-col gap-5">
-      <p className="text-sm muted">{T.optional[lang]}</p>
+    <div className="mk-stack mk-narrow">
+      <p className="lede">{T.optional[lang]}</p>
       {!configured ? (
-        <div className="todo"><p>{T.na[lang]}</p></div>
+        <div className="notice"><p>{T.na[lang]}</p></div>
       ) : !ready ? (
         <p className="muted" aria-live="polite">{T.checking[lang]}</p>
       ) : session ? (
-        <div className="card p-5 flex flex-col gap-3">
-          <p>{T.as[lang]} <b dir="ltr" className="break-all">{session.user.email}</b></p>
-          <div className="flex flex-wrap gap-2">
-            <Link className="btn btn-primary" href={`/${lang}/my`}>{T.my[lang]}</Link>
-            <button type="button" className="btn btn-ghost" onClick={() => void signOut()}>{T.out[lang]}</button>
+        <div className="mk-panel">
+          <p style={{ margin: 0 }}>{T.as[lang]} <b dir="ltr" className="break-all">{session.user.email}</b></p>
+          <div className="mk-actions">
+            <Link className="btn btn--primary" href={`/${lang}/my`}>{T.my[lang]}</Link>
+            <button type="button" className="btn btn--ghost" onClick={() => void signOut()}>{T.out[lang]}</button>
           </div>
         </div>
       ) : (
-        <form className="card p-5 flex flex-col gap-3" onSubmit={submit} aria-label={T.title[lang]}>
-          <label className="flex flex-col gap-1 text-sm" htmlFor="login-email">{T.email[lang]}
-            <input id="login-email" type="email" dir="ltr" autoComplete="email" required className={field} style={{ borderColor: "var(--line)" }} value={email} onChange={(e) => setEmail(e.target.value)} />
-          </label>
-          <button type="submit" className="btn btn-primary self-start" disabled={busy || !email.trim()}>{busy ? T.sending[lang] : T.send[lang]}</button>
+        <form className="mk-panel" onSubmit={submit} aria-label={T.title[lang]}>
+          <div className="field">
+            <label className="label" htmlFor="login-email">{T.email[lang]}</label>
+            <input id="login-email" type="email" dir="ltr" autoComplete="email" required className="input" value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+          <div>
+            <button type="submit" className="btn btn--primary" disabled={busy || !email.trim()}>{busy ? T.sending[lang] : T.send[lang]}</button>
+          </div>
         </form>
       )}
-      <div aria-live="polite" role="status">
-        {msg && <p className="text-sm" style={{ color: msg.ok ? "var(--accent)" : "var(--amber)" }}>{msg.text}</p>}
+      <div aria-live="polite" role="status" className="mk-live">
+        {msg && <p className={`mk-msg ${msg.ok ? "mk-msg--ok" : "mk-msg--warn"}`}>{msg.text}</p>}
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
+import "@/styles/market.css";
 import type { Locale } from "@/lib/i18n";
 
 type Kind = "needs" | "careers";
@@ -70,6 +71,10 @@ const T = {
   required: { fa: "عنوان را بنویسید تا متن ساخته شود.", en: "Write a title and the message will appear." },
 };
 
+function F({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
+  return <div className="field"><label className="label" htmlFor={id}>{label}</label>{children}</div>;
+}
+
 export function PostForm({ kind, lang }: { kind: Kind; lang: Locale }) {
   const c = CFG[kind];
   const [mode, setMode] = useState(c.modes[0].v);
@@ -111,67 +116,67 @@ export function PostForm({ kind, lang }: { kind: Kind; lang: Locale }) {
     }
   };
 
-  const field = "w-full rounded-xl border px-3 py-2 bg-[var(--surface)]";
-  const brd = { borderColor: "var(--line)" } as const;
   return (
-    <form className="card p-5 md:p-6 flex flex-col gap-4" onSubmit={(e) => e.preventDefault()} aria-label={c.subject[lang]}>
-      <p className="text-sm muted">{T.intro[lang]}</p>
-      <fieldset className="flex flex-wrap gap-2 border-0 p-0 m-0">
-        <legend className="text-sm muted mb-1">{T.mode[lang]}</legend>
-        {c.modes.map((m) => (
-          <label key={m.v} className={`btn ${mode === m.v ? "btn-primary" : "btn-ghost"} cursor-pointer`}>
-            <input type="radio" className="sr-only" name={`${kind}-mode`} checked={mode === m.v} onChange={() => setMode(m.v)} />
-            {m[lang]}
-          </label>
-        ))}
+    <form className="mk-form" onSubmit={(e) => e.preventDefault()} aria-label={c.subject[lang]}>
+      <p className="mk-form-intro">{T.intro[lang]}</p>
+      <fieldset className="mk-fieldset">
+        <legend>{T.mode[lang]}</legend>
+        <div className="mk-choices">
+          {c.modes.map((m) => (
+            <label key={m.v} className="mk-choice">
+              <input type="radio" name={`${kind}-mode`} checked={mode === m.v} onChange={() => setMode(m.v)} />
+              {m[lang]}
+            </label>
+          ))}
+        </div>
       </fieldset>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className="flex flex-col gap-1 text-sm">{T.cat[lang]}
-          <select id={`${kind}-cat`} className={field} style={brd} value={cat} onChange={(e) => setCat(e.target.value)}>
+      <div className="mk-grid-2">
+        <F id={`${kind}-cat`} label={T.cat[lang]}>
+          <select id={`${kind}-cat`} className="select" value={cat} onChange={(e) => setCat(e.target.value)}>
             {c.cats.map((o) => <option key={o.v} value={o.v}>{o[lang]}</option>)}
           </select>
-        </label>
+        </F>
         {c.arrangements && (
-          <label className="flex flex-col gap-1 text-sm">{T.arr[lang]}
-            <select id={`${kind}-arr`} className={field} style={brd} value={arr} onChange={(e) => setArr(e.target.value)}>
+          <F id={`${kind}-arr`} label={T.arr[lang]}>
+            <select id={`${kind}-arr`} className="select" value={arr} onChange={(e) => setArr(e.target.value)}>
               {c.arrangements.map((o) => <option key={o.v} value={o.v}>{o[lang]}</option>)}
             </select>
-          </label>
+          </F>
         )}
       </div>
-      <label className="flex flex-col gap-1 text-sm">{c.titleLabel[lang]}
-        <input id={`${kind}-title`} className={field} style={brd} value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
-      </label>
-      <label className="flex flex-col gap-1 text-sm">{T.details[lang]}
-        <textarea id={`${kind}-details`} className={field} style={brd} rows={4} value={details} onChange={(e) => setDetails(e.target.value)} maxLength={800} />
-      </label>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className="flex flex-col gap-1 text-sm">{T.area[lang]}
-          <input id={`${kind}-area`} className={field} style={brd} value={area} onChange={(e) => setArea(e.target.value)} maxLength={80} />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">{T.name[lang]}
-          <input id={`${kind}-name`} className={field} style={brd} value={name} onChange={(e) => setName(e.target.value)} maxLength={60} />
-        </label>
+      <F id={`${kind}-title`} label={c.titleLabel[lang]}>
+        <input id={`${kind}-title`} className="input" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
+      </F>
+      <F id={`${kind}-details`} label={T.details[lang]}>
+        <textarea id={`${kind}-details`} className="textarea" rows={4} value={details} onChange={(e) => setDetails(e.target.value)} maxLength={800} />
+      </F>
+      <div className="mk-grid-2">
+        <F id={`${kind}-area`} label={T.area[lang]}>
+          <input id={`${kind}-area`} className="input" value={area} onChange={(e) => setArea(e.target.value)} maxLength={80} />
+        </F>
+        <F id={`${kind}-name`} label={T.name[lang]}>
+          <input id={`${kind}-name`} className="input" value={name} onChange={(e) => setName(e.target.value)} maxLength={60} />
+        </F>
       </div>
-      <label className="flex flex-col gap-1 text-sm">{T.contact[lang]}
-        <input id={`${kind}-contact`} className={field} style={brd} value={contact} onChange={(e) => setContact(e.target.value)} maxLength={80} inputMode="text" />
+      <F id={`${kind}-contact`} label={T.contact[lang]}>
+        <input id={`${kind}-contact`} className="input" value={contact} onChange={(e) => setContact(e.target.value)} maxLength={80} inputMode="text" />
+      </F>
+      <label className="mk-check" htmlFor={`${kind}-consent`}>
+        <input id={`${kind}-consent`} type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+        <span>{T.consent[lang]}{!consent && <span className="field-hint">{T.consentNo[lang]}</span>}</span>
       </label>
-      <label className="flex items-start gap-2 text-sm">
-        <input id={`${kind}-consent`} type="checkbox" className="mt-1" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
-        <span>{T.consent[lang]}{!consent && <span className="block muted">{T.consentNo[lang]}</span>}</span>
-      </label>
-      <div className="flex flex-col gap-2" aria-live="polite">
-        <b className="text-sm">{T.result[lang]}</b>
+      <div className="mk-result" aria-live="polite">
+        <h3>{T.result[lang]}</h3>
         {text ? (
           <>
-            <textarea readOnly rows={Math.min(12, text.split("\n").length + 1)} className={`${field} font-mono text-sm`} style={brd} value={text} onFocus={(e) => e.currentTarget.select()} aria-label={T.result[lang]} />
-            <div className="flex items-center gap-3">
-              <button type="button" className="btn btn-primary" onClick={copy}>{T.copy[lang]}</button>
-              {note && <span className="text-sm muted">{note}</span>}
+            <textarea readOnly rows={Math.min(12, text.split("\n").length + 1)} className="textarea mk-mono" value={text} onFocus={(e) => e.currentTarget.select()} aria-label={T.result[lang]} />
+            <div className="mk-row">
+              <button type="button" className="btn btn--primary" onClick={copy}>{T.copy[lang]}</button>
+              {note && <span className="mk-session">{note}</span>}
             </div>
           </>
         ) : (
-          <p className="text-sm muted">{T.required[lang]}</p>
+          <p className="mk-session">{T.required[lang]}</p>
         )}
       </div>
     </form>

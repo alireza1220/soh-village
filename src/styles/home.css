@@ -1,0 +1,130 @@
+/* Home page. Prefix hm-. Tokens and the class catalogue come from globals.css; logical properties only. */
+
+.hm-display { font-size: clamp(28px, 3.4vw, 38px); margin: 0; }
+.hm-section-h { margin-block-end: 24px; }
+.hm-head { max-width: 780px; margin-block-end: 32px; }
+.hm-head .hm-section-h { margin-block-end: 12px; }
+.hm-head__intro { margin: 0; }
+.hm-credit { margin: 8px 0 0; font-size: 12.5px; color: var(--muted); }
+.hm-credit .photo-credit { opacity: 1; }
+.hm-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; margin-block-start: 32px; }
+
+/* Hero */
+.hm-hero { background: var(--panel); }
+.hm-hero .hero__slide[data-active="false"] { pointer-events: none; }
+.hm-hero__caption { display: flex; flex-direction: column; gap: 4px; }
+.hm-hero__caption a { text-decoration: underline; text-underline-offset: 2px; }
+.hm-hero__text { font-size: 15px; font-weight: 500; }
+.hm-hero__dots { display: none; }
+@media (min-width: 768px) {
+  .hm-hero__dots { display: flex; position: absolute; z-index: 4; bottom: 0; inset-inline-end: 48px; background: color-mix(in srgb, var(--panel) 78%, transparent); }
+  .hm-hero__caption { max-width: min(720px, calc(100% - 288px)); }
+}
+
+/* Welcome */
+.hm-welcome__grid { display: grid; gap: 32px; align-items: center; }
+@media (min-width: 1024px) { .hm-welcome__grid { grid-template-columns: 3fr 2fr; gap: 0; } }
+.hm-welcome__panel { display: flex; flex-direction: column; gap: 16px; padding: 28px 20px; }
+@media (min-width: 640px) { .hm-welcome__panel { padding: 48px; } }
+@media (min-width: 1024px) { .hm-welcome__panel { padding: 64px; } }
+.hm-welcome__panel p:not(.eyebrow) { margin: 0; color: var(--on-panel); }
+.hm-welcome__photo { display: flex; flex-direction: column; }
+.hm-welcome__photo .media-wrap { height: 100%; padding-block-end: 0; }
+.hm-welcome__media { aspect-ratio: 4 / 3; }
+/* Credit sits on the photo: top-start on phones (the button owns the bottom corner), bottom-start from 640px. */
+.hm-welcome__credit {
+  position: absolute; z-index: 2; inset-inline-start: 0; top: 0; margin: 0; width: 100%; padding: 12px 16px 28px; font-size: 12.5px; line-height: 1.5; color: var(--on-panel);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--scrim) 80%, transparent), transparent);
+}
+@media (min-width: 640px) {
+  .hm-welcome__credit { top: auto; bottom: 0; width: auto; max-width: calc(100% - 200px); padding: 28px 16px 12px; background: linear-gradient(0deg, color-mix(in srgb, var(--scrim) 80%, transparent), transparent); }
+}
+@media (min-width: 1024px) {
+  .hm-welcome__grid { align-items: stretch; }
+  .hm-welcome__media { aspect-ratio: auto; height: 100%; min-height: 380px; }
+}
+
+/* Explore */
+.hm-explore__main { display: flex; flex-direction: column; gap: 0; }
+.hm-explore__figure { margin: 0 0 16px; }
+.hm-explore__tabs { margin-block-end: 24px; }
+.hm-explore__panel { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.hm-explore__panel p { margin: 0; }
+.hm-explore__panel .eyebrow { align-self: stretch; margin-block-end: 8px; }
+.hm-explore__title { font-size: 24px; margin: 0 0 8px; }
+.hm-plan { display: flex; flex-direction: column; gap: 16px; align-self: stretch; }
+.hm-plan__title { margin: 0; font-size: 13px; font-family: var(--font-body), system-ui, sans-serif; }
+.hm-plan__title:lang(fa) { font-family: var(--font-fa), Tahoma, sans-serif; letter-spacing: 0; text-transform: none; font-size: 15px; }
+.hm-plan__list { display: flex; flex: 1; flex-direction: column; gap: 12px; list-style: none; margin: 0; padding: 0; }
+@media (min-width: 1024px) { .hm-plan__list > li { flex: 1; display: flex; } .hm-plan__list .navy-card { flex: 1; } }
+.hm-thumb { --accent: var(--turq); }
+.hm-thumb > div { opacity: 1; }
+
+/* Village year */
+/* Two featured cards side by side, the filtered list full width below them, so both halves keep the same rhythm. */
+.hm-year { display: flex; flex-direction: column; gap: 56px; }
+.hm-year__features { display: grid; gap: 40px; grid-template-columns: 1fr; }
+@media (min-width: 768px) { .hm-year__features { grid-template-columns: 1fr 1fr; gap: 32px; } }
+.hm-year__features h3 { margin: 0; font-size: 24px; }
+.hm-year__features p { margin: 0; }
+.hm-clamp { display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+.hm-source { font-size: 13.5px; color: var(--muted); }
+.hm-source .tag { margin-inline-end: 4px; }
+.hm-year__list { display: flex; flex-direction: column; gap: 16px; }
+.hm-year__rows { display: grid; grid-template-columns: 1fr; gap: 12px; list-style: none; margin: 0; padding: 0; }
+@media (min-width: 900px) { .hm-year__rows { grid-template-columns: repeat(auto-fill, minmax(min(100%, 480px), 1fr)); gap: 16px; } }
+.hm-year__row { text-decoration: none; }
+.hm-year__row .navy-card__meta { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.hm-date--word .date-block__big { font-size: 20px; }
+.hm-date--word .date-block__big:lang(fa) { font-size: 20px; }
+.hm-year__list .tab-count { margin: 0; }
+
+/* Cards (market + guide) */
+.hm-cards { display: grid; gap: 24px; list-style: none; margin: 0; padding: 0; grid-template-columns: 1fr; }
+@media (min-width: 768px) { .hm-cards { grid-template-columns: repeat(3, 1fr); } }
+.hm-card { height: 100%; }
+.hm-card .post-card__body p { margin: 0; }
+.hm-card .post-card__body h3 { margin: 0; }
+.hm-card__more { margin-block-start: auto; align-self: flex-start; }
+.hm-card__img { border-radius: 0; }
+.hm-card__placeholder { position: absolute; inset: 0; background: var(--sage); }
+.hm-card__placeholder > div { color: var(--action); }
+.hm-market__empty { display: grid; gap: 24px; max-width: 520px; }
+.hm-market__empty > p { margin: 0; }
+.hm-market__example { border-style: dashed; }
+.hm-allsections { margin-block-start: 48px; }
+.hm-allsections ul { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
+.hm-chip { display: inline-flex; align-items: center; min-height: 44px; padding-inline: 16px; margin: 0; }
+
+/* At a glance, map and population */
+.hm-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0; list-style: none; margin: 0 0 40px; padding: 0; border-block: 1px solid var(--line); }
+@media (min-width: 900px) { .hm-stats { grid-template-columns: repeat(4, 1fr); } }
+.hm-stats li { display: flex; flex-direction: column; gap: 4px; padding: 20px 16px; border-inline-start: 1px solid var(--line); }
+.hm-stats li:first-child { border-inline-start: 0; }
+@media (max-width: 899px) { .hm-stats li:nth-child(odd) { border-inline-start: 0; } .hm-stats li:nth-child(n+3) { border-block-start: 1px solid var(--line); } }
+.hm-stats b { font-family: var(--font-serif), Georgia, serif; font-size: 22px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.hm-stats b:lang(fa) { font-family: var(--font-fa), Tahoma, sans-serif; font-weight: 700; }
+.hm-stats span { font-size: 14px; }
+.hm-glance { align-items: stretch; gap: 24px; }
+.hm-glance__panel { display: flex; flex-direction: column; gap: 20px; padding: 28px 20px; }
+@media (min-width: 640px) { .hm-glance__panel { padding: 40px; } }
+.hm-panel-h { margin: 0; font-size: 24px; }
+.hm-glance__panel .card { border-color: var(--panel-2); }
+.hm-glance__panel figcaption .muted { color: var(--panel-muted); }
+.hm-glance__panel figcaption a { color: var(--turq); }
+.hm-bars { display: flex; flex-direction: column; gap: 20px; font-variant-numeric: tabular-nums; }
+.hm-bar { display: flex; flex-direction: column; gap: 8px; }
+.hm-bar__row { display: flex; justify-content: space-between; gap: 12px; font-size: 15px; }
+.hm-bar__row span { color: var(--panel-muted); }
+.hm-bar__track { height: 12px; background: var(--panel-2); }
+.hm-bar__fill { height: 12px; background: var(--turq); }
+.hm-panel-note { margin: 0; font-size: 14px; line-height: 1.7; color: var(--panel-muted); }
+
+/* CTA band */
+.hm-cta__inner { display: flex; flex-direction: column; gap: 24px; align-items: flex-start; }
+.hm-cta__inner p { margin: 12px 0 0; max-width: 640px; color: var(--on-action); }
+@media (min-width: 768px) { .hm-cta__inner { flex-direction: row; align-items: center; justify-content: space-between; gap: 48px; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .hm-hero .hero__slide { transition: none; }
+}

@@ -10,3 +10,8 @@ export const serverSupabase = () => {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   return url && key ? { url: url.replace(/\/$/, ""), key } : null;
 };
+
+// Headers that carry a project key. Older keys are JWTs (start with "eyJ") and are also sent as a bearer token.
+// The newer sb_publishable_ / sb_secret_ keys are NOT JWTs and must go in the apikey header only.
+export const keyHeaders = (key: string): Record<string, string> =>
+  key.startsWith("eyJ") ? { apikey: key, Authorization: `Bearer ${key}` } : { apikey: key };

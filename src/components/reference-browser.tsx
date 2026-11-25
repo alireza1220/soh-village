@@ -1,5 +1,6 @@
 "use client";
 
+import "@/styles/misc.css";
 import { useMemo, useState } from "react";
 import type { Locale } from "@/lib/i18n";
 import { statusLabel } from "@/lib/reference-comments";
@@ -28,36 +29,34 @@ export function ReferenceBrowser({ groups, lang }: { groups: RefGroup[]; lang: L
   const total = shown.reduce((n, g) => n + g.items.length, 0);
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <label className="flex flex-col gap-1 text-sm max-w-md w-full" htmlFor="ref-search">
-          {T.search[lang]}
+    <div className="ms-block">
+      <div className="ms-search">
+        <div className="field">
+          <label className="label" htmlFor="ref-search">{T.search[lang]}</label>
           <input
             id="ref-search"
+            type="search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={T.placeholder[lang]}
-            className="w-full rounded-xl border px-3 py-2 bg-[var(--surface)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
-            style={{ borderColor: "var(--line)" }}
+            className="input"
           />
-        </label>
-        <p className="text-sm muted">{total} {T.count[lang]}</p>
+        </div>
+        <p className="ms-count" role="status" aria-live="polite">{total} {T.count[lang]}</p>
       </div>
-      {shown.length === 0 ? <p className="muted">{T.empty[lang]}</p> : null}
+      {shown.length === 0 ? <p className="notice">{T.empty[lang]}</p> : null}
       {shown.map((g) => (
-        <section key={g.id} className="flex flex-col gap-3" aria-labelledby={g.id}>
-          <h2 id={g.id} className="text-2xl">{g.title[lang]}</h2>
-          <ul className="flex flex-col gap-2 list-none p-0 m-0">
+        <section key={g.id} className="ms-block" aria-labelledby={g.id}>
+          <div className="ms-head"><h2 id={g.id}>{g.title[lang]}</h2></div>
+          <ul className="ms-list">
             {g.items.map((item, index) => (
-              <li key={`${item.url}-${index}`} className="item">
-                <a className="link font-semibold break-all" href={item.url} target="_blank" rel="noopener noreferrer">{item.url}</a>
-                <p className="mt-2 flex flex-col gap-1 text-sm">
-                  <span>
-                    <span className="eyebrow">{T.comment[lang]}</span>
-                    {item.status ? <span className="chip">{statusLabel(item.status, lang)}</span> : null}
-                  </span>
-                  <span>{item.comment[lang]}</span>
-                </p>
+              <li key={`${item.url}-${index}`} className="ms-ref">
+                <a href={item.url} target="_blank" rel="noopener noreferrer" dir="ltr">{item.url}</a>
+                <span className="ms-ref__label">
+                  {T.comment[lang]}
+                  {item.status ? <span className="chip">{statusLabel(item.status, lang)}</span> : null}
+                </span>
+                <p>{item.comment[lang]}</p>
               </li>
             ))}
           </ul>

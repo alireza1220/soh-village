@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import "@/styles/market.css";
 import type { Locale } from "@/lib/i18n";
 import { ListingManager, type RunAction } from "@/components/listing-manager";
 import { errorText, postJson, type ManagedListing } from "@/components/listing-api";
@@ -36,30 +37,31 @@ export function ManageClient({ lang }: { lang: Locale }) {
   };
 
   const reset = () => { setItem(null); setDone(""); setCode(""); setErr(""); };
-  const field = "w-full rounded-xl border px-3 py-2 bg-[var(--surface)] font-mono tracking-wider focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]";
-
   return (
-    <div className="flex flex-col gap-4">
+    <div className="mk-stack">
       {!item && !done && (
-        <form className="card p-5 flex flex-col gap-3" onSubmit={open} aria-label={T.code[lang]}>
-          <p className="text-sm muted">{T.intro[lang]}</p>
-          <label className="flex flex-col gap-1 text-sm" htmlFor="manage-code">{T.code[lang]}
-            <input id="manage-code" dir="ltr" autoComplete="off" autoCapitalize="characters" spellCheck={false} placeholder="XXXX-XXXX-XXXX" className={field} style={{ borderColor: "var(--line)" }} value={code} maxLength={24} onChange={(e) => setCode(e.target.value)} />
-          </label>
-          <button type="submit" className="btn btn-primary self-start" disabled={busy || !code.trim()}>{busy ? T.opening[lang] : T.open[lang]}</button>
+        <form className="mk-panel mk-narrow" onSubmit={open} aria-label={T.code[lang]}>
+          <p className="mk-form-intro">{T.intro[lang]}</p>
+          <div className="field">
+            <label className="label" htmlFor="manage-code">{T.code[lang]}</label>
+            <input id="manage-code" dir="ltr" autoComplete="off" autoCapitalize="characters" spellCheck={false} placeholder="XXXX-XXXX-XXXX" className="input mk-mono" style={{ letterSpacing: "0.08em" }} value={code} maxLength={24} onChange={(e) => setCode(e.target.value)} />
+          </div>
+          <div>
+            <button type="submit" className="btn btn--primary" disabled={busy || !code.trim()}>{busy ? T.opening[lang] : T.open[lang]}</button>
+          </div>
         </form>
       )}
-      <div aria-live="polite" role="status">
-        {err && <p className="text-sm" style={{ color: "var(--amber)" }}>{err}</p>}
-        {done && <p className="text-sm" style={{ color: "var(--accent)" }}>{done}</p>}
+      <div aria-live="polite" role="status" className="mk-live">
+        {err && <p className="mk-msg mk-msg--warn">{err}</p>}
+        {done && <p className="mk-msg mk-msg--ok">{done}</p>}
       </div>
       {item && (
         <>
           <ListingManager lang={lang} items={[item]} run={run} onRemoved={() => { setItem(null); setDone(T.deleted[lang]); }} />
-          <button type="button" className="btn btn-ghost self-start" onClick={reset}>{T.other[lang]}</button>
+          <div><button type="button" className="btn btn--ghost" onClick={reset}>{T.other[lang]}</button></div>
         </>
       )}
-      {!item && done && <button type="button" className="btn btn-ghost self-start" onClick={reset}>{T.other[lang]}</button>}
+      {!item && done && <div><button type="button" className="btn btn--ghost" onClick={reset}>{T.other[lang]}</button></div>}
     </div>
   );
 }

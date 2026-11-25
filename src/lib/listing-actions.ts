@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { parseListingInput, publicRow } from "@/lib/listing-validation";
 import { secret, secretsReady } from "@/lib/secrets";
 import { serverSupabase } from "@/lib/supabase";
+import { keyHeaders } from "@/lib/supabase";
 
 // Shared by POST /api/listings/manage and POST /api/my/listings. Server-only.
 export type Sb = NonNullable<ReturnType<typeof serverSupabase>>;
@@ -17,7 +18,7 @@ const RENEW_WINDOW_MS = 7 * DAY;
 const RENEW_EXTEND_MS = 30 * DAY;
 const MAX_RENEWALS = 4;
 
-export const sbHeaders = (sb: Sb) => ({ apikey: sb.key, Authorization: `Bearer ${sb.key}` });
+export const sbHeaders = (sb: Sb) => keyHeaders(sb.key);
 
 // Answers 503 when production secrets are missing or too short. Call right after serverSupabase().
 export function configGate(): Response | null {

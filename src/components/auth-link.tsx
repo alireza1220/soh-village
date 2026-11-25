@@ -10,5 +10,5 @@ export function AuthLink({ lang, className }: { lang: Locale; className?: string
   const loggedIn = !!publicSupabase() && ready && !!session;
   const href = loggedIn ? `/${lang}/my` : `/${lang}/login`;
   const text = loggedIn ? (lang === "fa" ? "آگهی‌های من" : "My listings") : lang === "fa" ? "ورود" : "Log in";
-  return <Link href={href} className={className ?? "btn btn-ghost"}>{text}</Link>;
+  return <Link href={href} className={className ?? "ut-link"}>{text}</Link>;
 }

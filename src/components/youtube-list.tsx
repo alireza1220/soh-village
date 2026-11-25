@@ -1,13 +1,14 @@
 import Link from "next/link";
 import type { Locale } from "@/lib/i18n";
+import "@/styles/misc.css";
 import { sectionTitle, youtubeFor, type YtVideo } from "@/lib/youtube";
 
 export function YoutubeList({ videos, lang }: { videos: YtVideo[]; lang: Locale }) {
   return (
-    <ul className="flex flex-col gap-8 list-none p-0 m-0">
+    <ul className="ms-embeds">
       {videos.map((v) => (
-        <li key={v.id} id={`yt-${v.id}`} className="card overflow-hidden scroll-mt-24">
-          <div className="relative" style={{ aspectRatio: "16 / 9" }}>
+        <li key={v.id} id={`yt-${v.id}`} className="ms-embed">
+          <div className="ms-embed__video">
             <iframe
               src={`https://www.youtube-nocookie.com/embed/${v.id}`}
               title={v.title[lang]}
@@ -15,18 +16,17 @@ export function YoutubeList({ videos, lang }: { videos: YtVideo[]; lang: Locale 
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
               allowFullScreen
-              className="absolute inset-0 h-full w-full border-0"
             />
           </div>
-          <div className="p-4 flex flex-col gap-2">
-            <h3 className="text-xl">{v.title[lang]}</h3>
-            <p className="text-sm muted">{v.channel}</p>
-            <p className="text-sm">{v.note[lang]}</p>
-            <p className="text-sm flex flex-wrap gap-x-4 gap-y-1">
+          <div className="ms-embed__body">
+            <h3>{v.title[lang]}</h3>
+            <p className="ms-sub">{v.channel}</p>
+            <p>{v.note[lang]}</p>
+            <p className="ms-embed__links">
               {v.sections.map((slug) => (
-                <Link key={slug} className="link" href={`/${lang}/${slug}`}>{sectionTitle(slug)[lang]}</Link>
+                <Link key={slug} href={`/${lang}/${slug}`}>{sectionTitle(slug)[lang]}</Link>
               ))}
-              <a className="link" href={`https://www.youtube.com/watch?v=${v.id}`} target="_blank" rel="noopener noreferrer">YouTube</a>
+              <a href={`https://www.youtube.com/watch?v=${v.id}`} target="_blank" rel="noopener noreferrer">YouTube</a>
             </p>
           </div>
         </li>
@@ -39,13 +39,13 @@ export function YoutubeForSection({ section, lang }: { section: string; lang: Lo
   const videos = youtubeFor(section);
   if (videos.length === 0) return null;
   return (
-    <section className="flex flex-col gap-3" aria-labelledby={`yt-${section}`}>
-      <h2 id={`yt-${section}`} className="text-2xl">{lang === "fa" ? "ویدیو در یوتیوب" : "On YouTube"}</h2>
-      <ul className="flex flex-col gap-2 list-none p-0 m-0">
+    <section className="ms-block" aria-labelledby={`yt-${section}`}>
+      <div className="ms-head"><h2 id={`yt-${section}`}>{lang === "fa" ? "ویدیو در یوتیوب" : "On YouTube"}</h2></div>
+      <ul className="ms-list">
         {videos.map((v) => (
           <li key={v.id}>
-            <Link className="link font-semibold" href={`/${lang}/references#yt-${v.id}`}>{v.title[lang]}</Link>
-            <span className="text-sm muted"> · {v.channel}</span>
+            <Link className="link" href={`/${lang}/references#yt-${v.id}`}>{v.title[lang]}</Link>
+            <span className="ms-sub"> · {v.channel}</span>
           </li>
         ))}
       </ul>

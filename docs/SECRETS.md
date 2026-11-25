@@ -118,3 +118,14 @@ The per-IP limits (5 posts per hour, 20 manage calls per hour) use the address V
 - [ ] SMTP key is only in Supabase, not in the repo.
 - [ ] Secret scanning is on in GitHub.
 - [ ] You know the rotation steps (section 8) and `MANAGE_CODE_SALT` is never changed casually.
+
+## New-style Supabase keys (publishable and secret)
+
+Newer Supabase projects show two keys that start with `sb_publishable_` and `sb_secret_`. They work here:
+
+| Supabase shows | Put it in | Public? |
+|---|---|---|
+| publishable key (`sb_publishable_...`) | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes, it is meant for the browser |
+| secret key (`sb_secret_...`) | `SUPABASE_SERVICE_ROLE_KEY` | **no, server only** |
+
+The variable names still say "anon" and "service role" for historical reasons. The code (`keyHeaders` in `src/lib/supabase.ts`) sends the new keys in the `apikey` header only, because they are not JWTs; the older JWT-style keys (`eyJ...`) are still sent as before, so either kind works. Never paste a secret key in chat, in a commit, or into a variable that starts with `NEXT_PUBLIC_`.

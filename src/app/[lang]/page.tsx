@@ -1,172 +1,301 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import "@/styles/home.css";
 import { Credit } from "@/components/credit";
+import { ExploreTabs, type ExploreTab } from "@/components/home/explore-tabs";
+import { HeroSlideshow, type HeroSlide } from "@/components/home/hero-slideshow";
+import { MarketTeaser } from "@/components/home/market-teaser";
+import { YearList } from "@/components/home/year-list";
+import { Arrow } from "@/components/icons";
 import { VillageMap } from "@/components/map";
 import { SectionMark } from "@/components/section-mark";
-import { hasLocale } from "@/lib/i18n";
-import { photos } from "@/lib/photos";
-import { population, sections, siteName, stats } from "@/lib/site";
-
-const starts: { slug: string; title: { fa: string; en: string }; text: { fa: string; en: string }; image?: string }[] = [
-  { slug: "map", title: { fa: "کجاست", en: "Where" }, text: { fa: "نقشه‌ی روستا", en: "The village on the map" }, image: "soh-map.png" },
-  { slug: "tourism", title: { fa: "چطور بروید", en: "How to get there" }, text: { fa: "راه، همسایه‌ها و جاهای دیدنی", en: "The road, the neighbours and the sights" }, image: "karkas-mountain.jpg" },
-  { slug: "history", title: { fa: "چه می‌دانیم", en: "What we know" }, text: { fa: "تاریخ، با برچسب برای مطلب تأییدنشده", en: "History, with a label when a fact is not checked" }, image: "opening.jpg" },
-  { slug: "market", title: { fa: "بازارچه", en: "Market" }, text: { fa: "آگهی محلی؛ سایت پول نمی‌گیرد", en: "Local listings. The site takes no payment." } },
-  { slug: "references", title: { fa: "راهنما و منابع", en: "Guide and sources" }, text: { fa: "روش استفاده از سایت و همه‌ی پیوندها", en: "How to use the site, and every link we found" } },
-];
-
-const copy = {
-  eyebrow: { fa: "مورچه‌خورت · شاهین‌شهر و میمه · اصفهان", en: "Murcheh Khvort · Shahin Shahr and Meymeh · Isfahan" },
-  lead: { fa: "راهنمای روستای سُه: کجاست، چه دارد، و چطور مطلب یا آگهی اضافه کنید. هر مطلب منبع دارد و اگر تأیید نشده باشد برچسب خورده است.", en: "A guide to Soh: where it is, what is there, and how to add a note or a listing. Every fact has a source, and anything not checked is labelled." },
-  place: { fa: "در دامنه‌ی کوه‌های کرکس، با کاروانسرایی قاجاری، دو امامزاده‌ی گنبدفیروزه‌ای و باغ‌های سیب.", en: "On the slopes of the Karkas mountains, with a Qajar caravanserai, two turquoise-domed shrines and apple orchards." },
-  explore: { fa: "گشت در سُه", en: "Explore Soh" },
-  exploreSub: { fa: "هر بخش از منابع نام‌برده ساخته شده و مطلب تأییدنشده برچسب دارد.", en: "Every section is built from named sources, and unverified items are labelled." },
-  glance: { fa: "یک نگاه", en: "At a glance" },
-  help: { fa: "به ساختن این سایت کمک کنید", en: "Help build this site" },
-  helpSub: { fa: "عکس، واژه‌ی محلی، خاطره، اصلاح اشتباه یا آگهی ملک دارید؟ همه‌چیز پیش از انتشار بررسی می‌شود.", en: "Have a photo, a local word, a memory, a correction or a property listing? Everything is checked before it is published." },
-  explore2: { fa: "بخش‌ها", en: "Browse sections" },
-  contribute: { fa: "مشارکت", en: "Contribute" },
-  map: { fa: "نقشه", en: "Map" },
-  pop: { fa: "جمعیت", en: "Population" },
-  households: { fa: "خانوار", en: "households" },
-  popNote: { fa: "مرکز آمار ایران، از ویکی‌پدیا. کجارو می‌نویسد در بهار و تابستان حدود ۱۰۰۰ نفر در روستا هستند و گردشنامه تا ۵۰۰۰ نفر در نوروز، محرم و تابستان (سرشماری نیست و دو عدد با هم نمی‌خوانند).", en: "Statistical Centre of Iran, via Wikipedia. Kojaro says about 1,000 people are in the village in spring and summer, and Gardeshnama up to 5,000 at Nowruz, Muharram and in summer (not census figures, and they disagree)." },
-};
+import {
+  entriesLabel, entryCount, findCard, hc, heroFiles, photoOf, planCards, statusLabel, yearRows,
+} from "@/lib/home-content";
+import { dirOf, hasLocale } from "@/lib/i18n";
+import { LISTING_CATEGORIES, LISTING_TYPES } from "@/lib/market";
+import { population, sectionBySlug, sections, siteName, stats } from "@/lib/site";
 
 export default async function Home({ params }: PageProps<"/[lang]">) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
-  const hero = photos.find((p) => p.section === "village") ?? photos[0];
+  const dir = dirOf(lang);
+  const href = (slug: string) => `/${lang}/${slug}`;
+  const sec = (slug: string) => sectionBySlug(slug);
+
+  // Hero: only photos registered in photos.ts, so credit and licence are always known.
+  const heroPhotos = heroFiles.map((f) => photoOf(f)).filter((p): p is NonNullable<typeof p> => !!p).slice(0, 4);
+  const slides: HeroSlide[] = heroPhotos.map((p) => ({
+    src: `/photos/${p.file}`, alt: p.alt[lang], caption: p.caption[lang], credit: <Credit p={p} lang={lang} light />,
+  }));
+
+  const opening = photoOf("opening.jpg");
+  const mountain = photoOf("karkas-mountain.jpg");
+  const traditionsPhoto = photoOf("nakhl-gardani-mehriz.jpg", "karkas-peak.jpg");
+
+  // Explore tabs: History, Sights, Traditions.
+  const tabDefs: { id: string; label: string; slug: string; photo?: typeof opening }[] = [
+    { id: "history", label: hc.tabHistory[lang], slug: "history", photo: opening },
+    { id: "sights", label: hc.tabSights[lang], slug: "tourism", photo: mountain },
+    { id: "traditions", label: hc.tabTraditions[lang], slug: "traditions", photo: traditionsPhoto },
+  ];
+  const exploreTabs: ExploreTab[] = tabDefs.flatMap((d) => {
+    const s = sec(d.slug);
+    if (!s || !d.photo) return [];
+    return [{
+      id: d.id, label: d.label, count: entriesLabel(entryCount(d.slug), lang), title: s.title[lang], intro: s.intro[lang], href: href(d.slug),
+      linkLabel: `${hc.openSection[lang]} ${s.title[lang]}`, image: d.photo.file, alt: d.photo.alt[lang],
+      ar: "16 / 9", credit: <Credit p={d.photo} lang={lang} />,
+    }];
+  });
+
+  // Village-year rows and featured cards (text restated from existing sourced entries in site.ts).
+  const yearItems = yearRows.map((r) => ({
+    id: r.id, filters: r.filters, big: r.big[lang], small: r.small[lang], title: r.title[lang], text: r.text[lang],
+    source: r.source[lang], sourceLabel: hc.sourceLabel[lang], wordy: r.wordy,
+    href: r.section === "population" ? "#population" : href(r.section),
+  }));
+  const yearFilters = [
+    { id: "all", label: hc.fAll[lang] }, { id: "traditions", label: hc.fTraditions[lang] },
+    { id: "seasons", label: hc.fSeasons[lang] }, { id: "visit", label: hc.fVisit[lang] },
+  ];
+  const tasua = findCard("traditions", "Tasua palm carrying");
+  const caravanserai = (["history", "tourism"] as const).map((s) => findCard(s, "Soh Caravanserai")).find(Boolean);
+  const features = [
+    { key: "traditions", slug: "traditions", button: hc.cardTraditions[lang], photo: photoOf("nakhl-gardani-mehriz.jpg"), title: tasua?.title[lang] ?? sec("traditions")?.title[lang] ?? "", text: tasua?.text[lang] ?? sec("traditions")?.intro[lang] ?? "", status: tasua?.status, source: tasua?.source },
+    { key: "history", slug: "history", button: hc.cardHistory[lang], photo: opening, title: caravanserai?.title[lang] ?? sec("history")?.title[lang] ?? "", text: caravanserai?.text[lang] ?? sec("history")?.intro[lang] ?? "", status: caravanserai?.status, source: caravanserai?.source },
+  ];
+
+  // Guide cards: History, Words and dialect, Resources.
+  const guide = [
+    { slug: "history", chip: { fa: "تاریخ", en: "History" }, photo: opening },
+    { slug: "words", chip: { fa: "زبان", en: "Language" }, photo: undefined },
+    { slug: "resources", chip: { fa: "منابع", en: "Sources" }, photo: undefined },
+  ];
+
   const max = Math.max(...population.map((p) => p.people));
+  const typeSell = LISTING_TYPES.find((o) => o.v === "sell")?.[lang] ?? "";
+  const catFruit = LISTING_CATEGORIES.find((o) => o.v === "fruit")?.[lang] ?? "";
+
   return (
     <>
-      <section className="wrap pt-10 pb-12 grid gap-10 items-center lg:grid-cols-2">
-        <div className="flex flex-col gap-6">
-          <span className="pill self-start">{copy.eyebrow[lang]}</span>
-          <h1 className="text-[clamp(38px,6vw,64px)]">{siteName[lang]}</h1>
-          <p className="text-lg max-w-xl">{copy.lead[lang]}</p>
-          <p className="muted max-w-xl">{copy.place[lang]}</p>
-          <div className="flex flex-wrap gap-3">
-            <a href="#explore" className="btn btn-primary">{copy.explore[lang]}</a>
-            <Link href={`/${lang}/contribute`} className="btn btn-ghost">{copy.contribute[lang]}</Link>
+      <h1 className="sr-only">{siteName[lang]}</h1>
+
+      {slides.length > 0 && (
+        <HeroSlideshow
+          slides={slides}
+          numLocale={lang === "fa" ? "fa-IR" : "en-US"}
+          labels={{ region: hc.heroLabel[lang], pause: hc.pause[lang], play: hc.play[lang], slide: hc.slide[lang], of: hc.slideOf[lang], goTo: hc.goTo[lang] }}
+        />
+      )}
+
+      {/* WELCOME */}
+      <section className="section section--sage hm-welcome" aria-labelledby="hm-welcome-title">
+        <div className="wrap hm-welcome__grid">
+          <div className="panel hm-welcome__panel">
+            <p className="eyebrow">{hc.welcomeEyebrow[lang]}</p>
+            <h2 id="hm-welcome-title" className="hm-display">{hc.welcomeTitle[lang]}</h2>
+            <p>{hc.welcomeP1[lang]}</p>
+            <p>{hc.welcomeP2[lang]}</p>
           </div>
-        </div>
-        {hero && (
-          <figure className="card hero-photo relative m-0 overflow-hidden" style={{ aspectRatio: `${hero.width} / ${hero.height}` }}>
-            <Image src={`/photos/${hero.file}`} alt={hero.alt[lang]} fill priority sizes="(max-width: 1024px) 100vw, 540px" className="object-cover" />
-            <p lang="fa" className="fa-display absolute top-3 z-10 text-[84px] font-bold leading-none text-white/95 drop-shadow-lg start-5">سُه</p>
-            <figcaption className="absolute inset-x-0 bottom-0 z-10 p-4 flex flex-col gap-1 text-white">
-              <span className="text-sm">{hero.caption[lang]}</span>
-              <Credit p={hero} lang={lang} light />
-            </figcaption>
-          </figure>
-        )}
-      </section>
-
-      <section className="wrap pb-12" aria-labelledby="start">
-        <h2 id="start" className="section-title mb-4">{lang === "fa" ? "از اینجا شروع کنید" : "Start here"}</h2>
-        <ul className="grid gap-3 list-none p-0 m-0" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))" }}>
-          {starts.map((s) => {
-            const ph = s.image ? photos.find((p) => p.file === s.image) : undefined;
-            const mapShot = s.image === "soh-map.png";
-            return (
-              <li key={s.slug}>
-                <Link href={`/${lang}/${s.slug}`} className="card lift flex h-full flex-col overflow-hidden">
-                  <div className="relative" style={{ aspectRatio: "16 / 10", background: "linear-gradient(135deg, var(--accent-soft), var(--chip))" }}>
-                    {mapShot ? (
-                      <>
-                        <Image src="/photos/soh-map.png" alt={lang === "fa" ? "نقشه‌ی محدوده‌ی سُه" : "Map of the Soh area"} fill sizes="240px" className="object-cover" />
-                        <span className="region-badge">© OpenStreetMap</span>
-                      </>
-                    ) : ph ? (
-                      <>
-                        <Image src={`/photos/${ph.file}`} alt={ph.alt[lang]} fill sizes="240px" className="object-cover" />
-                        {ph.scope === "region" && <span className="region-badge">{lang === "fa" ? "عکس منطقه، نه سُه" : "Region photo, not Soh"}</span>}
-                      </>
-                    ) : (
-                      <SectionMark slug={s.slug} />
-                    )}
-                  </div>
-                  <div className="p-4 flex flex-col gap-1">
-                    <b>{s.title[lang]}</b>
-                    <span className="text-sm muted">{s.text[lang]}</span>
-                  </div>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
-
-      <section className="wrap pb-12">
-        <ul className="grid gap-3 list-none p-0 m-0" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))" }}>
-          {stats.map((s) => (
-            <li key={s.k.en} className="card p-4">
-              <b className="block text-2xl" style={{ fontFamily: "var(--font-serif), var(--font-fa)", fontVariantNumeric: "tabular-nums" }}>{s.v[lang]}</b>
-              <span className="text-sm muted">{s.k[lang]}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="wrap pb-14 flex flex-col gap-6" aria-labelledby="explore">
-        <div className="flex flex-col gap-2 max-w-2xl">
-          <h2 id="explore" className="section-title">{copy.explore2[lang]}</h2>
-          <p className="muted">{copy.exploreSub[lang]}</p>
-        </div>
-        <ul className="grid gap-4 list-none p-0 m-0" style={{ gridTemplateColumns: "repeat(auto-fill,minmax(250px,1fr))" }}>
-          {sections.map((s) => {
-            const ph = photos.find((p) => p.section === s.slug);
-            return (
-              <li key={s.slug}>
-                <Link href={`/${lang}/${s.slug}`} className="card lift flex h-full flex-col overflow-hidden">
-                  <div className="relative" style={{ aspectRatio: "16 / 9", background: "linear-gradient(135deg, var(--accent-soft), var(--chip))" }}>
-                    {ph ? (
-                      <>
-                        <Image src={`/photos/${ph.file}`} alt={ph.alt[lang]} fill sizes="(max-width: 640px) 100vw, 300px" className="object-cover" />
-                        {ph.scope === "region" && <span className="region-badge">{lang === "fa" ? "عکس منطقه، نه سُه" : "Region photo, not Soh"}</span>}
-                      </>
-                    ) : (
-                      <SectionMark slug={s.slug} />
-                    )}
-                  </div>
-                  <div className="p-4 flex flex-col gap-1">
-                    <h3 className="text-xl">{s.title[lang]}</h3>
-                    <p className="text-sm muted">{s.intro[lang]}</p>
-                  </div>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
-
-      <section className="wrap pb-14 grid gap-8 lg:grid-cols-[3fr_2fr] items-start" aria-labelledby="glance">
-        <div className="flex flex-col gap-3">
-          <h2 id="glance" className="section-title">{copy.map[lang]}</h2>
-          <VillageMap lang={lang} />
-        </div>
-        <div className="flex flex-col gap-3">
-          <h2 className="section-title">{copy.pop[lang]}</h2>
-          <div className="card p-5 flex flex-col gap-4" role="img" aria-label={population.map((p) => `${p.year}: ${p.people}`).join(", ")}>
-            {population.map((p) => (
-              <div key={p.year} className="flex flex-col gap-1" style={{ fontVariantNumeric: "tabular-nums" }}>
-                <div className="flex justify-between text-sm"><b>{p.year}</b><span className="muted">{p.people} · {p.households} {copy.households[lang]}</span></div>
-                <div className="h-3 rounded-full" style={{ background: "var(--chip)" }}>
-                  <div className="h-3 rounded-full" style={{ width: `${Math.round((p.people / max) * 100)}%`, background: "var(--apple)" }} />
+          {opening && (
+            <div className="hm-welcome__photo">
+              <div className="media-wrap">
+                <div className="media hm-welcome__media">
+                  <Image src={`/photos/${opening.file}`} alt={opening.alt[lang]} fill sizes="(max-width: 1023px) 100vw, 480px" className="object-cover" />
                 </div>
+                <p className="hm-welcome__credit"><Credit p={opening} lang={lang} light /></p>
+                <Link href={href("history")} className="btn btn--primary btn-corner">{hc.welcomeCta[lang]}</Link>
               </div>
-            ))}
-          </div>
-          <p className="text-sm muted">{copy.popNote[lang]}</p>
+            </div>
+          )}
         </div>
       </section>
 
-      <section className="wrap">
-        <div className="card p-8 md:p-12 flex flex-col gap-4 items-start" style={{ background: "linear-gradient(135deg, var(--accent-soft), var(--surface))" }}>
-          <h2 className="section-title max-w-2xl">{copy.help[lang]}</h2>
-          <p className="muted max-w-2xl">{copy.helpSub[lang]}</p>
-          <Link href={`/${lang}/contribute`} className="btn btn-primary">{copy.contribute[lang]} →</Link>
+      {/* EXPLORE + PLAN YOUR VISIT */}
+      <section className="section" aria-labelledby="hm-explore-title">
+        <div className="wrap split hm-explore">
+          <div>
+            <p className="eyebrow">{hc.exploreEyebrow[lang]}</p>
+            <h2 id="hm-explore-title" className="hm-display hm-section-h">{hc.exploreTitle[lang]}</h2>
+            {exploreTabs.length > 0 && <ExploreTabs tabs={exploreTabs} dir={dir} label={hc.exploreLabel[lang]} />}
+          </div>
+          <aside aria-labelledby="hm-plan-title" className="hm-plan">
+            <h3 id="hm-plan-title" className="eyebrow hm-plan__title">{hc.planEyebrow[lang]}</h3>
+            <ul className="hm-plan__list">
+              {planCards.map((c) => (
+                <li key={c.slug}>
+                  <Link href={href(c.slug)} className="navy-card">
+                    <span className="navy-card__thumb hm-thumb" aria-hidden="true"><SectionMark slug={c.mark ?? c.slug} /></span>
+                    <span className="navy-card__body">
+                      <span className="navy-card__title">{c.title[lang]}</span>
+                      <span className="navy-card__meta">{c.text[lang]}</span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <Link href={href("tourism")} className="link-arrow">{hc.planViewAll[lang]} <Arrow /></Link>
+          </aside>
+        </div>
+      </section>
+
+      {/* VILLAGE YEAR */}
+      <section className="section section--mist" aria-labelledby="hm-year-title">
+        <div className="wrap">
+          <div className="hm-head">
+            <p className="eyebrow">{hc.yearEyebrow[lang]}</p>
+            <h2 id="hm-year-title" className="hm-display hm-section-h">{hc.yearTitle[lang]}</h2>
+            <p className="muted hm-head__intro">{hc.yearIntro[lang]}</p>
+          </div>
+          <div className="hm-year">
+            <div className="hm-year__features">
+              {features.map((f) => (
+                <article key={f.key} className="feature-card">
+                  <div className="media-wrap">
+                    <div className="media" style={{ "--ar": "16 / 10" } as React.CSSProperties}>
+                      {f.photo ? (
+                        <Image src={`/photos/${f.photo.file}`} alt={f.photo.alt[lang]} fill sizes="(max-width: 1023px) 100vw, 600px" className="object-cover" />
+                      ) : (
+                        <div className="hm-card__placeholder"><SectionMark slug={f.slug} /></div>
+                      )}
+                    </div>
+                    <Link href={href(f.slug)} className="btn btn--primary btn-corner">{f.button}</Link>
+                  </div>
+                  {f.photo && <p className="hm-credit"><Credit p={f.photo} lang={lang} /></p>}
+                  <h3>{f.title}</h3>
+                  <p className="hm-clamp">{f.text}</p>
+                  {(f.status || f.source) && (
+                    <p className="hm-source">
+                      {statusLabel(f.status, lang) && <span className="tag">{statusLabel(f.status, lang)}</span>}
+                      {f.source && <span> {hc.sourceLabel[lang]}: {f.source}</span>}
+                    </p>
+                  )}
+                </article>
+              ))}
+            </div>
+            <YearList
+              items={yearItems} filters={yearFilters} dir={dir} label={hc.filterLabel[lang]}
+              showing={hc.showing[lang]} of={hc.showingOf[lang]}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* VILLAGE MARKET */}
+      <section className="section" aria-labelledby="hm-market-title">
+        <div className="wrap">
+          <div className="hm-head">
+            <p className="eyebrow">{hc.marketEyebrow[lang]}</p>
+            <h2 id="hm-market-title" className="hm-display hm-section-h">{hc.marketTitle[lang]}</h2>
+            <p className="muted hm-head__intro">{hc.marketIntro[lang]}</p>
+          </div>
+          <MarketTeaser
+            lang={lang} href={href("market")}
+            labels={{
+              empty: hc.marketEmpty[lang], example: hc.marketExample[lang], exampleTitle: hc.marketExampleTitle[lang], exampleMeta: hc.marketExampleMeta[lang],
+              readMore: hc.readMore[lang], area: hc.area[lang], until: hc.until[lang], typeSell, catFruit,
+            }}
+          />
+          <div className="hm-actions">
+            <Link href={href("market")} className="btn btn--primary">{hc.marketCta[lang]}</Link>
+            <Link href={href("needs")} className="link-arrow">{hc.marketPost[lang]} <Arrow /></Link>
+          </div>
+        </div>
+      </section>
+
+      {/* FROM THE GUIDE */}
+      <section className="section section--mist" aria-labelledby="hm-guide-title">
+        <div className="wrap">
+          <div className="hm-head">
+            <p className="eyebrow">{hc.guideEyebrow[lang]}</p>
+            <h2 id="hm-guide-title" className="hm-display hm-section-h">{hc.guideTitle[lang]}</h2>
+          </div>
+          <ul className="hm-cards">
+            {guide.map((g) => {
+              const s = sec(g.slug);
+              if (!s) return null;
+              return (
+                <li key={g.slug}>
+                  <article className="post-card hm-card">
+                    <div className="media hm-card__img" style={{ "--ar": "16 / 10" } as React.CSSProperties}>
+                      {g.photo ? (
+                        <Image src={`/photos/${g.photo.file}`} alt={g.photo.alt[lang]} fill sizes="(max-width: 767px) 100vw, 400px" className="object-cover" />
+                      ) : (
+                        <div className="hm-card__placeholder"><SectionMark slug={g.slug} /></div>
+                      )}
+                    </div>
+                    <div className="post-card__body">
+                      <p className="post-card__meta"><span className="tag">{g.chip[lang]}</span></p>
+                      <h3>{s.title[lang]}</h3>
+                      <p>{s.intro[lang]}</p>
+                      {g.photo && <p className="hm-credit"><Credit p={g.photo} lang={lang} /></p>}
+                      <Link href={href(g.slug)} className="link-arrow hm-card__more">{hc.readMore[lang]} <Arrow /></Link>
+                    </div>
+                  </article>
+                </li>
+              );
+            })}
+          </ul>
+          <div className="hm-actions">
+            <Link href={href("references")} className="btn btn--dark">{hc.guideAll[lang]}</Link>
+          </div>
+          <nav aria-label={hc.allSections[lang]} className="hm-allsections">
+            <p className="eyebrow">{hc.allSections[lang]}</p>
+            <ul>
+              {sections.map((s) => (
+                <li key={s.slug}><Link href={href(s.slug)} className="chip hm-chip">{s.title[lang]}</Link></li>
+              ))}
+            </ul>
+          </nav>
+        </div>
+      </section>
+
+      {/* MAP + POPULATION */}
+      <section className="section" aria-labelledby="hm-glance-title">
+        <div className="wrap">
+          <div className="hm-head">
+            <p className="eyebrow">{hc.glanceEyebrow[lang]}</p>
+            <h2 id="hm-glance-title" className="hm-display hm-section-h">{siteName[lang]}</h2>
+          </div>
+          <ul className="hm-stats">
+            {stats.map((s) => (
+              <li key={s.k.en}>
+                <b>{s.v[lang]}</b>
+                <span className="muted">{s.k[lang]}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="split hm-glance">
+            <div className="panel hm-glance__panel">
+              <h3 className="hm-panel-h">{hc.mapTitle[lang]}</h3>
+              <VillageMap lang={lang} />
+            </div>
+            <div className="panel hm-glance__panel" id="population">
+              <h3 className="hm-panel-h">{hc.popTitle[lang]}</h3>
+              <div className="hm-bars" role="img" aria-label={population.map((p) => `${p.year}: ${p.people}`).join(", ")}>
+                {population.map((p) => (
+                  <div key={p.year} className="hm-bar">
+                    <div className="hm-bar__row"><b dir="ltr">{p.year}</b><span>{p.people} · {p.households} {hc.households[lang]}</span></div>
+                    <div className="hm-bar__track"><div className="hm-bar__fill" style={{ width: `${Math.round((p.people / max) * 100)}%` }} /></div>
+                  </div>
+                ))}
+              </div>
+              <p className="hm-panel-note">{hc.popNote[lang]}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA BAND */}
+      <section className="section section--action hm-cta" aria-labelledby="hm-cta-title">
+        <div className="wrap hm-cta__inner">
+          <div>
+            <h2 id="hm-cta-title" className="hm-display">{hc.ctaTitle[lang]}</h2>
+            <p>{hc.ctaText[lang]}</p>
+          </div>
+          <Link href={href("contribute")} className="btn btn--light">{hc.ctaButton[lang]}</Link>
         </div>
       </section>
     </>

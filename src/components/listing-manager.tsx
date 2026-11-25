@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import "@/styles/market.css";
 import type { Locale } from "@/lib/i18n";
 import { CONTACT_KINDS, LISTING_CATEGORIES, LISTING_TYPE_LABELS, LISTING_TYPES } from "@/lib/market";
 import { errorText, type ManagedListing } from "@/components/listing-api";
@@ -43,9 +44,6 @@ const STATUS: Record<string, { fa: string; en: string }> = {
   expired: { fa: "منقضی", en: "Expired" },
 };
 
-const field = "w-full rounded-xl border px-3 py-2 bg-[var(--surface)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]";
-const brd = { borderColor: "var(--line)" } as const;
-const lbl = "flex flex-col gap-1 text-sm";
 
 const label = (list: { v: string; fa: string; en: string }[], v: string, lang: Locale) => list.find((o) => o.v === v)?.[lang] ?? v;
 
@@ -96,85 +94,81 @@ function ListingCard({ lang, item, run, onChange, onRemoved }: { lang: Locale; i
     return doRun("update", fields);
   };
 
+  const FF = (id: string, label: string, el: React.ReactNode) => (
+    <div className="field"><label className="label" htmlFor={id}>{label}</label>{el}</div>
+  );
   return (
-    <li className="item flex flex-col gap-3 list-none">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="chip" data-status={st}>{STATUS[st]?.[lang] ?? st}</span>
+    <li className="mk-listing">
+      <div className="mk-chips">
+        <span className="mk-status" data-status={st}>{STATUS[st]?.[lang] ?? st}</span>
         <span className="chip">{label(LISTING_TYPE_LABELS, item.type, lang)}</span>
         <span className="chip">{label(LISTING_CATEGORIES, item.category, lang)}</span>
       </div>
-      <h3 className="text-lg font-semibold break-words">{item.title}</h3>
-      <p className="text-sm muted">
+      <h3>{item.title}</h3>
+      <p className="mk-expiry">
         {T.expires[lang]}: {fmtDate(item.expiresAt, lang)} · {T.renewals[lang]}: {(item.renewals ?? 0).toLocaleString(lang === "fa" ? "fa-IR" : "en")}
       </p>
 
       {mode === "edit" && (
-        <form className="flex flex-col gap-3" onSubmit={(e) => { e.preventDefault(); void save(); }} aria-label={T.edit[lang]}>
-          {item.status === "approved" && <p className="text-sm muted">{T.editNote[lang]}</p>}
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className={lbl} htmlFor={`${pre}-type`}>{T.type[lang]}
-              <select id={`${pre}-type`} className={field} style={brd} value={f.type} onChange={(e) => set("type", e.target.value)}>
+        <form className="mk-editform" onSubmit={(e) => { e.preventDefault(); void save(); }} aria-label={T.edit[lang]}>
+          {item.status === "approved" && <p className="mk-msg">{T.editNote[lang]}</p>}
+          <div className="mk-grid-2">
+            {FF(`${pre}-type`, T.type[lang],
+              <select id={`${pre}-type`} className="select" value={f.type} onChange={(e) => set("type", e.target.value)}>
                 {(LISTING_TYPES.some((o) => o.v === f.type) ? LISTING_TYPES : [...LISTING_TYPES, ...LISTING_TYPE_LABELS.filter((o) => o.v === f.type)]).map((o) => <option key={o.v} value={o.v}>{o[lang]}</option>)}
-              </select>
-            </label>
-            <label className={lbl} htmlFor={`${pre}-cat`}>{T.cat[lang]}
-              <select id={`${pre}-cat`} className={field} style={brd} value={f.category} onChange={(e) => set("category", e.target.value)}>
+              </select>)}
+            {FF(`${pre}-cat`, T.cat[lang],
+              <select id={`${pre}-cat`} className="select" value={f.category} onChange={(e) => set("category", e.target.value)}>
                 {LISTING_CATEGORIES.map((o) => <option key={o.v} value={o.v}>{o[lang]}</option>)}
-              </select>
-            </label>
+              </select>)}
           </div>
-          <label className={lbl} htmlFor={`${pre}-title`}>{T.title[lang]}
-            <input id={`${pre}-title`} className={field} style={brd} value={f.title} maxLength={120} required onChange={(e) => set("title", e.target.value)} />
-          </label>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className={lbl} htmlFor={`${pre}-qty`}>{T.qty[lang]}<input id={`${pre}-qty`} className={field} style={brd} value={f.quantity} maxLength={80} onChange={(e) => set("quantity", e.target.value)} /></label>
-            <label className={lbl} htmlFor={`${pre}-price`}>{T.price[lang]}<input id={`${pre}-price`} className={field} style={brd} value={f.price} maxLength={80} onChange={(e) => set("price", e.target.value)} /></label>
-            <label className={lbl} htmlFor={`${pre}-area`}>{T.area[lang]}<input id={`${pre}-area`} className={field} style={brd} value={f.area} maxLength={80} onChange={(e) => set("area", e.target.value)} /></label>
-            <label className={lbl} htmlFor={`${pre}-avail`}>{T.avail[lang]}<input id={`${pre}-avail`} className={field} style={brd} value={f.available} maxLength={80} onChange={(e) => set("available", e.target.value)} /></label>
+          {FF(`${pre}-title`, T.title[lang], <input id={`${pre}-title`} className="input" value={f.title} maxLength={120} required onChange={(e) => set("title", e.target.value)} />)}
+          <div className="mk-grid-2">
+            {FF(`${pre}-qty`, T.qty[lang], <input id={`${pre}-qty`} className="input" value={f.quantity} maxLength={80} onChange={(e) => set("quantity", e.target.value)} />)}
+            {FF(`${pre}-price`, T.price[lang], <input id={`${pre}-price`} className="input" value={f.price} maxLength={80} onChange={(e) => set("price", e.target.value)} />)}
+            {FF(`${pre}-area`, T.area[lang], <input id={`${pre}-area`} className="input" value={f.area} maxLength={80} onChange={(e) => set("area", e.target.value)} />)}
+            {FF(`${pre}-avail`, T.avail[lang], <input id={`${pre}-avail`} className="input" value={f.available} maxLength={80} onChange={(e) => set("available", e.target.value)} />)}
           </div>
-          <label className={lbl} htmlFor={`${pre}-details`}>{T.details[lang]}
-            <textarea id={`${pre}-details`} className={field} style={brd} rows={3} value={f.details} maxLength={800} onChange={(e) => set("details", e.target.value)} />
-          </label>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <label className={lbl} htmlFor={`${pre}-name`}>{T.name[lang]}<input id={`${pre}-name`} className={field} style={brd} value={f.posterName} maxLength={60} onChange={(e) => set("posterName", e.target.value)} /></label>
-            <label className={lbl} htmlFor={`${pre}-ckind`}>{T.ckind[lang]}
-              <select id={`${pre}-ckind`} className={field} style={brd} value={f.contactKind} onChange={(e) => set("contactKind", e.target.value)}>
+          {FF(`${pre}-details`, T.details[lang], <textarea id={`${pre}-details`} className="textarea" rows={3} value={f.details} maxLength={800} onChange={(e) => set("details", e.target.value)} />)}
+          <div className="mk-grid-3">
+            {FF(`${pre}-name`, T.name[lang], <input id={`${pre}-name`} className="input" value={f.posterName} maxLength={60} onChange={(e) => set("posterName", e.target.value)} />)}
+            {FF(`${pre}-ckind`, T.ckind[lang],
+              <select id={`${pre}-ckind`} className="select" value={f.contactKind} onChange={(e) => set("contactKind", e.target.value)}>
                 {CONTACT_KINDS.map((o) => <option key={o.v} value={o.v}>{o[lang]}</option>)}
-              </select>
-            </label>
-            <label className={lbl} htmlFor={`${pre}-cval`}>{T.cval[lang]}<input id={`${pre}-cval`} dir="ltr" className={field} style={brd} value={f.contactValue} maxLength={60} onChange={(e) => set("contactValue", e.target.value)} /></label>
+              </select>)}
+            {FF(`${pre}-cval`, T.cval[lang], <input id={`${pre}-cval`} dir="ltr" className="input" value={f.contactValue} maxLength={60} onChange={(e) => set("contactValue", e.target.value)} />)}
           </div>
-          <label className="flex items-start gap-2 text-sm" htmlFor={`${pre}-cpub`}>
-            <input id={`${pre}-cpub`} type="checkbox" className="mt-1" checked={f.contactPublic} onChange={(e) => set("contactPublic", e.target.checked)} />
+          <label className="mk-check" htmlFor={`${pre}-cpub`}>
+            <input id={`${pre}-cpub`} type="checkbox" checked={f.contactPublic} onChange={(e) => set("contactPublic", e.target.checked)} />
             <span>{T.cpub[lang]}</span>
           </label>
-          <div className="flex flex-wrap gap-2">
-            <button type="submit" className="btn btn-primary" disabled={busy || !f.title.trim()}>{busy ? T.saving[lang] : T.save[lang]}</button>
-            <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => setMode("view")}>{T.cancel[lang]}</button>
+          <div className="mk-actions">
+            <button type="submit" className="btn btn--primary" disabled={busy || !f.title.trim()}>{busy ? T.saving[lang] : T.save[lang]}</button>
+            <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => setMode("view")}>{T.cancel[lang]}</button>
           </div>
         </form>
       )}
 
       {mode === "confirm" && (
-        <div className="todo flex flex-col gap-3" role="alertdialog" aria-labelledby={`${pre}-confirm`}>
-          <p id={`${pre}-confirm`} className="text-sm">{T.delSure[lang]}</p>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" className="btn btn-primary" disabled={busy} onClick={() => void doRun("delete")}>{T.delYes[lang]}</button>
-            <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => setMode("view")}>{T.cancel[lang]}</button>
+        <div className="mk-confirm" role="alertdialog" aria-labelledby={`${pre}-confirm`}>
+          <p id={`${pre}-confirm`}>{T.delSure[lang]}</p>
+          <div className="mk-actions">
+            <button type="button" className="btn btn--dark" disabled={busy} onClick={() => void doRun("delete")}>{T.delYes[lang]}</button>
+            <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => setMode("view")}>{T.cancel[lang]}</button>
           </div>
         </div>
       )}
 
       {mode === "view" && (
-        <div className="flex flex-wrap gap-2">
-          {!locked && <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => { setMsg(null); setMode("edit"); }}>{T.edit[lang]}</button>}
-          {canRenew(item) && <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => void doRun("renew")}>{busy ? T.saving[lang] : T.renew[lang]}</button>}
-          {item.status !== "removed" && <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => { setMsg(null); setMode("confirm"); }}>{T.del[lang]}</button>}
+        <div className="mk-actions">
+          {!locked && <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => { setMsg(null); setMode("edit"); }}>{T.edit[lang]}</button>}
+          {canRenew(item) && <button type="button" className="btn btn--primary" disabled={busy} onClick={() => void doRun("renew")}>{busy ? T.saving[lang] : T.renew[lang]}</button>}
+          {item.status !== "removed" && <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => { setMsg(null); setMode("confirm"); }}>{T.del[lang]}</button>}
         </div>
       )}
 
-      <div aria-live="polite" role="status">
-        {msg && <p className="text-sm" style={msg.ok ? { color: "var(--accent)" } : { color: "var(--amber)" }}>{msg.text}</p>}
+      <div aria-live="polite" role="status" className="mk-live">
+        {msg && <p className={`mk-msg ${msg.ok ? "mk-msg--ok" : "mk-msg--warn"}`}>{msg.text}</p>}
       </div>
     </li>
   );
@@ -185,9 +179,9 @@ export function ListingManager({ lang, items, run, onRemoved, empty }: { lang: L
   const [list, setList] = useState(items);
   const [gone, setGone] = useState<string[]>([]);
   const shown = list.filter((l) => !gone.includes(l.id));
-  if (!shown.length) return <p className="muted">{empty ?? (lang === "fa" ? "آگهی‌ای نیست." : "No listings.")}</p>;
+  if (!shown.length) return <p className="muted" role="status">{empty ?? (lang === "fa" ? "آگهی‌ای نیست." : "No listings.")}</p>;
   return (
-    <ul className="flex flex-col gap-3 p-0 m-0">
+    <ul className="mk-list">
       {shown.map((l) => (
         <ListingCard
           key={l.id}

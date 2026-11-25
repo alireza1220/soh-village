@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
+import "@/styles/market.css";
 import type { Locale } from "@/lib/i18n";
 import { CONTACT_KINDS, LISTING_CATEGORIES, LISTING_TYPES } from "@/lib/market";
 import { publicSupabase } from "@/lib/supabase";
@@ -43,6 +44,10 @@ const T = {
   loginHint: { fa: "برای نگه‌داشتن آگهی‌هایتان در یک‌جا وارد شوید (اختیاری)", en: "Log in to keep your listings in one place (optional)" },
   limit: { fa: "امروز آگهی‌های زیادی فرستاده‌اید؛ بعداً دوباره امتحان کنید.", en: "Too many listings sent; try again later." },
 };
+
+function F({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
+  return <div className="field"><label className="label" htmlFor={id}>{label}</label>{children}</div>;
+}
 
 export function MarketForm({ lang }: { lang: Locale }) {
   const [type, setType] = useState<string>(LISTING_TYPES[0].v);
@@ -106,54 +111,53 @@ export function MarketForm({ lang }: { lang: Locale }) {
   const copyCode = async () => {
     try { await navigator.clipboard.writeText(manageCode); setCodeNote(T.copied[lang]); } catch { setCodeNote(T.failed[lang]); }
   };
-  const field = "w-full rounded-xl border px-3 py-2 bg-[var(--surface)]";
-  const brd = { borderColor: "var(--line)" } as const;
-  const lbl = "flex flex-col gap-1 text-sm";
   return (
-    <form className="card p-5 md:p-6 flex flex-col gap-4" onSubmit={(e) => e.preventDefault()} aria-label={T.head[lang]}>
-      <p className="text-sm muted">{T.intro[lang]}</p>
-      <fieldset className="flex flex-wrap gap-2 border-0 p-0 m-0">
-        <legend className="text-sm muted mb-1">{T.type[lang]}</legend>
-        {LISTING_TYPES.map((m) => (
-          <label key={m.v} className={`btn ${type === m.v ? "btn-primary" : "btn-ghost"} cursor-pointer`}>
-            <input type="radio" className="sr-only" name="market-type" checked={type === m.v} onChange={() => setType(m.v)} />
-            {m[lang]}
-          </label>
-        ))}
+    <form className="mk-form" onSubmit={(e) => e.preventDefault()} aria-label={T.head[lang]}>
+      <p className="mk-form-intro">{T.intro[lang]}</p>
+      <fieldset className="mk-fieldset">
+        <legend>{T.type[lang]}</legend>
+        <div className="mk-choices">
+          {LISTING_TYPES.map((m) => (
+            <label key={m.v} className="mk-choice">
+              <input type="radio" name="market-type" checked={type === m.v} onChange={() => setType(m.v)} />
+              {m[lang]}
+            </label>
+          ))}
+        </div>
       </fieldset>
-      <label className={lbl}>{T.cat[lang]}
-        <select id="market-form-cat" className={field} style={brd} value={cat} onChange={(e) => setCat(e.target.value)}>
+      <F id="market-form-cat" label={T.cat[lang]}>
+        <select id="market-form-cat" className="select" value={cat} onChange={(e) => setCat(e.target.value)}>
           {LISTING_CATEGORIES.map((o) => <option key={o.v} value={o.v}>{o[lang]}</option>)}
         </select>
-      </label>
-      <label className={lbl}>{T.title[lang]}
-        <input id="market-title" className={field} style={brd} value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
-      </label>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className={lbl}>{T.qty[lang]}<input id="market-qty" className={field} style={brd} value={qty} onChange={(e) => setQty(e.target.value)} maxLength={80} /></label>
-        <label className={lbl}>{T.price[lang]}<input id="market-price" className={field} style={brd} value={price} onChange={(e) => setPrice(e.target.value)} maxLength={80} /></label>
-        <label className={lbl}>{T.area[lang]}<input id="market-area" className={field} style={brd} value={area} onChange={(e) => setArea(e.target.value)} maxLength={80} /></label>
-        <label className={lbl}>{T.avail[lang]}<input id="market-avail" className={field} style={brd} value={avail} onChange={(e) => setAvail(e.target.value)} maxLength={80} /></label>
+      </F>
+      <F id="market-title" label={T.title[lang]}>
+        <input id="market-title" className="input" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
+      </F>
+      <div className="mk-grid-2">
+        <F id="market-qty" label={T.qty[lang]}><input id="market-qty" className="input" value={qty} onChange={(e) => setQty(e.target.value)} maxLength={80} /></F>
+        <F id="market-price" label={T.price[lang]}><input id="market-price" className="input" value={price} onChange={(e) => setPrice(e.target.value)} maxLength={80} /></F>
+        <F id="market-area" label={T.area[lang]}><input id="market-area" className="input" value={area} onChange={(e) => setArea(e.target.value)} maxLength={80} /></F>
+        <F id="market-avail" label={T.avail[lang]}><input id="market-avail" className="input" value={avail} onChange={(e) => setAvail(e.target.value)} maxLength={80} /></F>
       </div>
-      <label className={lbl}>{T.details[lang]}
-        <textarea id="market-details" className={field} style={brd} rows={3} value={details} onChange={(e) => setDetails(e.target.value)} maxLength={800} />
-      </label>
-      <div className="grid gap-4 sm:grid-cols-3">
-        <label className={lbl}>{T.name[lang]}<input id="market-name" className={field} style={brd} value={name} onChange={(e) => setName(e.target.value)} maxLength={60} /></label>
-        <label className={lbl}>{T.ckind[lang]}
-          <select id="market-ckind" className={field} style={brd} value={ckind} onChange={(e) => setCkind(e.target.value)}>
+      <F id="market-details" label={T.details[lang]}>
+        <textarea id="market-details" className="textarea" rows={3} value={details} onChange={(e) => setDetails(e.target.value)} maxLength={800} />
+      </F>
+      <div className="mk-grid-3">
+        <F id="market-name" label={T.name[lang]}><input id="market-name" className="input" value={name} onChange={(e) => setName(e.target.value)} maxLength={60} /></F>
+        <F id="market-ckind" label={T.ckind[lang]}>
+          <select id="market-ckind" className="select" value={ckind} onChange={(e) => setCkind(e.target.value)}>
             {CONTACT_KINDS.map((o) => <option key={o.v} value={o.v}>{o[lang]}</option>)}
           </select>
-        </label>
-        <label className={lbl}>{T.cval[lang]}<input id="market-cval" dir="ltr" className={field} style={brd} value={cval} onChange={(e) => setCval(e.target.value)} maxLength={60} /></label>
+        </F>
+        <F id="market-cval" label={T.cval[lang]}><input id="market-cval" dir="ltr" className="input" value={cval} onChange={(e) => setCval(e.target.value)} maxLength={60} /></F>
       </div>
-      <label className="flex items-start gap-2 text-sm">
-        <input id="market-consent" type="checkbox" className="mt-1" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
-        <span>{T.consent[lang]}{!consent && <span className="block muted">{T.consentNo[lang]}</span>}</span>
+      <label className="mk-check" htmlFor="market-consent">
+        <input id="market-consent" type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+        <span>{T.consent[lang]}{!consent && <span className="field-hint">{T.consentNo[lang]}</span>}</span>
       </label>
-      <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" value={website} onChange={(e) => setWebsite(e.target.value)} style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }} />
+      <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" value={website} onChange={(e) => setWebsite(e.target.value)} className="mk-hp" />
       {canSend && (
-        <p className="text-sm muted">
+        <p className="mk-session">
           {session ? (
             <>{T.postingAs[lang]} <b dir="ltr">{session.user.email}</b> · <Link className="link" href={`/${lang}/my`}>{T.myListings[lang]}</Link></>
           ) : (
@@ -162,37 +166,39 @@ export function MarketForm({ lang }: { lang: Locale }) {
         </p>
       )}
       {manageCode && (
-        <div className="todo flex flex-col gap-3" role="alert">
-          <b>{T.codeTitle[lang]}</b>
-          <p dir="ltr" className="font-mono text-2xl tracking-widest break-all select-all" style={{ textAlign: "center" }}>{manageCode}</p>
-          <p className="text-sm">{T.codeWarn[lang]}</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <button type="button" className="btn btn-primary" onClick={copyCode}>{T.codeCopy[lang]}</button>
-            <Link className="link text-sm" href={`/${lang}/manage`}>{T.codeManage[lang]}</Link>
-            <span className="text-sm muted" aria-live="polite">{codeNote}</span>
+        <div className="mk-code" role="alert">
+          <h3>{T.codeTitle[lang]}</h3>
+          <p dir="ltr" className="mk-code__value mk-mono">{manageCode}</p>
+          <p>{T.codeWarn[lang]}</p>
+          <div className="mk-row">
+            <button type="button" className="btn btn--primary" onClick={copyCode}>{T.codeCopy[lang]}</button>
+            <Link href={`/${lang}/manage`}>{T.codeManage[lang]}</Link>
+            <span aria-live="polite">{codeNote}</span>
           </div>
         </div>
       )}
       {canSend && (
-        <div className="flex flex-col gap-2" aria-live="polite">
-          <button type="button" className="btn btn-primary self-start" disabled={!title.trim() || status === "sending" || status === "sent"} onClick={send}>
-            {status === "sending" ? T.sending[lang] : T.send[lang]}
-          </button>
-          {msg && <p className={`text-sm ${status === "sent" ? "" : "muted"}`} style={status === "sent" ? { color: "var(--accent)" } : undefined}>{msg}</p>}
+        <div className="mk-stack" style={{ gap: 12 }} aria-live="polite">
+          <div>
+            <button type="button" className="btn btn--primary" disabled={!title.trim() || status === "sending" || status === "sent"} onClick={send}>
+              {status === "sending" ? T.sending[lang] : T.send[lang]}
+            </button>
+          </div>
+          {msg && <p className={`mk-msg ${status === "sent" ? "mk-msg--ok" : "mk-msg--warn"}`}>{msg}</p>}
         </div>
       )}
-      <div className="flex flex-col gap-2" aria-live="polite">
-        <b className="text-sm">{T.result[lang]}</b>
+      <div className="mk-result" aria-live="polite">
+        <h3>{T.result[lang]}</h3>
         {text ? (
           <>
-            <textarea readOnly rows={Math.min(14, text.split("\n").length + 1)} className={`${field} font-mono text-sm`} style={brd} value={text} onFocus={(e) => e.currentTarget.select()} aria-label={T.result[lang]} />
-            <div className="flex items-center gap-3">
-              <button type="button" className="btn btn-primary" onClick={copy}>{T.copy[lang]}</button>
-              {note && <span className="text-sm muted">{note}</span>}
+            <textarea readOnly rows={Math.min(14, text.split("\n").length + 1)} className="textarea mk-mono" value={text} onFocus={(e) => e.currentTarget.select()} aria-label={T.result[lang]} />
+            <div className="mk-row">
+              <button type="button" className="btn btn--dark" onClick={copy}>{T.copy[lang]}</button>
+              {note && <span className="mk-session">{note}</span>}
             </div>
           </>
         ) : (
-          <p className="text-sm muted">{T.required[lang]}</p>
+          <p className="mk-session">{T.required[lang]}</p>
         )}
       </div>
     </form>

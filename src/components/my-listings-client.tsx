@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import "@/styles/market.css";
 import type { Locale } from "@/lib/i18n";
 import { useSession } from "@/components/use-session";
 import { signOut } from "@/lib/auth";
@@ -43,23 +44,23 @@ export function MyListingsClient({ lang }: { lang: Locale }) {
   if (!ready) return <p className="muted" aria-live="polite">{T.loading[lang]}</p>;
   if (!session) {
     return (
-      <div className="todo flex flex-col gap-3">
+      <div className="notice mk-stack" style={{ gap: 16 }}>
         <p>{T.need[lang]}</p>
-        <Link className="btn btn-primary self-start" href={`/${lang}/login`}>{T.login[lang]}</Link>
+        <div><Link className="btn btn--primary" href={`/${lang}/login`}>{T.login[lang]}</Link></div>
       </div>
     );
   }
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm muted" dir="ltr">{session.user.email}</p>
-        <button type="button" className="btn btn-ghost" onClick={() => void signOut()}>{T.out[lang]}</button>
+    <div className="mk-stack">
+      <div className="mk-row" style={{ justifyContent: "space-between" }}>
+        <p className="mk-session" dir="ltr">{session.user.email}</p>
+        <button type="button" className="btn btn--ghost" onClick={() => void signOut()}>{T.out[lang]}</button>
       </div>
-      <div aria-live="polite" role="status">
-        {note && <p className="text-sm" style={{ color: "var(--accent)" }}>{note}</p>}
+      <div aria-live="polite" role="status" className="mk-live">
+        {note && <p className="mk-msg mk-msg--ok">{note}</p>}
         {err && (
-          <p className="text-sm flex flex-wrap items-center gap-3" style={{ color: "var(--amber)" }}>
-            {err} <button type="button" className="btn btn-ghost" onClick={() => void load()}>{T.retry[lang]}</button>
+          <p className="mk-msg mk-msg--warn mk-row">
+            <span>{err}</span> <button type="button" className="btn btn--ghost" onClick={() => void load()}>{T.retry[lang]}</button>
           </p>
         )}
       </div>
