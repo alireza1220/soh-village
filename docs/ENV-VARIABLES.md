@@ -19,6 +19,7 @@ Rules that apply to every row:
 | `IP_HASH_SALT` | **secret** | **Yes, Sensitive** | Optional (dev default exists) | No | No | Spam limits (hashed IPs) |
 | `MANAGE_CODE_SALT` | *retired* | Not needed: **delete it** | Not needed | No | No | Nothing (manage codes no longer exist) |
 | `CRON_SECRET` | **secret** | **Yes, Sensitive, Production** | Only to test the keep-alive route by hand | No | No | The daily keep-alive job that stops Supabase pausing |
+| `ADMIN_API_KEY` | **secret** | Optional, Sensitive, Production | Only when calling the API by hand | No | No | Static key that lets scripts call `/api/admin/*` as an admin (see docs/ADMIN-API.md) |
 
 Not environment variables, but settings you must make elsewhere (details in sections 4 to 6):
 

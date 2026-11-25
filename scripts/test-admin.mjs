@@ -22,6 +22,7 @@ const ENV = {
   IP_HASH_SALT: "t",
   MANAGE_CODE_SALT: "",
   CRON_SECRET: "cron-t",
+  ADMIN_API_KEY: "test-admin-api-key-0123456789abcdef",
 };
 const DAY = 86_400_000;
 
@@ -682,6 +683,25 @@ async function scenarioCovers() {
 }
 
 // ---------- main ----------
+async function scenarioApiKey() {
+  section("static admin API key");
+  const KEY = ENV.ADMIN_API_KEY;
+  const ov = await api("/api/admin/overview", {}, { token: KEY });
+  check("key: overview 200", ov.status === 200 && ov.data.ok === true, JSON.stringify(ov));
+  check("wrong key: 401", (await api("/api/admin/overview", {}, { token: KEY + "x" })).status === 401);
+  check("no token: 401", (await api("/api/admin/overview", {})).status === 401);
+  const mk = await api("/api/admin/posts", { action: "create", fields: { kind: "blog", titleFa: "نوشته با کلید", titleEn: "Key post", bodyFa: "متن", bodyEn: "Body", published: false } }, { token: KEY });
+  check("key: create draft post 200", mk.status === 200 && mk.data.post && mk.data.post.published === false && mk.data.post.authorId === null, JSON.stringify(mk));
+  if (mk.data.post) {
+    const pub = await api("/api/admin/posts", { action: "update", id: mk.data.post.id, fields: { published: true } }, { token: KEY });
+    check("key: publish post", pub.status === 200 && pub.data.post.published === true, JSON.stringify(pub));
+    const del = await api("/api/admin/posts", { action: "delete", id: mk.data.post.id }, { token: KEY });
+    check("key: delete post", del.status === 200, JSON.stringify(del));
+  }
+  check("key: listings list 200", (await api("/api/admin/listings", { action: "list" }, { token: KEY })).status === 200);
+  check("key: users list 200", (await api("/api/admin/users", { action: "list" }, { token: KEY })).status === 200);
+}
+
 async function main() {
   const m = start("node", ["scripts/mock-supabase.mjs"], { MOCK_PORT: String(MOCK_PORT) }, "mock");
   await waitFor(`${MOCK}/__health`, 10000, m);
@@ -697,6 +717,7 @@ async function main() {
     await scenarioCovers();
     await scenarioUsers();
     await scenarioRate();
+    await scenarioApiKey();
     const log = dev.getLog();
     check("dev server log: no unhandled server errors", !/⨯|Unhandled|TypeError|ReferenceError/.test(log), log.split("\n").filter((l) => /⨯|Unhandled|TypeError|ReferenceError/.test(l)).slice(0, 4).join(" | "));
     check("dev server log: no token, phone or email printed", !/tok-[a-z]/.test(log) && !/0912\d{7}/.test(log) && !/@example\.com/.test(log));

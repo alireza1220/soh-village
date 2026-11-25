@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, timingSafeEqual } from "node:crypto";
 import { LIMITS, type RateKind } from "@/lib/limits";
 import { isComplete, profileFromRow, type Profile } from "@/lib/profile";
 import { secret, secretsReady } from "@/lib/secrets";
@@ -155,10 +155,25 @@ export async function requireProfile(sb: Sb, userId: string): Promise<Profile | 
 // Admin gate for every /api/admin/* route: the normal login gate (kind "admin"), then the role is read from the database
 // (never from the request). 403 forbidden for a valid user who is not an admin. Returns the verified admin or a Response.
 export async function requireAdmin(req: Request, sb: Sb): Promise<AuthOk | Response> {
+  // Static API key (env ADMIN_API_KEY, 24+ characters): "Authorization: Bearer <key>" acts as an admin without a login. For scripts and
+  // scheduled jobs. Its calls have user.id "" (posts get author_id null). A wrong key is just an invalid token (401 below).
+  const key = process.env.ADMIN_API_KEY ?? "";
+  const given = bearerFrom(req);
+  if (key.length >= 24 && given && sameSecret(given, key)) {
+    const cfg = configGate();
+    if (cfg) return cfg;
+    return { user: { id: "", email: "api-key" }, ipHash: hashedIp(req) };
+  }
   const auth = await authenticate(req, sb, "admin");
   if (auth instanceof Response) return auth;
   const p = await loadProfile(sb, auth.user.id);
   if (p === "error") return json({ error: "store_failed" }, 502);
   if (!p || p.role !== "admin") return json({ error: "forbidden" }, 403);
   return auth;
+}
+
+function sameSecret(a: string, b: string): boolean {
+  const ha = createHash("sha256").update(a).digest();
+  const hb = createHash("sha256").update(b).digest();
+  return timingSafeEqual(ha, hb);
 }

@@ -30,7 +30,7 @@ export async function POST(req: Request) {
       const parsed = parsePostInput(b.fields, "create");
       if (!parsed.ok) return json({ error: parsed.error }, 400);
       const published = parsed.value.published === true;
-      const row = { ...parsed.value, published, published_at: published ? new Date().toISOString() : null, author_id: user.id };
+      const row = { ...parsed.value, published, published_at: published ? new Date().toISOString() : null, author_id: user.id || null };
       const res = await fetch(base, { method: "POST", headers: writeHeaders(headers), body: JSON.stringify(row), cache: "no-store" });
       if (!res.ok) return failure("admin_posts_create", res);
       const rows = (await res.json()) as Row[];
