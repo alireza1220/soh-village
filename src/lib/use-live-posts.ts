@@ -29,6 +29,13 @@ export const urgentPosts = (posts: PublicPost[], max = 2) => posts.filter((p) =>
 /** Second priority: up to 3 featured posts, newest first (home band). */
 export const featuredPosts = (posts: PublicPost[], max = 3) => posts.filter((p) => p.priority === "featured").sort(byPriorityThenNewest).slice(0, max);
 
+/** Newest published news and blog posts together (events excluded), by publish date, newest first. Shown right below the home hero. */
+export const latestPosts = (posts: PublicPost[], max = 3) =>
+  posts
+    .filter((p) => p.kind !== "event")
+    .sort((a, b) => Date.parse(b.publishedAt ?? b.createdAt) - Date.parse(a.publishedAt ?? a.createdAt))
+    .slice(0, max);
+
 /**
  * Published news, blog posts and events from Supabase (the public_posts view, newest first, max 100).
  * `posts` is [] while loading, when Supabase is not configured (status "ready"), and on error (status "error").

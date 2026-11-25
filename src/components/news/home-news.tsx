@@ -4,18 +4,18 @@ import { useEffect, useMemo, useState } from "react";
 import { Arrow } from "@/components/icons";
 import type { L, Locale } from "@/lib/i18n";
 import { isUpcoming, postText, type PublicPost } from "@/lib/posts";
-import { featuredPosts, urgentPosts, useLivePosts } from "@/lib/use-live-posts";
+import { useLivePosts } from "@/lib/use-live-posts";
 import { dateBlock, fmtPostDate, fmtPostTime, nt, postWhen, sortUpcoming } from "./news-common";
 
 const T = {
   eyebrow: { fa: "تازه‌ها", en: "What's new" },
-  title: { fa: "تازه‌ترین خبرها و رویدادهای پیش رو", en: "Latest news and upcoming events" },
-  all: { fa: "همه‌ی خبرها و رویدادها", en: "All news and events" },
+  title: { fa: "رویدادهای پیش رو", en: "Upcoming events" },
+  all: { fa: "همه‌ی رویدادها و خبرها", en: "All events and news" },
   upcoming: { fa: "رویدادهای پیش رو", en: "Upcoming events" },
   latest: { fa: "تازه‌ترین‌ها", en: "Latest" },
 } satisfies Record<string, L>;
 
-/** Home section: up to 3 latest posts and the next 2 events. Renders nothing at all when there is nothing published. */
+/** Home section: the next 2 events (the newest news and blog posts have their own section, HomeLatest, below the hero). Renders nothing when no event is coming. */
 export function HomeNews({ lang }: { lang: Locale }) {
   const { posts } = useLivePosts();
   const [now, setNow] = useState<number | null>(null);
@@ -23,12 +23,7 @@ export function HomeNews({ lang }: { lang: Locale }) {
   useEffect(() => { setNow(Date.now()); }, []);
   const { latest, upcoming } = useMemo(() => {
     // Posts already shown in the urgent banner or the featured band are not repeated here.
-    const shown = new Set([...urgentPosts(posts), ...featuredPosts(posts)].map((p) => p.id));
-    const rest = posts.filter((p) => !shown.has(p.id));
-    return {
-      latest: rest.filter((p) => p.kind !== "event").slice(0, 3),
-      upcoming: now === null ? [] : rest.filter((p) => isUpcoming(p, now)).sort(sortUpcoming).slice(0, 2),
-    };
+    return { latest: [] as PublicPost[], upcoming: now === null ? [] : posts.filter((p) => isUpcoming(p, now)).sort(sortUpcoming).slice(0, 2) };
   }, [posts, now]);
 
   if (latest.length === 0 && upcoming.length === 0) return null;

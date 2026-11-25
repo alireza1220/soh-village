@@ -10,6 +10,7 @@ import { Arrow } from "@/components/icons";
 import { VillageMap } from "@/components/map";
 import { LatestAds } from "@/components/home/latest-ads";
 import { HomeFeatured } from "@/components/news/home-featured";
+import { HomeLatest } from "@/components/news/home-latest";
 import { HomeNews } from "@/components/news/home-news";
 import { HomeUrgent } from "@/components/news/home-urgent";
 import { SectionMark } from "@/components/section-mark";
@@ -89,6 +90,9 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
           labels={{ region: hc.heroLabel[lang], pause: hc.pause[lang], play: hc.play[lang], slide: hc.slide[lang], of: hc.slideOf[lang], goTo: hc.goTo[lang] }}
         />
       )}
+
+      {/* LATEST NEWS + BLOG POSTS: the 3 newest, right below the hero (renders nothing when none) */}
+      <HomeLatest lang={lang} />
 
       {/* WELCOME */}
       <section className="section section--sage hm-welcome" aria-labelledby="hm-welcome-title">

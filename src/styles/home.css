@@ -190,6 +190,8 @@
 .hm-feat__body h3 { margin: 0; color: var(--ink); overflow-wrap: anywhere; }
 .hm-feat__body p { margin: 0; overflow-wrap: anywhere; }
 .hm-feat__meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.hm-latest { background: var(--mist); }
+.hm-feat--latest { border-block-start-color: var(--turq); }
 .hm-feat__more { margin-block-start: auto; min-height: 44px; display: inline-flex; align-items: center; }
 
 /* What is new in the village: newest ads per board */
