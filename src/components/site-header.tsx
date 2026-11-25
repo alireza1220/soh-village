@@ -3,7 +3,7 @@ import { dirOf, type Locale } from "@/lib/i18n";
 import { resolveNav, ui } from "@/lib/nav";
 import { socialLinks } from "@/lib/social";
 import { siteName } from "@/lib/site";
-import { AuthLink } from "@/components/auth-link";
+import { AccountControl } from "@/components/account-control";
 import { SocialIcon } from "@/components/icons";
 import { LangSwitch } from "@/components/lang-switch";
 import { LogoBlock } from "@/components/logo-block";
@@ -27,7 +27,7 @@ export function SiteHeader({ lang }: { lang: Locale }) {
                 </a>
               ))}
             </span>
-            <AuthLink lang={lang} className="ut-link" />
+            <AccountControl lang={lang} className="ut-link" />
           </div>
         </div>
       </div>

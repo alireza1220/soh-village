@@ -44,18 +44,19 @@
 @media (min-width: 640px) { .mk-grid-2 { grid-template-columns: 1fr 1fr; } .mk-grid-3 { grid-template-columns: 1fr 1fr 1fr; } }
 .mk-fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .mk-fieldset legend { padding: 0; margin-bottom: 8px; font-size: 14px; font-weight: 600; color: var(--ink); }
-.mk-choices { display: flex; flex-wrap: wrap; gap: 8px; }
-.mk-choice { position: relative; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 20px; background: var(--panel); color: var(--on-panel); font-size: 14px; font-weight: 600; cursor: pointer; transition: background-color .15s; }
+.mk-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+.mk-choice { position: relative; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 20px; background: var(--panel); color: var(--on-panel); font-size: 14px; font-weight: 600; text-align: center; padding-block: 8px; cursor: pointer; transition: background-color .15s; }
 .mk-choice:hover { background: var(--panel-2); }
 .mk-choice input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
 .mk-choice:has(input:checked) { background: var(--action); color: var(--on-action); }
 .mk-choice:has(input:checked):hover { background: var(--action-hover); }
 .mk-choice:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 2px; }
 .mk-check { display: flex; align-items: flex-start; gap: 12px; font-size: 15px; min-height: 44px; padding-block: 8px; cursor: pointer; }
-.mk-check input { flex: none; width: 28px; height: 28px; margin: 0; accent-color: var(--action); cursor: pointer; }
+.mk-check input { flex: none; width: 28px; height: 28px; margin: 0; appearance: none; background: var(--surface); border: 2px solid var(--field-line); border-radius: 4px; cursor: pointer; }
+.mk-check input:checked { background: var(--action); border-color: var(--action); box-shadow: inset 0 0 0 5px var(--surface); }
+.mk-check span { text-wrap: pretty; }
 .mk-check input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 .mk-check .field-hint { display: block; margin-top: 4px; }
-.mk-hp { position: absolute; inset-inline-start: -9999px; width: 1px; height: 1px; opacity: 0; }
 .mk-mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 .mk-session { margin: 0; font-size: 15px; color: var(--muted); }
 .mk-tap { display: inline-flex; align-items: center; min-block-size: 44px; }
@@ -73,14 +74,6 @@
 .mk-result summary { cursor: pointer; min-block-size: 44px; display: flex; align-items: center; font-size: 16px; font-weight: 600; color: var(--ink); }
 .mk-result[open] summary { margin-block-end: 8px; }
 .mk-result .textarea { font-size: 14px; }
-
-/* Manage-code box: shown once after sending */
-.mk-code { display: flex; flex-direction: column; gap: 16px; padding: 32px 24px; background: var(--panel); color: var(--on-panel); border: 3px solid var(--turq); }
-.mk-code h3 { margin: 0; color: var(--on-panel); font-size: 24px; }
-.mk-code__value { margin: 0; padding: 20px 12px; background: var(--panel-2); color: var(--turq); text-align: center; font-size: clamp(18px, 6vw, 36px); font-weight: 600; letter-spacing: 0.06em; white-space: nowrap; overflow-x: auto; user-select: all; }
-.mk-code p { margin: 0; color: var(--on-panel); }
-.mk-code .btn--ghost { color: var(--on-panel); border-color: var(--on-panel); }
-.mk-code a { color: var(--on-panel); text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 44px; }
 
 /* My listings and manage */
 .mk-list { display: flex; flex-direction: column; gap: 24px; list-style: none; margin: 0; padding: 0; }

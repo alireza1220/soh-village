@@ -4,7 +4,7 @@ import { sectionBySlug } from "./site";
 // Header and footer navigation data (bilingual). Add or move a link here and the header mega-menu,
 // the mobile drawer and the footer columns all follow.
 //   slug  : a section from site.ts (label comes from its title) or a standalone route
-//   label : only for standalone routes (photos, map, references, credits, contribute, manage)
+//   label : only for standalone routes (photos, map, references, credits, contribute, my)
 export type NavDef = { slug: string; label?: L };
 export type NavGroupDef = { id: string; label: L; description: L; items: NavDef[] };
 
@@ -14,7 +14,8 @@ const routeLabels: Record<string, L> = {
   references: { fa: "راهنما و منابع", en: "Guide and sources" },
   credits: { fa: "منبع عکس‌ها", en: "Photo credits" },
   contribute: { fa: "مشارکت", en: "Contribute" },
-  manage: { fa: "مدیریت آگهی", en: "Manage a listing" },
+  my: { fa: "آگهی‌های من", en: "My ads" },
+  profile: { fa: "مشخصات من", en: "My profile" },
   login: { fa: "ورود", en: "Log in" },
 };
 
@@ -35,7 +36,7 @@ export const navGroups: NavGroupDef[] = [
     id: "market",
     label: { fa: "بازارچه", en: "Market" },
     description: { fa: "خرید و فروش، نیازمندی و کار. بدون پرداخت.", en: "Buy, sell, wanted, jobs. No payments." },
-    items: [{ slug: "market" }, { slug: "needs" }, { slug: "careers" }, { slug: "property" }, { slug: "manage" }],
+    items: [{ slug: "market" }, { slug: "needs" }, { slug: "careers" }, { slug: "property" }, { slug: "my" }],
   },
   {
     id: "guide",
@@ -76,5 +77,6 @@ export const ui = {
   footerAbout: { fa: "سایت جامعه‌ی روستای سُه، اصفهان.", en: "Community site for Soh village, Isfahan." },
   draft: { fa: "پیش‌نویس از منابع عمومی؛ برچسب‌ها اعتبار هر مطلب را نشان می‌دهند.", en: "Draft from public sources; labels show how well each fact is backed." },
   credits: { fa: "منبع عکس‌ها", en: "Photo credits" },
-  manage: { fa: "مدیریت آگهی", en: "Manage a listing" },
+  my: { fa: "آگهی‌های من", en: "My ads" },
+  profile: { fa: "مشخصات من", en: "My profile" },
 } satisfies Record<string, L>;

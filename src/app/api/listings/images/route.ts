@@ -1,51 +1,31 @@
 import { randomBytes } from "node:crypto";
-import { configGate, findRow, hashedIp, json, objectFilesOf, orphansOf, rateGate } from "@/lib/listing-actions";
+import { findRow, objectFilesOf, orphansOf } from "@/lib/listing-actions";
 import { imagePath, IMAGE_EXTS, MAX_IMAGES } from "@/lib/listing-images";
-import { hashManageCode, normalizeManageCode } from "@/lib/manage-code";
-import { bearerFrom, verifyAccessToken } from "@/lib/server-auth";
+import { authenticate, json, readBody, requireProfile, UUID } from "@/lib/server-guard";
 import { listObjects, removeObjects, signUpload } from "@/lib/storage";
 import { serverSupabase } from "@/lib/supabase";
 
 // Step 2 of the photo upload: hands out signed upload URLs (one for the full photo, one for the thumbnail) for a listing the
-// caller owns, by manage code ({code}) or by login ({listingId} + Authorization: Bearer). The browser uploads straight to
+// logged-in caller owns ({listingId} + Authorization: Bearer; needs a complete profile). The browser uploads straight to
 // Supabase Storage, then saves the ordered names with the normal "update" action (fields.images).
-const IMAGES_PER_HOUR = 12; // one call may sign up to 10 photos, so this is the real budget
 const FOLDER_SLACK = 4; // objects beyond 2 per allowed photo that a folder may hold (one failed half-upload or two)
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const ID_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789";
 const newId = () => Array.from(randomBytes(12), (b) => ID_CHARS[b % 36]).join("");
 
 export async function POST(req: Request) {
   const sb = serverSupabase();
   if (!sb) return json({ error: "not_configured" }, 503);
-  const cfg = configGate();
-  if (cfg) return cfg;
+  const auth = await authenticate(req, sb, "images");
+  if (auth instanceof Response) return auth;
+  const b = await readBody(req);
+  if (b instanceof Response) return b;
+  const profile = await requireProfile(sb, auth.user.id);
+  if (profile instanceof Response) return profile;
 
-  let b: Record<string, unknown>;
-  try {
-    b = await req.json();
-  } catch {
-    return json({ error: "bad_json" }, 400);
-  }
-  if (!b || typeof b !== "object" || Array.isArray(b)) return json({ error: "bad_json" }, 400);
-
-  const limited = await rateGate(sb, hashedIp(req), "images", IMAGES_PER_HOUR);
-  if (limited) return limited;
-
-  // Who is asking: a manage code, or a logged-in owner.
-  let row;
-  if (typeof b.code === "string") {
-    const code = normalizeManageCode(b.code);
-    if (!code) return json({ error: "not_found" }, 404);
-    row = await findRow(sb, `manage_hash=eq.${hashManageCode(code)}`);
-  } else {
-    const token = bearerFrom(req);
-    const user = token ? await verifyAccessToken(token) : null;
-    if (!user || !UUID.test(user.id)) return json({ error: "unauthorized" }, 401);
-    const id = typeof b.listingId === "string" ? b.listingId : "";
-    if (!UUID.test(id)) return json({ error: "not_found" }, 404);
-    row = await findRow(sb, `id=eq.${id}&owner_id=eq.${user.id}`);
-  }
+  // The listing must belong to the verified user.
+  const id = typeof b.listingId === "string" ? b.listingId : "";
+  if (!UUID.test(id)) return json({ error: "not_found" }, 404);
+  const row = await findRow(sb, `id=eq.${id}&owner_id=eq.${auth.user.id}`);
   if (row === "error") return json({ error: "store_failed" }, 502);
   if (!row) return json({ error: "not_found" }, 404);
   if (row.status !== "pending" && row.status !== "approved") return json({ error: "not_editable" }, 409);

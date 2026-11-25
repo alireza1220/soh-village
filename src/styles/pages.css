@@ -147,3 +147,8 @@ h2.pg-eyebrow:lang(fa) { font-size: 14px; }
 }
 
 .navy-card__thumb > img { object-fit: cover; }
+
+/* Compact banner for account pages (login, reset password, profile, my ads): the form starts above the fold on a phone */
+.page-banner.page-banner--compact { min-height: 0; }
+.page-banner--compact .page-banner__inner { padding-block: 16px 20px; }
+.page-banner--compact h1 { margin-block-start: 8px; font-size: clamp(26px, 6vw, 34px); }

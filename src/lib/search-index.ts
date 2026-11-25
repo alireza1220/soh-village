@@ -165,11 +165,11 @@ const guidePages: { path: string; title: L; text: L }[] = [
     text: join([contact.note]),
   },
   {
-    path: "manage",
-    title: { fa: "مدیریت آگهی", en: "Manage a listing" },
+    path: "my",
+    title: { fa: "آگهی‌های من", en: "My ads" },
     text: {
-      fa: "آگهی خود را با کد ویرایش یا حذف کنید.",
-      en: "Edit or remove your listing with your code.",
+      fa: "آگهی‌های خودتان را ببینید، ویرایش، تمدید یا حذف کنید. نیاز به ورود دارد.",
+      en: "See, edit, renew or remove your own ads. Needs a login.",
     },
   },
 ];

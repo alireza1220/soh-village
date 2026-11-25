@@ -13,20 +13,20 @@ Rules that apply to every row:
 
 | Variable | Public or secret | Vercel (Production + Preview) | Local `.env.local` | GitHub | Supabase | Needed for |
 |---|---|---|---|---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | public | **Yes** | Optional | No | It is Supabase's own value | Market board, listing form, login |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | public (the publishable key) | **Yes** | Optional | No | It is Supabase's own value | Reading approved listings, login link |
-| `SUPABASE_SERVICE_ROLE_KEY` | **secret** (the secret key) | **Yes, Sensitive** | Only if you test against the real database | No | It is Supabase's own value | Saving, editing and deleting listings (server only) |
+| `NEXT_PUBLIC_SUPABASE_URL` | public | **Yes** | Optional | No | It is Supabase's own value | The four boards, login, profile pictures |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | public (the publishable key) | **Yes** | Optional | No | It is Supabase's own value | Reading approved listings, login (password and email link) |
+| `SUPABASE_SERVICE_ROLE_KEY` | **secret** (the secret key) | **Yes, Sensitive** | Only if you test against the real database | No | It is Supabase's own value | Saving, editing and deleting listings, profiles and avatars (server only) |
 | `IP_HASH_SALT` | **secret** | **Yes, Sensitive** | Optional (dev default exists) | No | No | Spam limits (hashed IPs) |
-| `MANAGE_CODE_SALT` | **secret** | **Yes, Sensitive** | Optional (dev default exists) | No | No | Hashing the manage codes people get |
+| `MANAGE_CODE_SALT` | *retired* | Not needed: **delete it** | Not needed | No | No | Nothing (manage codes no longer exist) |
 | `CRON_SECRET` | **secret** | **Yes, Sensitive, Production** | Only to test the keep-alive route by hand | No | No | The daily keep-alive job that stops Supabase pausing |
 
 Not environment variables, but settings you must make elsewhere (details in sections 4 to 6):
 
 | Setting | Where | Needed for |
 |---|---|---|
-| Site URL and redirect URLs | Supabase → Authentication → URL Configuration | Email-link login |
-| Email provider on, custom SMTP, email template | Supabase → Authentication | Email-link login that actually sends mail |
-| Database tables (run `database/supabase-listings.sql` once) | Supabase → SQL Editor | Everything that stores listings |
+| Site URL and redirect URLs (four exact addresses) | Supabase → Authentication → URL Configuration | Login, sign-up confirmation, password reset |
+| Email provider on, minimum password length 8, Confirm email on/off, custom SMTP, email templates | Supabase → Authentication | Password and email-link login that actually works and sends mail |
+| Database tables (run `database/migrations/005-accounts-boards.sql`, or `database/supabase-listings.sql` on a new project) | Supabase → SQL Editor | Everything that stores listings, profiles and avatars |
 | Domain `soh-village.site` and its DNS records | Vercel → Settings → Domains, and your domain registrar | The live address |
 | GitHub | Nothing to set (see section 5) | |
 
@@ -40,12 +40,14 @@ Use the numbered steps literally. "Click X" means the visible text or icon named
 |---|---|---|---|---|---|
 | 1 | `NEXT_PUBLIC_SUPABASE_URL` | The web address of your Supabase project. The website calls it for listings and login. | No (public) | Vercel (Production and Preview). Local optional. | 1. Open https://supabase.com/dashboard and sign in.<br>2. Click the project named **soh-village** in the project list.<br>3. Read your browser's address bar. It looks like `https://supabase.com/dashboard/project/abcdefghijklmnopqrst`. The last part (`abcdefghijklmnopqrst`, about 20 lowercase letters) is the **project reference**, written `<REF>` below.<br>4. The value is `https://<REF>.supabase.co`. No trailing slash. Nothing after `.co`.<br>5. Cross-check: click the gear icon **Project Settings** at the bottom of the left sidebar, then **Data API** (older dashboards: **API**). The field **Project URL** (or **API URL**) must show exactly the same address. |
 | 2 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | The browser-safe key. The name says "anon" for historical reasons. In a new project it is the **publishable key**. | No (public by design) | Vercel (Production and Preview). Local optional. | 1. Open https://supabase.com/dashboard and click the **soh-village** project.<br>2. Click the gear icon **Project Settings** in the left sidebar.<br>3. Click **API Keys**.<br>4. On the tab **Publishable and secret API keys**, find the row **Publishable key** (name `default`). Click the copy icon. The value starts with `sb_publishable_`.<br>5. If your dashboard only offers the older keys, click the tab **Legacy anon, service_role API keys** and copy **anon** (public). It starts with `eyJ`. Either kind works; the code handles both.<br>6. Paste into Vercel as the value of `NEXT_PUBLIC_SUPABASE_ANON_KEY`. |
-| 3 | `SUPABASE_SERVICE_ROLE_KEY` | The key that can read and write the locked `listings` table. Used only by the server routes (`/api/listings`, `/api/listings/manage`, `/api/my/listings`, `/api/keepalive`). The name says "service role" for historical reasons. In a new project it is the **secret key**. | **Yes** | Vercel (Production and Preview, **Sensitive**). Local only if you test against the real database. | 1. Open https://supabase.com/dashboard and click the **soh-village** project.<br>2. Gear icon **Project Settings** → **API Keys**.<br>3. On the tab **Publishable and secret API keys**, find the section **Secret keys**, the row named `default`.<br>4. Click the eye (**Reveal**) icon, then the copy icon. The value starts with `sb_secret_`.<br>5. Older dashboards: tab **Legacy anon, service_role API keys** → **service_role** (secret) → **Reveal** → copy (starts with `eyJ`).<br>6. Paste straight into Vercel; never into chat, a file in the repo or a variable starting with `NEXT_PUBLIC_`.<br>7. To rotate it later: **API Keys** → **Secret keys** → create a new key, put it in Vercel, redeploy, then delete the old key. |
-| 4 | `IP_HASH_SALT` | Random text mixed into people's IP addresses before the spam limiter stores them, so the stored value cannot be reversed. At least 32 characters in production or the listing routes answer `503 not_configured`. | **Yes** | Vercel (Production and Preview, **Sensitive**). Local optional (a dev default exists). | You make it yourself; nothing to look up.<br>1. Open **Terminal** on your Mac.<br>2. Run `openssl rand -base64 32 \| pbcopy`. This copies a fresh 44-character random value to the clipboard and prints nothing.<br>3. In Vercel's value field, paste with Cmd+V.<br>4. Save the same value in your password manager under "soh-village IP_HASH_SALT" (Vercel will not show Sensitive values again).<br>5. If you lose it, run step 2 again and replace it: nothing breaks. |
-| 5 | `MANAGE_CODE_SALT` | Secret that turns each listing's manage code into the stored hash. At least 32 characters in production or the site refuses to post or manage listings. **Changing it later makes every existing manage code stop working.** | **Yes** | Vercel (Production and Preview, **Sensitive**). Local optional (a dev default exists). | Same method, but a different value from #4.<br>1. Terminal: `openssl rand -base64 32 \| pbcopy`.<br>2. Paste into Vercel as `MANAGE_CODE_SALT`.<br>3. Save it in your password manager under "soh-village MANAGE_CODE_SALT".<br>4. Set it once and never change it after people have posted. |
+| 3 | `SUPABASE_SERVICE_ROLE_KEY` | The key that can read and write the locked `listings`, `profiles` and `rate_events` tables and the storage buckets. Used only by the server routes (`/api/listings`, `/api/listings/images`, `/api/my/listings`, `/api/profile`, `/api/keepalive`). The name says "service role" for historical reasons. In a new project it is the **secret key**. | **Yes** | Vercel (Production and Preview, **Sensitive**). Local only if you test against the real database. | 1. Open https://supabase.com/dashboard and click the **soh-village** project.<br>2. Gear icon **Project Settings** → **API Keys**.<br>3. On the tab **Publishable and secret API keys**, find the section **Secret keys**, the row named `default`.<br>4. Click the eye (**Reveal**) icon, then the copy icon. The value starts with `sb_secret_`.<br>5. Older dashboards: tab **Legacy anon, service_role API keys** → **service_role** (secret) → **Reveal** → copy (starts with `eyJ`).<br>6. Paste straight into Vercel; never into chat, a file in the repo or a variable starting with `NEXT_PUBLIC_`.<br>7. To rotate it later: **API Keys** → **Secret keys** → create a new key, put it in Vercel, redeploy, then delete the old key. |
+| 4 | `IP_HASH_SALT` | Random text mixed into people's IP addresses before the spam limiter stores them, so the stored value cannot be reversed. At least 32 characters in production or every write route answers `503 not_configured`. | **Yes** | Vercel (Production and Preview, **Sensitive**). Local optional (a dev default exists). | You make it yourself; nothing to look up.<br>1. Open **Terminal** on your Mac.<br>2. Run `openssl rand -base64 32 \| pbcopy`. This copies a fresh 44-character random value to the clipboard and prints nothing.<br>3. In Vercel's value field, paste with Cmd+V.<br>4. Save the same value in your password manager under "soh-village IP_HASH_SALT" (Vercel will not show Sensitive values again).<br>5. If you lose it, run step 2 again and replace it: nothing breaks. |
+| 5 | `MANAGE_CODE_SALT` | **Retired.** It used to hash the manage codes. Manage codes no longer exist, nothing reads this variable, and a missing or short value no longer causes a 503. | No longer applies | Nowhere | If it is still set in Vercel: Settings → Environment Variables → the row **MANAGE_CODE_SALT** → **⋯** → **Remove**, then redeploy. Nothing breaks if you leave it. |
 | 6 | `CRON_SECRET` | Proves that a call to `/api/keepalive` really comes from Vercel's daily cron job (`vercel.json`, 06:00 UTC). The job keeps the free Supabase project from pausing after a week of inactivity. Without it the route answers `401`. | **Yes** | Vercel (**Production**, Sensitive). Local only to test the route by hand. | Same method, a third different value.<br>1. Terminal: `openssl rand -base64 32 \| pbcopy`.<br>2. Paste into Vercel as `CRON_SECRET` (Production ticked).<br>3. Vercel then sends `Authorization: Bearer <CRON_SECRET>` automatically on every scheduled call. You never type it elsewhere.<br>4. Check it works after the next deploy: Vercel → project → **Settings** → **Cron Jobs** → the `/api/keepalive` row → **Run**. Expect a 200 response. |
 
-Automatic values you do **not** set: `NODE_ENV` (Next.js sets it: `development` locally, `production` on Vercel including previews) and `MOCK_PORT` / `PORT` (only used by the test mock `scripts/mock-supabase.mjs`).
+Variable #5 is kept in the table only so the numbers stay the same and you recognise it in Vercel.
+
+Automatic values you do **not** set: `NODE_ENV` (Next.js sets it: `development` locally, `production` on Vercel including previews) and `MOCK_PORT` / `PORT` / `MOCK_SEED` (only used by the test mock `scripts/mock-supabase.mjs`).
 
 ---
 
@@ -59,15 +61,15 @@ Automatic values you do **not** set: `NODE_ENV` (Next.js sets it: `development` 
    1. **Key**: type the name exactly as written (case-sensitive).
    2. **Value**: paste the value.
    3. **Environments**: tick **Production** and **Preview**. Leave **Development** unticked for secrets (Sensitive values cannot be used in Development). For `CRON_SECRET`, **Production** is enough.
-   4. Turn on **Sensitive** for #3, #4, #5 and #6. Leave it off for #1 and #2 (they are public).
+   4. Turn on **Sensitive** for #3, #4 and #6. Leave it off for #1 and #2 (they are public).
    5. Click **Save**.
 5. Click the **Deployments** tab, open the **⋯** menu on the latest row and click **Redeploy**, then confirm. The two `NEXT_PUBLIC_` values are baked into the site while it builds, so they only take effect on a new build.
-6. Preview deployments (pull requests and branches) also run with `NODE_ENV=production`. That is why the two salts must be ticked for **Preview** too, or previews answer `503 not_configured` when you post.
+6. Preview deployments (pull requests and branches) also run with `NODE_ENV=production`. That is why `IP_HASH_SALT` must be ticked for **Preview** too, or previews answer `503 not_configured` when you post.
 
 Command-line alternative (needs Node): `npm i -g vercel`, `vercel login`, in the repo folder run `vercel link`, then for each variable `vercel env add NAME production` (and again with `preview`) and paste the value when asked; add `--sensitive` for secrets. Redeploy with `vercel --prod` or from the dashboard.
 
 ### 3b. Local (your computer)
-Local values are optional. With none set, the site runs in a safe fallback mode (listings from the local file, copy-text form), and `node scripts/test-market.mjs` supplies its own fake values.
+Local values are optional. With none set, the boards show only the built-in text and the log-in and post forms say "not available yet"; `node scripts/test-market.mjs` supplies its own fake values, and `node scripts/dev-mock.mjs` runs the whole app against a fake in-memory Supabase with demo accounts.
 1. In Terminal: `cd ~/code/alireza1220/soh-village`.
 2. `cp .env.example .env.local`.
 3. Open it: `open -e .env.local`. Replace each `your-...` placeholder with the real value from section 2. For a safer setup, leave the secrets empty and only set #1 and #2.
@@ -86,12 +88,13 @@ Open https://supabase.com/dashboard → project **soh-village** for all of these
 
 | Setting | Exact steps | Value |
 |---|---|---|
-| Database tables | Left sidebar **SQL Editor** → **New query** → paste the whole file `database/supabase-listings.sql` → **Run**. Then **Table Editor**: you should see `listings` and `rate_events`. | The file contents (done once; safe to run again) |
+| Database tables | Left sidebar **SQL Editor** → **New query** → paste the whole file `database/migrations/005-accounts-boards.sql` (existing project) or `database/supabase-listings.sql` (new project) → **Run**. Then **Table Editor**: you should see `listings`, `profiles` and `rate_events`; **Storage** shows the public buckets `listing-images` and `avatars`. **Run it BEFORE deploying the new site version** (it drops the old `manage_hash` and `poster_name` columns). | The file contents (safe to run again) |
 | Site URL | **Authentication** → **URL Configuration** → **Site URL** → type the address → **Save changes**. | `https://soh-village.site` |
-| Redirect URLs | Same page → **Redirect URLs** → **Add URL** for each → **Save**. | `https://soh-village.site/fa/login` and `https://soh-village.site/en/login`. If you also serve `www`, add the same two with `https://www.`. Do not add a bare `*.vercel.app` wildcard. For a preview deployment add its exact address from Vercel, only while you test it. |
-| Email sign-in on | **Authentication** → **Sign In / Providers** (older: **Providers**) → **Email** → switch **Enable Email provider** on. Keep **Allow new users to sign up** on (the login form creates accounts by email link). | On |
+| Redirect URLs | Same page → **Redirect URLs** → **Add URL** for each → **Save**. | `https://soh-village.site/fa/login`, `https://soh-village.site/en/login`, `https://soh-village.site/fa/reset-password` and `https://soh-village.site/en/reset-password`. If you also serve `www`, add the same four with `https://www.`. No query strings. Do not add a bare `*.vercel.app` wildcard. For a preview deployment add its exact address from Vercel, only while you test it. |
+| Email sign-in on, password length | **Authentication** → **Sign In / Providers** (older: **Providers**) → **Email** → switch **Enable Email provider** on. Keep **Allow new users to sign up** on. Set **Minimum password length** to `8` (the site's form also requires 8). | On, 8 |
+| Confirm email | Same page → **Confirm email**. ON = people must click a mail before their first password login (needs working custom SMTP); OFF = the account works at once. See the trade-off in `docs/LOGIN-SETUP.md`, section 3. | ON once custom SMTP works; OFF until then |
 | Real email sending (custom SMTP) | **Authentication** → **Emails** (older: **Settings**) → **SMTP Settings** → switch **Enable Custom SMTP** on → fill **Sender email**, **Sender name**, **Host**, **Port number**, **Username**, **Password** → **Save**. Without this Supabase's built-in sender is rate-limited to a handful of emails an hour and is not meant for real use. | Values come from your mail provider: see the next table |
-| Email template | **Authentication** → **Emails** → **Templates** → **Magic Link** → paste the Persian and English text from `docs/LOGIN-SETUP.md` → **Save**. | Text from the docs |
+| Email templates | **Authentication** → **Emails** → **Templates** → **Confirm signup**, **Magic Link** and **Reset Password** → paste the Persian and English text from `docs/LOGIN-SETUP.md` (section 6) → **Save**. | Text from the docs |
 | Database password | Only for direct database tools; the website does not use it. It was chosen when you created the project. To reset: **Project Settings** → **Database** → **Reset database password**. Store it in a password manager. | Never in the repo or Vercel |
 
 ### Getting the SMTP values (pick one provider)
@@ -113,20 +116,25 @@ Open https://supabase.com/dashboard → project **soh-village** for all of these
 
 ## 6. Check that everything is connected
 1. Vercel → **Deployments**: the latest row says **Ready**.
-2. Open `https://soh-village.site/en/market`, scroll to the form, fill the title and a contact, click **Send listing**. You should see a manage code like `ABCD-EFGH-JKMN`. Copy it.
-3. Supabase → **Table Editor** → `listings`: one new row with `status = pending`, a long `manage_hash`, and no readable code anywhere.
-4. In that row change `status` to `approved` and save. Reload the market page: the listing appears within a minute. Its contact is shown only if you ticked permission.
-5. Open `/en/manage`, enter the code: the listing loads and edit, renew and delete work.
+2. Open `https://soh-village.site/en/market`: you can read everything, and the form asks you to log in first. Create an account (email + password), fill the profile (name, family name, mobile), then post a test ad.
+3. Supabase → **Table Editor** → `listings`: one new row with `status = pending` and your `owner_id`; `profiles`: your row. Nothing readable about a manage code exists any more.
+4. In the listing row change `status` to `approved` and save. Reload the market page: the ad appears within a minute with your first name. Its contact is shown only if you ticked permission on that ad.
+5. Open `/en/my` (also reachable as `/en/manage`): the ad is listed and edit, renew and delete work.
 6. Vercel → **Settings** → **Cron Jobs**: `/api/keepalive` is listed; **Run** returns 200.
-7. Optional login: `/en/login` → enter your email → the email arrives → the link brings you back signed in → **My listings** shows your posts.
+7. Email checks: "Forgot password" on `/en/login` sends a mail whose link opens `/en/reset-password`; the email-link login lands on `/en/login` signed in.
 
 ### If something fails
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| Sending a listing says it could not send, or the API answers `503 not_configured` | A salt is missing or under 32 characters, or `SUPABASE_SERVICE_ROLE_KEY` is missing, in the environment you are using (Production vs Preview) | Re-check section 2, rows 3 to 5; tick both Production and Preview; redeploy |
+| Sending a listing says it could not send, or the API answers `503 not_configured` | `IP_HASH_SALT` is missing or under 32 characters, or `SUPABASE_SERVICE_ROLE_KEY` is missing, in the environment you are using (Production vs Preview) | Re-check section 2, rows 3 and 4; tick both Production and Preview; redeploy |
+| Boards show an error, or posting fails right after a deploy | Migration 005 was not run before the new site went out | Run `database/migrations/005-accounts-boards.sql` in the SQL Editor |
+| "Complete your profile first" when posting | The user has no `profiles` row yet | They fill the profile page; nothing to fix |
+| Hand-added row in the Table Editor fails | `owner_id` is required on new rows | Fill `owner_id` with any user id |
 | Market board is empty and approved rows exist | Publishable key or URL wrong, not redeployed after adding them, or the `public_listings` view is missing | Re-copy rows 1 and 2; redeploy; re-run the SQL file |
 | `Invalid API key` in the browser console | A different project's key, or a stray space copied with it | Re-copy from the same project; paste without spaces |
 | `/api/keepalive` returns 401 | `CRON_SECRET` not set for Production | Set it (row 6) and redeploy |
-| Login email never arrives | Built-in sender limit or no custom SMTP | Section 4, custom SMTP |
-| Login link ends on an error page ("requested path is invalid") | The redirect URL is not in Supabase's list | Section 4, Redirect URLs |
-| Everyone's old manage codes stopped working | `MANAGE_CODE_SALT` was changed | Restore the old value if you saved it |
+| Login, confirmation or reset email never arrives | Built-in sender limit or no custom SMTP | Section 4, custom SMTP |
+| Password login says "email not confirmed" | Confirm email is ON and the person never clicked the mail | Fix email delivery, or turn Confirm email OFF until it works |
+| A short password is accepted or refused unexpectedly | Supabase's minimum length differs from the site's 8 | Authentication → Email → Minimum password length = 8 |
+| Login, confirmation or reset link ends on an error page ("requested path is invalid") | The redirect URL is not in Supabase's list | Section 4, Redirect URLs (all four addresses) |
+| Old manage codes do not work | Manage codes are retired on purpose | The owner logs in; ads posted without an account have no owner and can be edited only in the Table Editor |

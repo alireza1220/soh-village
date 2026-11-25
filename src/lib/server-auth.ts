@@ -18,9 +18,12 @@ export async function verifyAccessToken(token: string): Promise<{ id: string; em
       signal: AbortSignal.timeout(3000),
     });
     if (!res.ok) return null;
-    const u = (await res.json()) as { id?: unknown; email?: unknown };
+    const u = (await res.json()) as { id?: unknown; email?: unknown; is_anonymous?: unknown };
     if (typeof u.id !== "string" || !u.id) return null;
-    return { id: u.id, email: typeof u.email === "string" ? u.email : "" };
+    // Anonymous sign-ins (if ever switched on in Supabase) must not pass the "log in first" gate: a real e-mail is required.
+    const email = typeof u.email === "string" ? u.email : "";
+    if (u.is_anonymous === true || !email) return null;
+    return { id: u.id, email };
   } catch {
     return null;
   }

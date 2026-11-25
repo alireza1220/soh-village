@@ -1,9 +1,11 @@
+import type { BoardId } from "./boards";
 import type { L } from "./i18n";
 import type { ListingImage } from "./listing-images";
 
-// Village market: buying and selling. No payments happen on the site.
-// Older rows may still be service, seeking or hiring; those are not offered when writing a listing.
-export type ListingType = "sell" | "need" | "service" | "seeking" | "hiring";
+// Village boards (market, careers, needs, property): one listings table, one row shape. No payments happen on the site.
+// Which types a board offers, and what it calls them, lives in boards.ts (use typeLabel there). LISTING_TYPES below is the MARKET's.
+// Older rows may still be "service"; it is not offered when writing a listing.
+export type ListingType = "sell" | "need" | "service" | "seeking" | "hiring" | "offer" | "rent";
 export type Opt<T extends string = string> = { v: T; fa: string; en: string };
 
 export const LISTING_TYPES: Opt<ListingType>[] = [
@@ -11,7 +13,7 @@ export const LISTING_TYPES: Opt<ListingType>[] = [
   { v: "need", fa: "می‌خواهم بخرم", en: "Wanted" },
 ];
 
-// Names for types the market no longer offers, so a saved row still reads in both languages.
+// Names for the market's older types, so a saved row still reads in both languages. Prefer typeLabel() from boards.ts.
 const RETIRED_LISTING_TYPES: Opt<ListingType>[] = [
   { v: "service", fa: "خدمت می‌دهم", en: "Service offered" },
   { v: "seeking", fa: "دنبال کار", en: "Looking for work" },
@@ -40,8 +42,14 @@ export const CONTACT_KINDS: Opt[] = [
   { v: "other", fa: "دیگر", en: "Other" },
 ];
 
+/** The poster as a public ad may show them: only when the poster allowed it (profile.show_on_ads). Never a family name or phone. */
+export type ListingPoster = { firstName: string; /** full public URL of the 96 px avatar, when there is one */ avatarUrl?: string };
+
 export type Listing = {
   id: string;
+  /** which board the row belongs to; undefined (static rows) means "market" */
+  board?: BoardId;
+  poster?: ListingPoster;
   type: ListingType;
   category: string;
   title: string; // as the poster wrote it

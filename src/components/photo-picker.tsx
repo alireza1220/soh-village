@@ -7,7 +7,7 @@ import type { Locale } from "@/lib/i18n";
 import { MAX_IMAGES } from "@/lib/listing-images";
 import { PhotoError, processImage } from "@/lib/image-resize";
 import { processedPatch, type NewPhoto, type PhotoItem } from "@/lib/photo-upload";
-import { errorText } from "@/components/listing-api";
+import { errorText } from "@/lib/api-errors";
 
 export type PickerMode = "edit" | "busy" | "sent";
 

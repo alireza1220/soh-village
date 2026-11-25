@@ -3,7 +3,8 @@ import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } f
 import "@/styles/market.css";
 import "@/styles/market-board.css";
 import type { Locale } from "@/lib/i18n";
-import { CATEGORY_SHORT, LISTING_CATEGORIES, LISTING_TYPES, listings as localListings, type Listing } from "@/lib/market";
+import { BOARDS, categoryLabel, typeLabel, type BoardId } from "@/lib/boards";
+import { listings as localListings, type Listing } from "@/lib/market";
 import { useLiveListings } from "@/lib/use-live-listings";
 import { GalleryCard, ListRow, Skeletons } from "./market-card";
 import { MarketDetail } from "./market-detail";
@@ -14,20 +15,21 @@ import { T } from "./market-text";
 import { isoToday, loadPrefs, num, savePrefs } from "./market-utils";
 
 const PAGE = 24;
-const CATS = new Set(LISTING_CATEGORIES.map((c) => c.v));
 
-function parseUrl(): { f: Filters; ad: string | null } {
+function parseUrl(board: BoardId): { f: Filters; ad: string | null } {
   const p = new URLSearchParams(window.location.search);
   const type = p.get("type");
   const sort = p.get("sort");
   const view = p.get("view");
   const cat = p.get("cat") ?? "all";
+  const types = BOARDS[board].types.map((t) => t.v) as string[];
+  const cats = BOARDS[board].categories.map((c) => c.v) as string[];
   const m = window.location.hash.match(/^#ad=([\w-]{1,64})$/);
   return {
     f: {
       q: (p.get("q") ?? "").slice(0, 100),
-      type: type === "sell" || type === "need" ? type : "all",
-      cat: CATS.has(cat) ? cat : "all",
+      type: type && types.includes(type) ? type : "all",
+      cat: cats.includes(cat) ? cat : "all",
       photos: p.get("photos") === "1",
       saved: p.get("saved") === "1",
       sort: sort === "old" || sort === "end" ? sort : "new",
@@ -49,8 +51,9 @@ function buildUrl(f: Filters, ad: string | null, viewExplicit: boolean) {
   return window.location.pathname + (qs ? `?${qs}` : "") + (ad ? `#ad=${ad}` : "");
 }
 
-export function MarketBoard({ lang }: { lang: Locale }) {
-  const { listings: remote, status, reload } = useLiveListings();
+export function MarketBoard({ lang, board }: { lang: Locale; board: BoardId }) {
+  const cfg = BOARDS[board];
+  const { listings: remote, status, reload } = useLiveListings(board);
   const [f, setF] = useState<Filters>(DEFAULTS);
   const [openId, setOpenId] = useState<string | null>(null);
   const [saved, setSaved] = useState<string[]>([]);
@@ -67,7 +70,7 @@ export function MarketBoard({ lang }: { lang: Locale }) {
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- the URL and localStorage only exist in the browser, so state is read after mount */
     const prefs = loadPrefs();
-    const u = parseUrl();
+    const u = parseUrl(board);
     viewExplicit.current = new URLSearchParams(window.location.search).has("view");
     setSaved(prefs.saved);
     setF({ ...u.f, view: viewExplicit.current ? u.f.view : prefs.view ?? "list" });
@@ -75,7 +78,7 @@ export function MarketBoard({ lang }: { lang: Locale }) {
     setToday(isoToday());
     /* eslint-enable react-hooks/set-state-in-effect */
     const onPop = () => {
-      const n = parseUrl();
+      const n = parseUrl(board);
       viewExplicit.current = new URLSearchParams(window.location.search).has("view");
       setF((old) => ({ ...n.f, view: viewExplicit.current ? n.f.view : old.view }));
       if (!n.ad) pushedAd.current = false;
@@ -83,7 +86,7 @@ export function MarketBoard({ lang }: { lang: Locale }) {
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
-  }, []);
+  }, [board]);
 
   const writeUrl = useCallback((next: Filters, ad: string | null, mode: "push" | "replace") => {
     const url = buildUrl(next, ad, viewExplicit.current);
@@ -106,7 +109,7 @@ export function MarketBoard({ lang }: { lang: Locale }) {
     });
   }, []);
 
-  const all: Listing[] = useMemo(() => (today ? [...remote, ...localListings].filter((l) => l.expiresAt >= today) : []), [remote, today]);
+  const all: Listing[] = useMemo(() => (today ? [...remote, ...(board === "market" ? localListings : [])].filter((l) => l.expiresAt >= today) : []), [remote, today, board]);
   const index = useMemo(() => all.map(indexListing), [all]);
   const dq = useDeferredValue(f.q);
   const toks = useMemo(() => tokens(dq), [dq]);
@@ -167,32 +170,32 @@ export function MarketBoard({ lang }: { lang: Locale }) {
   const clearAll = () => set({ q: "", type: "all", cat: "all", photos: false, saved: false });
   const countText = (n: number) => (lang === "fa" ? `${num(n, lang)} آگهی` : `${num(n, lang)} ${n === 1 ? "ad" : "ads"}`);
   const filteredCount = (n: number, total: number) => (lang === "fa" ? `${num(n, lang)} از ${num(total, lang)} آگهی` : `${num(n, lang)} of ${num(total, lang)} ${total === 1 ? "ad" : "ads"}`);
-  const typeName = (v: string) => LISTING_TYPES.find((t) => t.v === v)?.[lang] ?? v;
+  const typeName = (v: string) => typeLabel(board, v, lang);
 
   const chips: { key: string; label: string; patch: Partial<Filters> }[] = [];
   if (f.q.trim()) chips.push({ key: "q", label: `«${f.q.trim()}»`, patch: { q: "" } });
   if (f.type !== "all") chips.push({ key: "type", label: typeName(f.type), patch: { type: "all" } });
-  if (f.cat !== "all") chips.push({ key: "cat", label: CATEGORY_SHORT[f.cat][lang], patch: { cat: "all" } });
+  if (f.cat !== "all") chips.push({ key: "cat", label: categoryLabel(board, f.cat, lang, true), patch: { cat: "all" } });
   if (f.photos) chips.push({ key: "photos", label: T.photosOnly[lang], patch: { photos: false } });
   if (f.saved) chips.push({ key: "saved", label: T.saved[lang], patch: { saved: false } });
 
   const view = f.view;
-  const cardProps = { lang, today, toks, onToggleSave: toggleSave, onOpen: openAd };
-  const postBtn = <a className="mkb-post" href="#pg-form-title"><PlusI size={20} />{T.post[lang]}</a>;
+  const cardProps = { lang, board, today, toks, onToggleSave: toggleSave, onOpen: openAd };
+  const postBtn = <a className="mkb-post" href="#pg-form-title"><PlusI size={20} />{cfg.postCta[lang]}</a>;
 
   return (
-    <div className="mkb" data-view={view}>
+    <div className="mkb" data-view={view} data-board={board}>
       <div className="mkb-top" role="search" aria-label={T.searchLabel[lang]}>
-        <p className="mkb-intro">{T.intro[lang]}</p>
+        <p className="mkb-intro">{cfg.intro[lang]}</p>
         <div className="mkb-top__row">
-          <SearchBox lang={lang} value={f.q} onChange={(v) => set({ q: v })} />
+          <SearchBox lang={lang} board={board} value={f.q} onChange={(v) => set({ q: v })} />
           {postBtn}
         </div>
       </div>
 
       <noscript><p className="mk-msg mk-msg--warn">{T.noJs[lang]} <a href={`/${lang}/contribute`}>{T.noJsLink[lang]}</a></p></noscript>
 
-      <FilterBar lang={lang} f={f} set={set} catCounts={catCounts} savedCount={saved.length} />
+      <FilterBar lang={lang} board={board} f={f} set={set} catCounts={catCounts} savedCount={saved.length} />
 
       <div className="mkb-summary">
         <p className="mkb-summary__count" role="status" aria-live="polite">
@@ -221,9 +224,9 @@ export function MarketBoard({ lang }: { lang: Locale }) {
         </div>
       ) : all.length === 0 ? (
         <div className="mkb-state">
-          <span className="mkb-state__icon"><CatIcon cat="fruit" size={44} /></span>
-          <h3>{T.emptyTitle[lang]}</h3>
-          <p>{T.emptyText[lang]}</p>
+          <span className="mkb-state__icon"><CatIcon cat={cfg.categories[0].v} size={44} /></span>
+          <h3>{cfg.empty.title[lang]}</h3>
+          <p>{cfg.empty.text[lang]}</p>
           {postBtn}
         </div>
       ) : shown.length === 0 ? (
@@ -256,7 +259,7 @@ export function MarketBoard({ lang }: { lang: Locale }) {
 
       {open && (
         <MarketDetail
-          l={open} lang={lang} today={today} saved={savedSet.has(open.id)} onToggleSave={toggleSave} onClose={closeAd} onNav={navAd}
+          l={open} board={board} lang={lang} today={today} saved={savedSet.has(open.id)} onToggleSave={toggleSave} onClose={closeAd} onNav={navAd}
           pos={openPos >= 0 ? { index: openPos, total: shown.length } : null}
         />
       )}

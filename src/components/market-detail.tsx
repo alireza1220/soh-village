@@ -1,20 +1,21 @@
 "use client";
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Locale } from "@/lib/i18n";
-import { CATEGORY_SHORT, CONTACT_KINDS, LISTING_CATEGORIES, LISTING_TYPE_LABELS, type Listing } from "@/lib/market";
-import { Placeholder } from "./market-card";
+import { categoryLabel, factsOf, typeLabel, type BoardId } from "@/lib/boards";
+import { CONTACT_KINDS, type Listing } from "@/lib/market";
+import { isAsk, Placeholder, PosterLine } from "./market-card";
 import { CatIcon, ChatI, ChevL, ChevR, CloseI, CopyI, HeartI, PhoneI, SendI, ShareI, ZoomI } from "./market-icons";
 import { T } from "./market-text";
 import { contactLink, copyText, fmtDate, num, relativeDay } from "./market-utils";
 
 type Props = {
-  l: Listing; lang: Locale; today: string; saved: boolean; pos: { index: number; total: number } | null;
+  l: Listing; board: BoardId; lang: Locale; today: string; saved: boolean; pos: { index: number; total: number } | null;
   onToggleSave: (id: string) => void; onClose: () => void; onNav: (d: -1 | 1) => void;
 };
 const FOCUSABLE = 'a[href],button:not([disabled]),input,select,textarea,[tabindex]:not([tabindex="-1"])';
 
-export function MarketDetail({ l, lang, today, saved, pos, onToggleSave, onClose, onNav }: Props) {
+export function MarketDetail({ l, board, lang, today, saved, pos, onToggleSave, onClose, onNav }: Props) {
   const rtl = lang === "fa";
   const uid = useId();
   const dlg = useRef<HTMLDivElement>(null);
@@ -93,8 +94,10 @@ export function MarketDetail({ l, lang, today, saved, pos, onToggleSave, onClose
   };
   const copyContact = async () => { if (l.contact) flash((await copyText(l.contact.value)) ? T.copied[lang] : l.contact.value); };
 
-  const cat = LISTING_CATEGORIES.find((c) => c.v === l.category);
-  const typeName = LISTING_TYPE_LABELS.find((t) => t.v === l.type)?.[lang] ?? l.type;
+  const b = l.board ?? board;
+  const typeName = typeLabel(b, l.type, lang);
+  // Market keeps its big price; other boards name the price in their own words (pay, budget ...) as a fact.
+  const facts = factsOf(b, b === "market" ? { quantity: l.quantity, area: l.area, available: l.available } : l, lang);
   const kindName = l.contact ? (CONTACT_KINDS.find((k) => k.v === l.contact!.kind)?.[lang] ?? l.contact.kind) : "";
   const link = l.contact ? contactLink(l.contact.kind, l.contact.value) : null;
   const Prev = rtl ? ChevR : ChevL, Next = rtl ? ChevL : ChevR;
@@ -140,16 +143,15 @@ export function MarketDetail({ l, lang, today, saved, pos, onToggleSave, onClose
 
           <div className="mkb-dlg__info">
             <p className="mkb-tags">
-              <span className={`mkb-tag${l.type === "need" ? " mkb-tag--need" : ""}`}>{typeName}</span>
-              <span className="mkb-tag" data-cat={l.category}><CatIcon cat={l.category} size={14} />{cat?.[lang] ?? (CATEGORY_SHORT[l.category] ?? CATEGORY_SHORT.other)[lang]}</span>
+              <span className={`mkb-tag${isAsk(l.type) ? " mkb-tag--need" : ""}`}>{typeName}</span>
+              <span className="mkb-tag" data-cat={l.category}><CatIcon cat={l.category} size={14} />{categoryLabel(b, l.category, lang)}</span>
             </p>
             <h2 id={titleId} className="mkb-dlg__title"><bdi dir="auto">{l.title}</bdi></h2>
-            {l.price ? <p className="mkb-price mkb-price--big"><bdi dir="auto">{l.price}</bdi></p> : l.type === "sell" ? <p className="mkb-price mkb-price--big mkb-price--ask">{T.noPrice[lang]}</p> : null}
+            {b === "market" && (l.price ? <p className="mkb-price mkb-price--big"><bdi dir="auto">{l.price}</bdi></p> : l.type === "sell" ? <p className="mkb-price mkb-price--big mkb-price--ask">{T.noPrice[lang]}</p> : null)}
             <dl className="mkb-facts">
-              {l.quantity && (<><dt>{T.qty[lang]}</dt><dd><bdi dir="auto">{l.quantity}</bdi></dd></>)}
-              <dt>{T.area[lang]}</dt><dd><bdi dir="auto">{l.area}</bdi></dd>
-              {l.available && (<><dt>{T.avail[lang]}</dt><dd><bdi dir="auto">{l.available}</bdi></dd></>)}
+              {facts.map((f) => (<Fragment key={f.label}><dt>{f.label}</dt><dd><bdi dir="auto">{f.value}</bdi></dd></Fragment>))}
             </dl>
+            <PosterLine poster={l.poster} size={40} label={T.postedBy[lang]} />
             {l.details && <p className="mkb-details" dir="auto">{l.details}</p>}
             <p className="mkb-dates">{T.posted[lang]} {fmtDate(l.postedAt, lang)} ({relativeDay(l.postedAt, today, lang)}) · {T.until[lang]} {fmtDate(l.expiresAt, lang)}</p>
 

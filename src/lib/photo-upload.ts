@@ -20,7 +20,7 @@ export type PhotoItem =
       ext?: ImageExt;
       full?: Blob;
       thumb?: Blob;
-      /** error code (see listing-api ERRORS) when state is failed or error */
+      /** error code (see api-errors.ts) when state is failed or error */
       error?: string;
       /** name on the server once both files are uploaded */
       uploadedName?: string;
@@ -33,7 +33,7 @@ export const processedPatch = (p: ProcessedImage): Partial<NewPhoto> => ({
   state: "ready", previewUrl: p.previewUrl, bytes: p.bytes, width: p.width, height: p.height, ext: p.ext, full: p.full, thumb: p.thumb, error: undefined,
 });
 
-export type PhotoAuth = { code: string } | { token: string; listingId: string };
+export type PhotoAuth = { token: string; listingId: string };
 export type Progress = { phase: "sending" | "saving"; /** 1-based photo being sent */ index: number; total: number; /** 0..1 over all bytes */ fraction: number };
 export type SaveResult = {
   /** names saved on the listing (only meaningful when finalize succeeded) */
@@ -55,8 +55,7 @@ export const pendingUploads = (items: PhotoItem[]): NewPhoto[] =>
 type SignedFile = { name: string; full: { url: string }; thumb: { url: string } };
 
 export async function requestUploads(auth: PhotoAuth, exts: ImageExt[]): Promise<{ ok: true; files: SignedFile[] } | { ok: false; error: string }> {
-  const body = "code" in auth ? { code: auth.code, items: exts.map((ext) => ({ ext })) } : { listingId: auth.listingId, items: exts.map((ext) => ({ ext })) };
-  const r = await postJson("/api/listings/images", body, "token" in auth ? auth.token : undefined);
+  const r = await postJson("/api/listings/images", { listingId: auth.listingId, items: exts.map((ext) => ({ ext })) }, auth.token);
   const files = r.data.files;
   if (r.ok && Array.isArray(files) && files.length === exts.length) return { ok: true, files: files as SignedFile[] };
   return { ok: false, error: r.status === 429 ? "rate_limited" : (r.data.error as string) || (r.status === 0 ? "network" : "upload_failed") };

@@ -46,7 +46,32 @@ Legacy (restyled, still valid): `card item btn btn-primary btn-ghost chip tag li
 
 ## Shell components and nav data
 - `src/lib/nav.ts`: `navGroups` = `[{ id, label: {fa,en}, description: {fa,en}, items: [{ slug, label? }] }]`. `slug` is a section from `site.ts` (label taken from its title) or a standalone route (`photos map references credits contribute manage`, labels in `routeLabels`). `resolveNav(lang)` returns plain strings with hrefs (`/fa/history`) for client components. `ui` holds shell microcopy. Do not import `nav.ts` runtime values from client components (it pulls `site.ts`); pass resolved data as props.
-- `src/lib/social.ts` (`socialLinks`), `icons.tsx` (`SearchIcon Chevron ChevronEnd Arrow PauseIcon PlayIcon CloseIcon MenuIcon FacebookIcon InstagramIcon TelegramIcon SocialIcon`), `site-header.tsx`, `nav-menu.tsx`, `mobile-drawer.tsx`, `site-footer.tsx`, `logo-block.tsx`, `lang-switch.tsx`, `auth-link.tsx`, `nav-link.tsx`, `site-search.tsx`, `src/lib/use-live-listings.ts` (`useLiveListings(): Listing[]`, [] when Supabase is not configured).
+- `src/lib/social.ts` (`socialLinks`), `icons.tsx` (`SearchIcon Chevron ChevronEnd Arrow PauseIcon PlayIcon CloseIcon MenuIcon FacebookIcon InstagramIcon TelegramIcon SocialIcon`), `site-header.tsx`, `nav-menu.tsx`, `mobile-drawer.tsx`, `site-footer.tsx`, `logo-block.tsx`, `lang-switch.tsx`, `account-control.tsx` (header log-in link, or avatar + first name + My ads; replaces `auth-link.tsx`), `nav-link.tsx`, `site-search.tsx`, `src/lib/use-live-listings.ts` (`useLiveListings(board): {listings, status, reload}`; empty when Supabase is not configured).
+
+## Account, form and board classes
+Three small stylesheets, each imported only by the components that use it (tokens only, logical properties, 44px targets, `:focus-visible` ring, `prefers-reduced-motion` off switches). `globals.css` is not touched.
+
+### `src/styles/account.css` (prefix `acc-`): login, password, profile
+- `.acc-avatar` (round, `object-fit: cover`; size from the custom property `--acc-av`, default 40px, used at 24 / 40 / 48 / 64 / 96) and `.acc-avatar--initial` (tokens-coloured circle with the first letter when there is no picture). Use the component: `<Avatar name="Maryam" src={url} size={48} />` from `avatar.tsx` (decorative `alt=""`: the name is always printed next to it).
+- Login views: `.acc-views` (list of the four view switches: log in, create account, email link, forgot password), `.acc-view` (44px button; `aria-current="true"` marks the active one), `.acc-title` (h1/h2 that takes focus on view change), `.acc-sub` (one-line help), `.acc-links` + `.acc-linkbtn` (text-style buttons such as "Forgot password?").
+- Password field (`password-field.tsx`): `.acc-pw` wraps `.input` + `.acc-pw__toggle` (show/hide, 64px wide, `aria-pressed`), then `.acc-meter` with `.acc-meter__bars` / `.acc-meter__bar[data-on="true"]` for the simple 3-step hint (too short / ok / good).
+- `.acc-sent`: the "check your email" panel after sign-up with Confirm email ON, or after asking for a login or reset link (focused when shown).
+- Profile page: `.acc-profile-head` (avatar + name row), `.acc-avatar-edit` (+ `__btns`: choose / change / remove), `.acc-file` (visually hidden real file input, still focusable by its label), `.acc-progress` (thin upload bar), `.acc-section` (ruled block such as Password), `.acc-ro` (read-only line, for the email), `.acc-saved` (the `aria-live` "Saved" line).
+
+### `src/styles/forms.css` (prefixes `gate-`, `frm-`, `myads-`, `acct`): gates, posting form, My ads, header
+- `.page-banner--compact` (modifier on `.page-banner`, prop `compact` of `PageBanner`): about 100px banner for account pages (login, reset password, profile, my ads) so the form starts above the fold on a phone.
+- `.gate-card__btns`: the two gate choices (Log in, Create an account) side by side. Inside `.pg-form` the gate and form drop their own border and padding (one frame only).
+- `.acct__login`: the header "Log in" link drawn as a bordered button. `.btn--quiet-danger`: quiet outlined Delete button. `.myads-focus`: wrapper that takes focus after an ad is deleted. `.acc-email`: LTR email run that wraps only when needed. `.mkb-meta__i`: one item of the card meta line (the dot is a CSS `::after`, so a wrapped line never starts with it).
+- `.gate-card`: the "To post an ad, log in first" and "One more step: your name and mobile" card (turquoise top rule, one 44px `.btn`). `.gate-quiet`: the quiet placeholder while the session loads (`aria-live`). Wrap anything that writes in `<AuthGate lang reason next>`.
+- Posting form (`listing-form.tsx`, one form for all four boards, built from `BOARDS[board]` in `src/lib/boards.ts`): `.frm-as` ("posting as ..." line), `.frm-contact` (the contact block: `__private` explains that it stays private unless ticked, `__fields` is the kind + value grid), `.frm-done` (the "sent, waiting for approval" panel), `.frm-sub` (small helper text), `.frm-chip-board` (board chip in lists). Fields still use `.field`, `.label`, `.input`, `.select`, `.textarea`.
+- My ads (`/my`): `.myads-head` (avatar + first name + "Profile" link, space-between), `.myads-who`, `.myads-post` (the "Post a new ad" strip with one button per board).
+- Header account control: `.acct` (inline group), `.acct__who` (avatar + name link to the profile, max width trims long names), `.acct__name`, `.acct__my` (My ads link, hidden under 640px except in the drawer), `.acct__out` (log out, looks like a link), `.acct--drawer` (stacked variant inside the mobile drawer).
+
+### `src/styles/boards.css` (prefix `brd-`): the four boards
+- `.brd-poster` (avatar + first name line under a title; `.brd-poster__n` the name) and `.brd-poster--lg` (larger, in the detail layer). Only rendered when the poster allows it (`profiles.show_on_ads`).
+- `.brd-facts`: the one-line facts under a row title, from `factsOf(board, listing, lang)` (for example "Size: 2,000 m² - Price: negotiable"), in each board's own words.
+- `.brd-myads`: the small "my ads" link above a board's list.
+- Lists of careers / needs / property rows reuse the market card and detail classes (`.mk-*` in `market-board.css`), so photos, filters and the detail layer look the same on every board.
 
 ## RTL rules
 `<html dir>` follows the route. Use logical properties only: `margin-inline`, `padding-inline`, `inset-inline-start/end`, `border-inline-*`, `text-align: start`; Tailwind `ms- me- ps- pe- start- end-`. Arrows and end chevrons use `.icon-arrow` / `.icon-chevron-end` and flip in RTL by CSS. The hanging emblem sits at the inline start. Numbers, URLs and Latin tokens inside Persian text get `dir="ltr"`. Inline Persian in English pages needs `lang="fa"`. Persian never gets uppercase or letter-spacing.

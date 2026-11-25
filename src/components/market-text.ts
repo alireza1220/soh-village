@@ -1,12 +1,10 @@
+import type { BoardId } from "@/lib/boards";
 import type { L } from "@/lib/i18n";
 
 // Market board copy. Short and plain; poster text is never translated.
 export const T = {
-  intro: { fa: "آگهی‌های همسایه‌ها. پرداخت و کمیسیونی در کار نیست؛ مستقیم با آگهی‌دهنده حرف بزنید.", en: "Ads from neighbours. No payments, no fees: talk to the poster directly." },
   searchLabel: { fa: "جستجو در آگهی‌ها", en: "Search the ads" },
-  searchPh: { fa: "مثلاً سیب، گردو، نان…", en: "e.g. apples, walnuts, bread..." },
   clearSearch: { fa: "پاک کردن جستجو", en: "Clear search" },
-  post: { fa: "آگهی بگذارید", en: "Post an ad" },
   filters: { fa: "فیلترها", en: "Filters" },
   type: { fa: "نوع آگهی", en: "Ad type" },
   all: { fa: "همه", en: "All" },
@@ -28,15 +26,13 @@ export const T = {
   showMore: { fa: "نمایش بیشتر", en: "Show more" },
   remaining: { fa: "مانده", en: "left" },
   loading: { fa: "در حال بارگیری آگهی‌ها…", en: "Loading ads..." },
-  emptyTitle: { fa: "هنوز آگهی‌ای نیست", en: "Nothing here yet" },
-  emptyText: { fa: "اولین نفر باشید: چیزی دارید که بفروشید یا چیزی می‌خواهید؟", en: "Be the first: something to sell, or something you need?" },
   noMatchTitle: { fa: "آگهی‌ای پیدا نشد", en: "No ads found" },
   noMatchTips: { fa: "املای دیگری امتحان کنید، کلمه‌های کمتری بنویسید یا فیلترها را بردارید.", en: "Try another spelling, fewer words, or remove some filters." },
   noSaved: { fa: "هنوز آگهی‌ای ذخیره نکرده‌اید. روی قلب هر آگهی بزنید.", en: "You have not saved any ads yet. Tap the heart on an ad." },
   errTitle: { fa: "آگهی‌ها بارگیری نشد", en: "Ads could not load" },
   errText: { fa: "مشکل از اینترنت یا از سرور است. دوباره امتحان کنید.", en: "It may be your connection or our server. Please try again." },
   retry: { fa: "دوباره امتحان کنید", en: "Try again" },
-  source: { fa: "آگهی‌ها از بازارچه‌ی سُه می‌آیند و پس از بررسی منتشر می‌شوند.", en: "Ads come from the Soh market and are published after a check." },
+  source: { fa: "آگهی‌ها پس از بررسی منتشر می‌شوند و بعد از ۳۰ روز برداشته می‌شوند.", en: "Ads are published after a check and removed after 30 days." },
   gone: { fa: "این آگهی دیگر روی تابلو نیست.", en: "That ad is no longer on the board." },
   save: { fa: "ذخیره", en: "Save" },
   unsave: { fa: "برداشتن از ذخیره‌ها", en: "Remove from saved" },
@@ -49,14 +45,13 @@ export const T = {
   zoom: { fa: "بزرگ‌نمایی", en: "Zoom" },
   close: { fa: "بستن", en: "Close" },
   thumbs: { fa: "عکس‌های آگهی", en: "Ad photos" },
-  qty: { fa: "مقدار", en: "Amount" },
-  area: { fa: "منطقه", en: "Area" },
-  avail: { fa: "زمان", en: "When" },
   details: { fa: "توضیحات", en: "Details" },
   posted: { fa: "ثبت‌شده", en: "Posted" },
   until: { fa: "تا", en: "Until" },
   contact: { fa: "تماس", en: "Contact" },
   noContact: { fa: "آگهی‌دهنده راه تماسی نگذاشته؛ از بخش مشارکت بپرسید.", en: "No contact is shown; ask via Contribute." },
+  postedBy: { fa: "آگهی‌دهنده", en: "Posted by" },
+  myAds: { fa: "آگهی‌های من", en: "My ads" },
   copy: { fa: "کپی", en: "Copy" },
   copied: { fa: "کپی شد", en: "Copied" },
   call: { fa: "تماس", en: "Call" },
@@ -68,3 +63,11 @@ export const T = {
   nextAd: { fa: "آگهی بعدی", en: "Next ad" },
   noPrice: { fa: "قیمت با توافق", en: "Ask for price" },
 } satisfies Record<string, L>;
+
+/** Search box example, per board. */
+export const SEARCH_PH: Record<BoardId, L> = {
+  market: { fa: "مثلاً سیب، گردو، نان…", en: "e.g. apples, walnuts, bread..." },
+  careers: { fa: "مثلاً کارگر باغ، راهنما…", en: "e.g. orchard work, guide..." },
+  needs: { fa: "مثلاً اتاق، راننده…", en: "e.g. a room, a driver..." },
+  property: { fa: "مثلاً باغ، خانه، زمین…", en: "e.g. orchard, house, land..." },
+};

@@ -1,0 +1,10 @@
+/* Boards (careers, needs, property, market): poster line and board facts on rows and in the detail layer (prefix brd-).
+   Tokens only. Loaded by market-card.tsx next to market-board.css. */
+.brd-poster { display: flex; align-items: center; gap: 8px; margin: 4px 0 0; min-width: 0; font-size: 15px; color: var(--muted); }
+.brd-poster > span { min-width: 0; overflow-wrap: anywhere; }
+.brd-poster__n { color: var(--text); font-weight: 600; }
+.brd-poster--lg { gap: 12px; margin: 2px 0 0; font-size: 16px; }
+.brd-poster--lg .brd-poster__l { color: var(--muted); }
+.brd-facts { margin: 0; font-size: 15px; line-height: 1.5; color: var(--text); overflow-wrap: anywhere; }
+.brd-myads { margin: 0; }
+.brd-myads .link-arrow { display: inline-flex; align-items: center; min-height: 44px; }

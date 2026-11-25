@@ -14,7 +14,7 @@ export default async function Page({ params }: { params: Promise<{ lang: string 
   const title = lang === "fa" ? "ورود" : "Log in";
   return (
     <>
-      <PageBanner lang={lang} title={title} crumbs={[{ label: lang === "fa" ? "خانه" : "Home", href: `/${lang}` }, { label: title }]} />
+      <PageBanner compact lang={lang} title={title} crumbs={[{ label: lang === "fa" ? "خانه" : "Home", href: `/${lang}` }, { label: title }]} />
       <div className="wrap narrow mk-page">
         <LoginClient lang={lang} />
       </div>

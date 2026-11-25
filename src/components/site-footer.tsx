@@ -2,7 +2,6 @@ import Link from "next/link";
 import type { Locale } from "@/lib/i18n";
 import { resolveNav, ui } from "@/lib/nav";
 import { socialLinks } from "@/lib/social";
-import { AuthLink } from "@/components/auth-link";
 import { SocialIcon } from "@/components/icons";
 import { LogoBlock } from "@/components/logo-block";
 
@@ -40,8 +39,8 @@ export function SiteFooter({ lang }: { lang: Locale }) {
           <ul>
             <li><Link href={`/${lang}/credits`}>{ui.credits[lang]}</Link></li>
             <li><Link href={`/${lang}/contribute`}>{ui.contribute[lang]}</Link></li>
-            <li><AuthLink lang={lang} className="" /></li>
-            <li><Link href={`/${lang}/manage`}>{ui.manage[lang]}</Link></li>
+            <li><Link href={`/${lang}/my`}>{ui.my[lang]}</Link></li>
+            <li><Link href={`/${lang}/profile`}>{ui.profile[lang]}</Link></li>
           </ul>
         </div>
       </div>

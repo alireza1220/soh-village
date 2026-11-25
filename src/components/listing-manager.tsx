@@ -2,8 +2,12 @@
 import { useEffect, useRef, useState } from "react";
 import "@/styles/market.css";
 import type { Locale } from "@/lib/i18n";
-import { CONTACT_KINDS, LISTING_CATEGORIES, LISTING_TYPE_LABELS, LISTING_TYPES } from "@/lib/market";
-import { errorText, type ManagedListing } from "@/components/listing-api";
+import "@/styles/forms.css";
+import { BOARDS, categoryLabel, typeLabel } from "@/lib/boards";
+import { useProfile } from "@/lib/use-profile";
+import { ContactBlock, ListingFieldset, toFields, valuesReady, type FormValues } from "@/components/listing-form";
+import { errorText } from "@/lib/api-errors";
+import type { ManagedListing } from "@/components/listing-api";
 import { PhotoPicker } from "@/components/photo-picker";
 import { imageUrl, isImageName } from "@/lib/listing-images";
 import { pendingUploads, plural, savePhotos, type NewPhoto, type PhotoAuth, type PhotoItem, type Progress } from "@/lib/photo-upload";
@@ -31,19 +35,8 @@ const T = {
   savingPhotos: { fa: "عکس‌ها در حال ذخیره‌اند...", en: "Saving your photos..." },
   photoPartial: { fa: "تغییرها ذخیره شد، اما {k} عکس فرستاده نشد. دوباره «ذخیره» را بزنید.", en: "Changes saved, but {k} photo(s) did not go through. Press Save to retry." },
   keepOpen: { fa: "تا پایان ارسال این صفحه را نبندید.", en: "Keep this page open until sending ends." },
+  board: { fa: "بخش", en: "Section" },
   photosOf: { fa: "عکس‌های آگهی", en: "Listing photos" },
-  type: { fa: "نوع آگهی", en: "Type" },
-  cat: { fa: "دسته", en: "Category" },
-  title: { fa: "عنوان", en: "Title" },
-  qty: { fa: "مقدار", en: "Amount" },
-  price: { fa: "قیمت", en: "Price" },
-  area: { fa: "منطقه و محل تحویل", en: "Area and pickup place" },
-  avail: { fa: "چه زمانی", en: "When" },
-  details: { fa: "توضیح بیشتر", en: "More details" },
-  name: { fa: "نام (اختیاری)", en: "Name (optional)" },
-  ckind: { fa: "راه تماس", en: "Contact method" },
-  cval: { fa: "شماره یا شناسه", en: "Number or ID" },
-  cpub: { fa: "نمایش راه تماس در آگهی", en: "Show my contact in the listing" },
 };
 const STATUS: Record<string, { fa: string; en: string }> = {
   pending: { fa: "در انتظار بررسی", en: "Pending check" },
@@ -53,8 +46,6 @@ const STATUS: Record<string, { fa: string; en: string }> = {
   expired: { fa: "منقضی", en: "Expired" },
 };
 
-
-const label = (list: { v: string; fa: string; en: string }[], v: string, lang: Locale) => list.find((o) => o.v === v)?.[lang] ?? v;
 
 function effectiveStatus(l: ManagedListing): string {
   if (l.status === "approved" && l.expiresAt && new Date(l.expiresAt).getTime() < Date.now()) return "expired";
@@ -84,20 +75,25 @@ function ListingCard({ lang, item, run, onChange, onRemoved, photoAuth }: { lang
   const [mode, setMode] = useState<"view" | "edit" | "confirm">("view");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
-  const [f, setF] = useState(() => ({
+  const board = item.board ?? "market";
+  const bc = BOARDS[board];
+  const { profile } = useProfile();
+  const [f, setF] = useState<FormValues>(() => ({
     type: item.type, category: item.category, title: item.title ?? "", quantity: item.quantity ?? "", price: item.price ?? "",
     area: item.area && item.area !== "—" ? item.area : "", available: item.available ?? "", details: item.details ?? "",
-    posterName: item.posterName ?? "", contactKind: item.contactKind ?? CONTACT_KINDS[0].v, contactValue: item.contactValue ?? "", contactPublic: !!item.contactPublic,
+    contactKind: item.contactKind ?? "phone", contactValue: item.contactValue ?? "", contactPublic: !!item.contactPublic,
   }));
   const [photos, setPhotos] = useState<PhotoItem[]>(() => storedFrom(item.id, namesOf(item)));
   const [prog, setProg] = useState<Progress | null>(null);
   const photosRef = useRef(photos);
   useEffect(() => { photosRef.current = photos; });
   const preparing = photos.some((p) => p.kind === "new" && p.state === "preparing");
-  const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((p) => ({ ...p, [k]: v }));
+  const set = <K extends keyof FormValues>(k: K, v: FormValues[K]) => setF((p) => ({ ...p, [k]: v }));
   const st = effectiveStatus(item);
   const locked = item.status === "removed" || item.status === "rejected";
   const pre = `lm-${item.id}`;
+  const yesRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => { if (mode === "confirm") yesRef.current?.focus(); }, [mode]);
 
   const doRun = async (action: "update" | "renew" | "delete", fields?: Record<string, unknown>) => {
     setBusy(true); setMsg(null);
@@ -111,8 +107,7 @@ function ListingCard({ lang, item, run, onChange, onRemoved, photoAuth }: { lang
   };
 
   const save = async () => {
-    const base: Record<string, unknown> = { ...f };
-    if (!String(f.contactValue).trim()) delete base.contactValue;
+    const base: Record<string, unknown> = { ...toFields(f) };
     const names = photos.map((p) => (p.kind === "stored" ? p.name : p.uploadedName)).filter((n): n is string => !!n);
     const cur = namesOf(item);
     const changed = names.length !== cur.length || names.some((n, i) => n !== cur[i]);
@@ -149,19 +144,17 @@ function ListingCard({ lang, item, run, onChange, onRemoved, photoAuth }: { lang
     setMsg({ ok: false, text: `${res.finalized ? plural(fillN(T.photoPartial[lang], { k }, lang), k) : ""} ${errorText(why, lang)}`.trim() });
   };
 
-  const FF = (id: string, label: string, el: React.ReactNode) => (
-    <div className="field"><label className="label" htmlFor={id}>{label}</label>{el}</div>
-  );
   return (
     <li className="mk-listing">
       <div className="mk-chips">
         <span className="mk-status" data-status={st}>{STATUS[st]?.[lang] ?? st}</span>
-        <span className="chip">{label(LISTING_TYPE_LABELS, item.type, lang)}</span>
-        <span className="chip">{label(LISTING_CATEGORIES, item.category, lang)}</span>
+        <span className="chip frm-chip-board">{bc.title[lang]}</span>
+        <span className="chip">{typeLabel(board, item.type, lang)}</span>
+        <span className="chip">{categoryLabel(board, item.category, lang)}</span>
       </div>
       <h3>{item.title}</h3>
       <p className="mk-expiry">
-        {T.expires[lang]}: {fmtDate(item.expiresAt, lang)} · {T.renewals[lang]}: {(item.renewals ?? 0).toLocaleString(lang === "fa" ? "fa-IR" : "en")}
+        {T.expires[lang]}: {fmtDate(item.expiresAt, lang)}{(item.renewals ?? 0) > 0 && <> · {T.renewals[lang]}: {(item.renewals ?? 0).toLocaleString(lang === "fa" ? "fa-IR" : "en")}</>}
       </p>
 
       {mode !== "edit" && namesOf(item).length > 0 && (
@@ -177,37 +170,15 @@ function ListingCard({ lang, item, run, onChange, onRemoved, photoAuth }: { lang
       {mode === "edit" && (
         <form className="mk-editform" onSubmit={(e) => { e.preventDefault(); void save(); }} aria-label={T.edit[lang]}>
           {item.status === "approved" && <p className="mk-msg">{T.editNote[lang]}</p>}
-          <div className="mk-grid-2">
-            {FF(`${pre}-type`, T.type[lang],
-              <select id={`${pre}-type`} className="select" value={f.type} onChange={(e) => set("type", e.target.value)}>
-                {(LISTING_TYPES.some((o) => o.v === f.type) ? LISTING_TYPES : [...LISTING_TYPES, ...LISTING_TYPE_LABELS.filter((o) => o.v === f.type)]).map((o) => <option key={o.v} value={o.v}>{o[lang]}</option>)}
-              </select>)}
-            {FF(`${pre}-cat`, T.cat[lang],
-              <select id={`${pre}-cat`} className="select" value={f.category} onChange={(e) => set("category", e.target.value)}>
-                {LISTING_CATEGORIES.map((o) => <option key={o.v} value={o.v}>{o[lang]}</option>)}
-              </select>)}
-          </div>
-          {FF(`${pre}-title`, T.title[lang], <input id={`${pre}-title`} className="input" value={f.title} maxLength={120} required onChange={(e) => set("title", e.target.value)} />)}
-          <div className="mk-grid-2">
-            {FF(`${pre}-qty`, T.qty[lang], <input id={`${pre}-qty`} className="input" value={f.quantity} maxLength={80} onChange={(e) => set("quantity", e.target.value)} />)}
-            {FF(`${pre}-price`, T.price[lang], <input id={`${pre}-price`} className="input" value={f.price} maxLength={80} onChange={(e) => set("price", e.target.value)} />)}
-            {FF(`${pre}-area`, T.area[lang], <input id={`${pre}-area`} className="input" value={f.area} maxLength={80} onChange={(e) => set("area", e.target.value)} />)}
-            {FF(`${pre}-avail`, T.avail[lang], <input id={`${pre}-avail`} className="input" value={f.available} maxLength={80} onChange={(e) => set("available", e.target.value)} />)}
-          </div>
-          {FF(`${pre}-details`, T.details[lang], <textarea id={`${pre}-details`} className="textarea" rows={3} value={f.details} maxLength={800} onChange={(e) => set("details", e.target.value)} />)}
-          <div className="mk-grid-3">
-            {FF(`${pre}-name`, T.name[lang], <input id={`${pre}-name`} className="input" value={f.posterName} maxLength={60} onChange={(e) => set("posterName", e.target.value)} />)}
-            {FF(`${pre}-ckind`, T.ckind[lang],
-              <select id={`${pre}-ckind`} className="select" value={f.contactKind} onChange={(e) => set("contactKind", e.target.value)}>
-                {CONTACT_KINDS.map((o) => <option key={o.v} value={o.v}>{o[lang]}</option>)}
-              </select>)}
-            {FF(`${pre}-cval`, T.cval[lang], <input id={`${pre}-cval`} dir="ltr" className="input" value={f.contactValue} maxLength={60} onChange={(e) => set("contactValue", e.target.value)} />)}
-          </div>
-          <PhotoPicker lang={lang} items={photos} setItems={setPhotos} id={`${pre}-photos`} mode={busy ? "busy" : "edit"} />
-          <label className="mk-check" htmlFor={`${pre}-cpub`}>
-            <input id={`${pre}-cpub`} type="checkbox" checked={f.contactPublic} onChange={(e) => set("contactPublic", e.target.checked)} />
-            <span>{T.cpub[lang]}</span>
-          </label>
+          <ListingFieldset
+            lang={lang} board={board} idp={pre} v={f} set={set}
+            keepType={!bc.types.some((o) => o.v === item.type) && (
+              <label className="mk-choice"><input type="radio" name={`${pre}-type`} checked={f.type === item.type} onChange={() => set("type", item.type)} />{typeLabel(board, item.type, lang)}</label>
+            )}
+            keepCategory={!bc.categories.some((o) => o.v === item.category) && <option value={item.category}>{categoryLabel(board, item.category, lang)}</option>}
+            photos={<PhotoPicker lang={lang} items={photos} setItems={setPhotos} id={`${pre}-photos`} mode={busy ? "busy" : "edit"} />}
+          />
+          <ContactBlock lang={lang} idp={pre} v={f} set={set} phone={profile?.phone} />
           {prog && (
             <div className="ph-progress">
               <p>{prog.phase === "saving" ? T.savingPhotos[lang] : fillN(T.sendingPhoto[lang], { i: prog.index, n: prog.total }, lang)}</p>
@@ -218,7 +189,7 @@ function ListingCard({ lang, item, run, onChange, onRemoved, photoAuth }: { lang
             </div>
           )}
           <div className="mk-actions">
-            <button type="submit" className="btn btn--primary" disabled={busy || preparing || !f.title.trim()}>{busy ? T.saving[lang] : T.save[lang]}</button>
+            <button type="submit" className="btn btn--primary" disabled={busy || preparing || !valuesReady(board, f)}>{busy ? T.saving[lang] : T.save[lang]}</button>
             <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => { setPhotos(storedFrom(item.id, namesOf(item))); setMode("view"); }}>{T.cancel[lang]}</button>
             {preparing && <span className="mk-session">{T.waitPhotos[lang]}</span>}
           </div>
@@ -229,7 +200,7 @@ function ListingCard({ lang, item, run, onChange, onRemoved, photoAuth }: { lang
         <div className="mk-confirm" role="alertdialog" aria-labelledby={`${pre}-confirm`}>
           <p id={`${pre}-confirm`}>{T.delSure[lang]}</p>
           <div className="mk-actions">
-            <button type="button" className="btn btn--dark" disabled={busy} onClick={() => void doRun("delete")}>{T.delYes[lang]}</button>
+            <button type="button" ref={yesRef} className="btn btn--dark" disabled={busy} onClick={() => void doRun("delete")}>{T.delYes[lang]}</button>
             <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => setMode("view")}>{T.cancel[lang]}</button>
           </div>
         </div>
@@ -239,7 +210,7 @@ function ListingCard({ lang, item, run, onChange, onRemoved, photoAuth }: { lang
         <div className="mk-actions">
           {!locked && <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => { setMsg(null); setMode("edit"); }}>{T.edit[lang]}</button>}
           {canRenew(item) && <button type="button" className="btn btn--primary" disabled={busy} onClick={() => void doRun("renew")}>{busy ? T.saving[lang] : T.renew[lang]}</button>}
-          {item.status !== "removed" && <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => { setMsg(null); setMode("confirm"); }}>{T.del[lang]}</button>}
+          {item.status !== "removed" && <button type="button" className="btn btn--quiet-danger" disabled={busy} onClick={() => { setMsg(null); setMode("confirm"); }}>{T.del[lang]}</button>}
         </div>
       )}
 
@@ -254,9 +225,14 @@ export function ListingManager({ lang, items, run, onRemoved, empty, photoAuth }
   // Local copy so edits show at once; parents re-key this component when they reload the list.
   const [list, setList] = useState(items);
   const [gone, setGone] = useState<string[]>([]);
+  const [removedNote, setRemovedNote] = useState(false);
+  const focusRef = useRef<HTMLDivElement>(null);
   const shown = list.filter((l) => !gone.includes(l.id));
-  if (!shown.length) return <p className="muted" role="status">{empty ?? (lang === "fa" ? "آگهی‌ای نیست." : "No listings.")}</p>;
+  const note = <p className="mk-msg mk-msg--ok" role="status">{removedNote ? T.deleted[lang] : ""}</p>;
+  if (!shown.length) return <div ref={focusRef} tabIndex={-1} className="myads-focus">{note}<p className="muted">{empty ?? (lang === "fa" ? "آگهی‌ای نیست." : "No listings.")}</p></div>;
   return (
+    <div ref={focusRef} tabIndex={-1} className="myads-focus">
+    {note}
     <ul className="mk-list">
       {shown.map((l) => (
         <ListingCard
@@ -266,9 +242,10 @@ export function ListingManager({ lang, items, run, onRemoved, empty, photoAuth }
           run={run}
           photoAuth={photoAuth}
           onChange={(n) => setList((p) => p.map((x) => (x.id === n.id ? n : x)))}
-          onRemoved={(id) => { setGone((g) => [...g, id]); onRemoved?.(id); }}
+          onRemoved={(id) => { setGone((g) => [...g, id]); setRemovedNote(true); onRemoved?.(id); window.setTimeout(() => focusRef.current?.focus(), 0); }}
         />
       ))}
     </ul>
+    </div>
   );
 }

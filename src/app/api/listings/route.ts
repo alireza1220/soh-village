@@ -1,66 +1,37 @@
-import { configGate, failure, hashedIp, json, rateGate, sbHeaders } from "@/lib/listing-actions";
-import { parseListingInput } from "@/lib/listing-validation";
-import { generateManageCode, hashManageCode, normalizeManageCode } from "@/lib/manage-code";
-import { bearerFrom, verifyAccessToken } from "@/lib/server-auth";
+import { boardOf, parseListingInput } from "@/lib/listing-validation";
+import { authenticate, failure, json, readBody, requireProfile, sbHeaders } from "@/lib/server-guard";
 import { serverSupabase } from "@/lib/supabase";
 
-// Receives a market listing and stores it as "pending". Nothing is public until an admin approves it in Supabase.
-// The poster gets a manage code once; only its salted hash is stored.
-const MAX_PER_HOUR = 5;
-const clip = (v: unknown, n: number) => (typeof v === "string" ? v.trim().slice(0, n) : "");
-
+// Creates a listing for the logged-in poster, status "pending". Nothing is public until an admin approves it in Supabase.
+// Gate: Bearer token (401) > IP + user rate limits (429) > profile complete (403 profile_required).
 export async function POST(req: Request) {
   const sb = serverSupabase();
   if (!sb) return json({ error: "not_configured" }, 503);
-  const cfg = configGate();
-  if (cfg) return cfg;
+  const auth = await authenticate(req, sb, "post");
+  if (auth instanceof Response) return auth;
+  const b = await readBody(req);
+  if (b instanceof Response) return b;
+  const profile = await requireProfile(sb, auth.user.id);
+  if (profile instanceof Response) return profile;
 
-  let b: Record<string, unknown>;
-  try {
-    b = await req.json();
-  } catch {
-    return json({ error: "bad_json" }, 400);
-  }
-  if (!b || typeof b !== "object") return json({ error: "bad_json" }, 400);
-
-  // Spam checks: a hidden field real people never fill, and a form that was open for at least 3 seconds.
-  if (clip(b.website, 50)) return json({ ok: true }); // pretend success to bots
-  const openedFor = Number(b.openedMs);
-  if (!Number.isFinite(openedFor) || openedFor < 3000) return json({ error: "too_fast" }, 400);
-
-  const parsed = parseListingInput(b, "create");
+  // Old clients may still send a honeypot ("website") or "openedMs": both are ignored.
+  const board = boardOf(b);
+  if (!board) return json({ error: "bad_board" }, 400);
+  const parsed = parseListingInput(b, "create", { board, profilePhone: profile.phone });
   if (!parsed.ok) return json({ error: parsed.error }, 400);
-
-  // Rate limit first (insert, then count), so garbage tokens cannot drive unlimited Auth calls.
-  const ipHash = hashedIp(req);
-  const limited = await rateGate(sb, ipHash, "post", MAX_PER_HOUR);
-  if (limited) return limited;
-
-  // Optional login: a valid token links the listing to the account; a bad token just posts anonymously.
-  const token = bearerFrom(req);
-  const user = token ? await verifyAccessToken(token) : null;
-
-  const manageCode = generateManageCode();
-  const normalized = normalizeManageCode(manageCode);
-  if (!normalized) return json({ error: "store_failed" }, 502);
 
   try {
     const res = await fetch(`${sb.url}/rest/v1/listings`, {
       method: "POST",
       headers: { ...sbHeaders(sb), "Content-Type": "application/json", Prefer: "return=representation" },
-      body: JSON.stringify({
-        ...parsed.value,
-        ip_hash: ipHash,
-        manage_hash: hashManageCode(normalized),
-        owner_id: user?.id ?? null,
-      }),
+      body: JSON.stringify({ ...parsed.value, board, ip_hash: auth.ipHash, owner_id: auth.user.id }),
       cache: "no-store",
     });
     if (!res.ok) return failure("listing_insert", res);
     const rows = (await res.json()) as { id?: string }[];
     const id = rows[0]?.id;
     if (!id) return json({ error: "store_failed" }, 502);
-    return json({ ok: true, id, manageCode });
+    return json({ ok: true, id });
   } catch (e) {
     return failure("listing_exception", undefined, e);
   }

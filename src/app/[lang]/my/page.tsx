@@ -11,10 +11,10 @@ export function generateStaticParams() {
 export default async function Page({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
-  const title = lang === "fa" ? "آگهی‌های من" : "My listings";
+  const title = lang === "fa" ? "آگهی‌های من" : "My ads";
   return (
     <>
-      <PageBanner lang={lang} title={title} crumbs={[{ label: lang === "fa" ? "خانه" : "Home", href: `/${lang}` }, { label: title }]} />
+      <PageBanner compact lang={lang} title={title} crumbs={[{ label: lang === "fa" ? "خانه" : "Home", href: `/${lang}` }, { label: title }]} />
       <div className="wrap narrow mk-page">
         <MyListingsClient lang={lang} />
       </div>

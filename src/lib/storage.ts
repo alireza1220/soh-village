@@ -1,15 +1,15 @@
 import { IMAGE_BUCKET } from "@/lib/listing-images";
 import { keyHeaders, type serverSupabase } from "@/lib/supabase";
 
-// Server-only helpers for the "listing-images" bucket (Supabase Storage REST API, service key).
+// Server-only helpers for the public buckets "listing-images" (default) and "avatars" (Supabase Storage REST API, service key).
 type Sb = NonNullable<ReturnType<typeof serverSupabase>>;
 const base = (sb: Sb) => `${sb.url}/storage/v1`;
 const encPath = (p: string) => p.split("/").map(encodeURIComponent).join("/");
 
 /** Mints a one-time signed upload URL (absolute) for one object path, or null on failure. */
-export async function signUpload(sb: Sb, path: string): Promise<string | null> {
+export async function signUpload(sb: Sb, path: string, bucket: string = IMAGE_BUCKET): Promise<string | null> {
   try {
-    const res = await fetch(`${base(sb)}/object/upload/sign/${IMAGE_BUCKET}/${encPath(path)}`, {
+    const res = await fetch(`${base(sb)}/object/upload/sign/${bucket}/${encPath(path)}`, {
       method: "POST",
       headers: { ...keyHeaders(sb.key), "Content-Type": "application/json" },
       body: "{}",
@@ -30,11 +30,11 @@ export async function signUpload(sb: Sb, path: string): Promise<string | null> {
 export type StoredObject = { name: string; size: number; mimetype: string; /** ms since it was created; null when storage did not say */ ageMs: number | null };
 
 /** Objects directly under prefix (e.g. "<listing id>"), paging past 100 per call up to 5000. null = storage unreachable. */
-export async function listObjects(sb: Sb, prefix: string): Promise<StoredObject[] | null> {
+export async function listObjects(sb: Sb, prefix: string, bucket: string = IMAGE_BUCKET): Promise<StoredObject[] | null> {
   const out: StoredObject[] = [];
   try {
     for (let offset = 0; offset < 5000; offset += 100) {
-      const res = await fetch(`${base(sb)}/object/list/${IMAGE_BUCKET}`, {
+      const res = await fetch(`${base(sb)}/object/list/${bucket}`, {
         method: "POST",
         headers: { ...keyHeaders(sb.key), "Content-Type": "application/json" },
         body: JSON.stringify({ prefix, limit: 100, offset, sortBy: { column: "name", order: "asc" } }),
@@ -62,10 +62,10 @@ export async function listObjects(sb: Sb, prefix: string): Promise<StoredObject[
 }
 
 /** Removes objects by full path inside the bucket. Best effort; true when the call succeeded. */
-export async function removeObjects(sb: Sb, paths: string[]): Promise<boolean> {
+export async function removeObjects(sb: Sb, paths: string[], bucket: string = IMAGE_BUCKET): Promise<boolean> {
   if (!paths.length) return true;
   try {
-    const res = await fetch(`${base(sb)}/object/${IMAGE_BUCKET}`, {
+    const res = await fetch(`${base(sb)}/object/${bucket}`, {
       method: "DELETE",
       headers: { ...keyHeaders(sb.key), "Content-Type": "application/json" },
       body: JSON.stringify({ prefixes: paths }),

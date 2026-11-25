@@ -1,7 +1,7 @@
 // Shared contract for listing photos. No browser-only or Node-only APIs, so server routes, client components and tests all import it.
 //
 // Storage: one PUBLIC Supabase Storage bucket "listing-images" (free plan: 1 GB total). Objects are written only through
-// short-lived signed upload URLs that the server hands out after checking the poster's manage code (or login).
+// short-lived signed upload URLs that the server hands out after checking the poster's login (verified user id) and profile.
 // Per photo two files are stored, named by an unguessable random id plus the extension the browser could encode:
 //   <listing uuid>/<id>.<ext>      full size, long edge <= FULL_MAX_EDGE
 //   <listing uuid>/<id>-t.<ext>    thumbnail, long edge <= THUMB_MAX_EDGE

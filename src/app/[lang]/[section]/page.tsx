@@ -6,12 +6,13 @@ import { Blocks, cardAnchors } from "@/components/blocks";
 import { PageBanner, bannerPhoto } from "@/components/page-banner";
 import { PhotoStrip } from "@/components/photo-strip";
 import { MarketBoard } from "@/components/market-board";
-import { MarketForm } from "@/components/market-form";
-import { PostForm } from "@/components/post-form";
+import { AuthGate } from "@/components/auth-gate";
+import { ListingForm } from "@/components/listing-form";
 import { MediaBlock } from "@/components/media-block";
 import { Arrow } from "@/components/icons";
 import { illustrationFor } from "@/lib/illustrations";
 import { photos } from "@/lib/photos";
+import { BOARDS, isBoard } from "@/lib/boards";
 import { hasLocale, locales } from "@/lib/i18n";
 import { mediaFor, withoutPreviewed } from "@/lib/media";
 import { sectionBySlug, sections } from "@/lib/site";
@@ -32,6 +33,7 @@ async function Content({ params }: { params: PageProps<"/[lang]/[section]">["par
   const media = mediaFor(s.slug, lang, s.blocks);
   const blocks = withoutPreviewed(s.blocks, media);
   const anchors = cardAnchors(s.blocks);
+  const board = isBoard(s.slug) ? s.slug : null;
   const hasToc = anchors.length >= 4;
   const tocAnchors = media.length > 0 ? [...anchors, { id: `media-${s.slug}`, title: { fa: "ویدیوها و پست‌ها", en: "Videos and posts" } }] : anchors;
   // A real photo of the section wins; else its illustration (labelled); else the region fallback photo.
@@ -62,26 +64,22 @@ async function Content({ params }: { params: PageProps<"/[lang]/[section]">["par
             </nav>
           )}
           <div className="pg-main">
-            {s.slug === "market" && <MarketBoard lang={lang} />}
-            {s.slug === "market" && (
-              <p>
-                <Link className="link-arrow" href={`/${lang}/manage`}>
-                  {lang === "fa" ? "مدیریت آگهی" : "Manage your listing"} <Arrow />
+            {board && <MarketBoard lang={lang} board={board} />}
+            {board && (
+              <p className="brd-myads">
+                <Link className="link-arrow" href={`/${lang}/my`}>
+                  {lang === "fa" ? "آگهی‌های من" : "My ads"} <Arrow />
                 </Link>
               </p>
             )}
             <Blocks blocks={blocks} lang={lang} />
             <MediaBlock section={s.slug} lang={lang} items={media} />
-            {s.slug === "market" && (
+            {board && (
               <section className="pg-form" aria-labelledby="pg-form-title">
-                <h2 id="pg-form-title" className="pg-form__title">{lang === "fa" ? "آگهی خود را بنویسید" : "Write your listing"}</h2>
-                <MarketForm lang={lang} />
-              </section>
-            )}
-            {(s.slug === "needs" || s.slug === "careers") && (
-              <section className="pg-form" aria-labelledby="pg-form-title">
-                <h2 id="pg-form-title" className="pg-form__title">{lang === "fa" ? (s.slug === "needs" ? "نیاز یا پیشنهاد خود را بنویسید" : "آگهی کاری خود را بنویسید") : s.slug === "needs" ? "Write your request or offer" : "Write your job post"}</h2>
-                <PostForm kind={s.slug as "needs" | "careers"} lang={lang} />
+                <h2 id="pg-form-title" className="pg-form__title">{BOARDS[board].formTitle[lang]}</h2>
+                <AuthGate lang={lang} reason="post" next={`/${lang}/${board}#pg-form-title`}>
+                  <ListingForm board={board} lang={lang} />
+                </AuthGate>
               </section>
             )}
           </div>

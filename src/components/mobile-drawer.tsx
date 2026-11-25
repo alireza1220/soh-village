@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import type { Locale } from "@/lib/i18n";
 import type { NavGroup } from "@/lib/nav";
 import { socialLinks } from "@/lib/social";
-import { AuthLink } from "@/components/auth-link";
+import { AccountControl } from "@/components/account-control";
 import { Chevron, CloseIcon, MenuIcon, SocialIcon } from "@/components/icons";
 import { LangSwitch } from "@/components/lang-switch";
 import { LogoBlock } from "@/components/logo-block";
@@ -83,7 +83,7 @@ export function MobileDrawer({ lang, groups, labels }: { lang: Locale; groups: N
           <div className="drawer__foot">
             <Link href={`/${lang}/contribute`} className="btn btn--primary">{labels.contribute}</Link>
             <LangSwitch lang={lang} />
-            <AuthLink lang={lang} className="ut-link" />
+            <AccountControl lang={lang} className="ut-link" variant="drawer" />
             <span className="ut-bar__group" role="group" aria-label={labels.social}>
               {socialLinks.map((s) => (
                 <a key={s.id} className="icon-btn" href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label[lang]}>

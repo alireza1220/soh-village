@@ -387,7 +387,7 @@ export const sections: Section[] = [
     },
     blocks: [
       { t: "p", text: { fa: "تابلوی آگهی روستا. کمیسیون ندارد؛ سایت پولی نگه نمی‌دارد.", en: "The village notice board. No commission; the site holds no money." } },
-      { t: "notice", title: { fa: "قواعد (پیش‌نویس)", en: "Rules (draft)" }, items: [
+      { t: "notice", title: { fa: "قواعد", en: "Rules" }, items: [
         { fa: "پرداخت بیرون از سایت است؛ سایت طرفین را تأیید نمی‌کند.", en: "Pay outside the site; it does not verify people." },
         { fa: "برای کار پول ندهید. آگهی پیش‌پرداخت منتشر نمی‌شود.", en: "Never pay to get a job. Upfront-payment listings are not published." },
         { fa: "دستمزد و ساعت کار را پیش از شروع مکتوب کنید. کار کودکان پذیرفته نیست.", en: "Put pay and hours in writing first. No child labour." },
@@ -594,15 +594,10 @@ export const sections: Section[] = [
     slug: "property",
     title: { fa: "خرید و فروش ملک", en: "Property" },
     intro: {
-      fa: "خانه، باغ و زمین در سُه: خرید و فروش.",
-      en: "Houses, orchards and land in Soh.",
+      fa: "خانه، باغ و زمین در سُه: خرید، فروش و اجاره.",
+      en: "Houses, orchards and land in Soh: buy, sell, rent.",
     },
     blocks: [
-      { t: "p", text: { fa: "آگهی ملکی در سُه نیست. آگهی پس از تماس مالک و بررسی اضافه می‌شود.", en: "No Soh property listings yet. Added after the owner contacts us and details are checked." } },
-      { t: "table",
-        head: [{ fa: "نوع", en: "Type" }, { fa: "متراژ", en: "Size" }, { fa: "قیمت", en: "Price" }, { fa: "نوع سند", en: "Deed" }, { fa: "تماس", en: "Contact" }],
-        rows: [],
-        empty: { fa: "هنوز آگهی‌ای ثبت نشده است.", en: "No listings yet." } },
       { t: "links", items: [
         { name: { fa: "دیوار", en: "Divar" }, url: "https://divar.ir", note: { fa: "جستجوی «سه، میمه» یا «شاهین‌شهر و میمه»", en: "Search “Soh, Meymeh” or “Shahin Shahr and Meymeh”" } },
         { name: { fa: "شیپور", en: "Sheypoor" }, url: "https://www.sheypoor.com", note: { fa: "آگهی ملک و زمین", en: "Property and land listings" } },
@@ -624,7 +619,7 @@ export const sections: Section[] = [
       en: "Ask the village for what you need, and offer what you have.",
     },
     blocks: [
-      { t: "p", text: { fa: "مثل تابلوی نیازمندی‌های روستاست. نیاز یا پیشنهادتان را در فرم بنویسید و متن را بفرستید. آگهی‌ها بررسی می‌شوند؛ شماره‌ی تماس فقط با اجازه‌ی شما.", en: "Like the village notice board. Write your need or offer in the form and send the text. Posts are checked; your number is shown only with permission." } },
+      { t: "p", text: { fa: "مثل تابلوی نیازمندی‌های روستاست. وارد شوید و نیاز یا پیشنهادتان را بنویسید. آگهی‌ها بررسی می‌شوند؛ شماره‌ی تماس فقط با اجازه‌ی شما دیده می‌شود.", en: "Like the village notice board. Log in and write your need or offer. Posts are checked; your number is shown only with permission." } },
       { t: "tags", label: { fa: "نمونه‌ی نیازمندی‌ها", en: "Examples of what people ask for" }, items: [
         { fa: "اتاق یا خانه برای اقامت", en: "A room or house to stay" },
         { fa: "راننده یا وسیله‌ی رفت‌وآمد", en: "A driver or a ride" },
@@ -636,11 +631,7 @@ export const sections: Section[] = [
         { fa: "کمک در کارهای اداری و ترجمه", en: "Help with paperwork and translation" },
         { fa: "ابزار و وسایل دست‌دوم", en: "Tools and second-hand equipment" },
       ] },
-      { t: "table",
-        head: [{ fa: "نوع", en: "Type" }, { fa: "نیاز یا پیشنهاد", en: "Request or offer" }, { fa: "منطقه", en: "Area" }, { fa: "تاریخ", en: "Date" }, { fa: "تماس", en: "Contact" }],
-        rows: [],
-        empty: { fa: "هنوز آگهی‌ای منتشر نشده است. اولین نفر باشید.", en: "No posts published yet. Be the first." } },
-      { t: "notice", title: { fa: "قواعد پیشنهادی (پیش‌نویس)", en: "Draft rules" }, items: [
+      { t: "notice", title: { fa: "قواعد", en: "Rules" }, items: [
         { fa: "سایت پولی را نگه نمی‌دارد و کسی را تأیید نمی‌کند؛ پیش از پرداخت مطمئن شوید.", en: "No payments held, nobody verified. Make sure before you pay." },
         { fa: "شماره و نشانی فقط با رضایت صاحبش.", en: "Phones and addresses shown only with consent." },
         { fa: "هر آگهی پس از ۳۰ روز برداشته می‌شود، مگر تمدید شود.", en: "Posts expire after 30 days unless renewed." },
@@ -656,7 +647,7 @@ export const sections: Section[] = [
       en: "Work in and around Soh, and people seeking work.",
     },
     blocks: [
-      { t: "p", text: { fa: "کشاورزی و دامداری پایه‌ی کار روستاست (بررسی ۱۳۸۶: حدود ۸۶٪ اهالی کشاورزند). گردشگری، مرمت و صنایع دستی می‌توانند رشد کنند. کار یا کارگر می‌خواهید؟ فرم را پر کنید.", en: "Farming and livestock anchor local work (2007–08 survey: about 86% of residents farmed). Tourism, restoration and crafts could grow. Need work or workers? Fill in the form." } },
+      { t: "p", text: { fa: "کشاورزی و دامداری پایه‌ی کار روستاست (بررسی ۱۳۸۶: حدود ۸۶٪ اهالی کشاورزند). گردشگری، مرمت و صنایع دستی می‌توانند رشد کنند. کار یا کارگر می‌خواهید؟ وارد شوید و آگهی بگذارید.", en: "Farming and livestock anchor local work (2007–08 survey: about 86% of residents farmed). Tourism, restoration and crafts could grow. Need work or workers? Log in and post." } },
       { t: "cards", items: [
         { title: { fa: "باغ و کشاورزی", en: "Orchards and farming" }, text: { fa: "سیب، گردو، بادام و غلات؛ کار فصلی هرس، آبیاری و برداشت.", en: "Apples, walnuts, almonds, grain. Seasonal pruning, irrigation, harvest." }, status: "reported", source: "FA Wikipedia, Kojaro" },
         { title: { fa: "قالی‌بافی و صنایع دستی", en: "Carpets and crafts" }, text: { fa: "قالی جوشقانی، گیوه، چادرشب، گلدوزی و سبد بید؛ فروش در بازار اصفهان و تهران.", en: "Joshaqani carpets, giveh, chadorshab, embroidery, willow baskets; sold in Isfahan and Tehran bazaars." }, status: "reported", source: "Kojaro" },
@@ -664,10 +655,6 @@ export const sections: Section[] = [
         { title: { fa: "مرمت و ساخت‌وساز", en: "Restoration and building" }, text: { fa: "کاروانسرا و حمام با کمک مردم مرمت شد. بنّای آشنا با معماری خشتی و سنگی لازم است.", en: "Caravanserai and bath restored with local help. Masons who know adobe and stone are needed." }, status: "reported", source: "Kojaro" },
         { title: { fa: "کار از راه دور", en: "Remote work" }, text: { fa: "کسانی که ریشه در سُه دارند و جای دیگری زندگی می‌کنند می‌توانند از راه دور کمک کنند، مثلاً ترجمه، طراحی یا اداره‌ی همین سایت.", en: "People with Soh roots can help remotely: translation, design, running this site." }, status: "unverified" },
       ] },
-      { t: "table",
-        head: [{ fa: "نوع", en: "Type" }, { fa: "کار یا مهارت", en: "Job or skill" }, { fa: "نوع همکاری", en: "Arrangement" }, { fa: "منطقه", en: "Area" }, { fa: "تماس", en: "Contact" }],
-        rows: [],
-        empty: { fa: "هنوز آگهی کاری منتشر نشده است.", en: "No job posts published yet." } },
       { t: "notice", title: { fa: "برای ایمنی و انصاف", en: "For safety and fairness" }, items: [
         { fa: "برای کار پول نپردازید. آگهی پیش‌پرداخت منتشر نمی‌شود.", en: "Never pay to get a job. Upfront-payment posts are not published." },
         { fa: "دستمزد، ساعت و مدت کار را پیش از شروع مکتوب کنید.", en: "Put pay, hours and duration in writing first." },

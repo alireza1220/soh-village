@@ -1,106 +1,18 @@
-import { createHash } from "node:crypto";
 import { imagePath, isImageName, MAX_FILE_BYTES, MAX_IMAGES } from "@/lib/listing-images";
+import { isBoard } from "@/lib/boards";
 import { parseListingInput, publicRow } from "@/lib/listing-validation";
-import { secret, secretsReady } from "@/lib/secrets";
-import { serverSupabase } from "@/lib/supabase";
-import { keyHeaders } from "@/lib/supabase";
+import { json, sbHeaders, type Row, type Sb } from "@/lib/server-guard";
 import { listObjects, removeObjects, type StoredObject } from "@/lib/storage";
 
-// Shared by POST /api/listings/manage and POST /api/my/listings. Server-only.
-export type Sb = NonNullable<ReturnType<typeof serverSupabase>>;
-export type Row = Record<string, unknown>;
-
-export const json = (body: object, status = 200) => Response.json(body, { status });
+// Update / renew / delete / find for POST /api/my/listings. Server-only. The caller has already proven it owns the row.
+export type { Row, Sb };
 const storeFailed = () => json({ error: "store_failed" }, 502);
 
-// 502 for a failed Supabase call. The reason (step, HTTP status, Supabase's error code and message; never keys) goes to the
-// Vercel runtime log only, so the public response stays a plain store_failed.
-export async function failure(stage: string, res?: Response, err?: unknown): Promise<Response> {
-  let detail = "";
-  try {
-    if (res) {
-      const t = (await res.text()).slice(0, 240);
-      try {
-        const j = JSON.parse(t) as { code?: string; message?: string; error?: string; hint?: string };
-        detail = [j.code, j.message ?? j.error, j.hint].filter(Boolean).join(" | ");
-      } catch {
-        detail = t;
-      }
-    } else if (err) {
-      detail = (err instanceof Error ? `${err.name}: ${err.message}` : String(err)).slice(0, 240);
-    }
-  } catch {}
-  const upstream = res?.status;
-  console.error("store_failed", { stage, upstream, detail });
-  return json({ error: "store_failed" }, 502);
-}
-
-export const MANAGE_PER_HOUR = 20;
 const DAY = 86_400_000;
 const RENEW_WINDOW_MS = 7 * DAY;
 const RENEW_EXTEND_MS = 30 * DAY;
 const MAX_RENEWALS = 4;
 const RENEW_LAST_DAYS = 12;
-
-export const sbHeaders = (sb: Sb) => keyHeaders(sb.key);
-
-// Answers 503 when production secrets are missing or too short. Call right after serverSupabase().
-export function configGate(): Response | null {
-  return secretsReady() ? null : json({ error: "not_configured" }, 503);
-}
-
-// Best guess of the caller's IP. Vercel sets x-vercel-forwarded-for / x-real-ip itself (a caller cannot forge them).
-// If a CDN or proxy is ever put in front of Vercel, re-base this on that proxy's header (see docs/SECRETS.md).
-function clientIp(req: Request): string {
-  const h = req.headers;
-  const raw = h.get("x-vercel-forwarded-for") || h.get("x-real-ip") || h.get("x-forwarded-for")?.split(",")[0] || "";
-  return raw.trim() || "unknown";
-}
-
-// IPv6 users own a whole /64, so hash only its first 64 bits; IPv4 stays as is.
-function bucketIp(ip: string): string {
-  if (!ip.includes(":")) return ip;
-  const mapped = /^::ffff:(\d+\.\d+\.\d+\.\d+)$/i.exec(ip);
-  if (mapped) return mapped[1];
-  const [head, tail = ""] = ip.split("::");
-  const h = head ? head.split(":") : [];
-  if (ip.includes("::")) {
-    const t = tail ? tail.split(":") : [];
-    const fill = Math.max(0, 8 - h.length - t.length);
-    return [...h, ...Array(fill).fill("0"), ...t].slice(0, 4).map((g) => g.toLowerCase().replace(/^0+(?=.)/, "")).join(":");
-  }
-  return h.slice(0, 4).map((g) => g.toLowerCase().replace(/^0+(?=.)/, "")).join(":");
-}
-
-export function hashedIp(req: Request): string {
-  return createHash("sha256").update(bucketIp(clientIp(req)) + secret("IP_HASH_SALT")).digest("hex").slice(0, 32);
-}
-
-// Records this call, then counts this IP's calls in the last hour and refuses past the limit.
-// Insert-first keeps the limit correct under concurrent bursts. Refused calls are recorded too.
-// Returns a Response to send back, or null to continue. Fails closed if the log cannot be used.
-export async function rateGate(sb: Sb, ipHash: string, kind: string, limit: number): Promise<Response | null> {
-  try {
-    const ins = await fetch(`${sb.url}/rest/v1/rate_events`, {
-      method: "POST",
-      headers: { ...sbHeaders(sb), "Content-Type": "application/json", Prefer: "return=minimal" },
-      body: JSON.stringify({ ip_hash: ipHash, kind }),
-      cache: "no-store",
-    });
-    if (!ins.ok) return failure("rate_insert", ins);
-    const since = new Date(Date.now() - 3600_000).toISOString();
-    const count = await fetch(
-      `${sb.url}/rest/v1/rate_events?select=id&ip_hash=eq.${ipHash}&kind=eq.${kind}&created_at=gte.${encodeURIComponent(since)}`,
-      { headers: { ...sbHeaders(sb), Prefer: "count=exact", Range: "0-0" }, cache: "no-store" },
-    );
-    if (!count.ok) return failure("rate_count", count);
-    const total = Number(count.headers.get("content-range")?.split("/")[1] ?? 0);
-    if (total > limit) return json({ error: "rate_limited" }, 429);
-    return null;
-  } catch (e) {
-    return failure("rate_exception", undefined, e);
-  }
-}
 
 // Finds one row by a PostgREST filter. Returns the row, null (no match) or "error".
 export async function findRow(sb: Sb, filter: string): Promise<Row | null | "error"> {
@@ -199,7 +111,7 @@ export async function purgeImages(sb: Sb, row: Row): Promise<boolean> {
 export type Action = "update" | "renew" | "delete";
 
 // Applies update / renew / delete to a row the caller has already proven they own.
-export async function applyAction(sb: Sb, row: Row, action: Action, fields: unknown): Promise<Response> {
+export async function applyAction(sb: Sb, row: Row, action: Action, fields: unknown, profilePhone?: string): Promise<Response> {
   const status = String(row.status);
 
   if (action === "delete") {
@@ -214,7 +126,13 @@ export async function applyAction(sb: Sb, row: Row, action: Action, fields: unkn
   if (action === "update") {
     if (status === "removed" || status === "rejected") return json({ error: "not_editable" }, 409);
     if (!fields || typeof fields !== "object" || Array.isArray(fields)) return json({ error: "bad_fields" }, 400);
-    const parsed = parseListingInput(fields as Record<string, unknown>, "update");
+    const board = isBoard(row.board) ? row.board : "market";
+    const parsed = parseListingInput(fields as Record<string, unknown>, "update", {
+      board,
+      currentType: String(row.type ?? ""),
+      currentCategory: String(row.category ?? ""),
+      profilePhone,
+    });
     if (!parsed.ok) return json({ error: parsed.error }, 400);
     const patch: Row = { ...parsed.value };
     const f = fields as Record<string, unknown>;

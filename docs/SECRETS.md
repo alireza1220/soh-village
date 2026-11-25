@@ -7,10 +7,10 @@ A secret is a value that lets someone act as the website: write to the database,
 | Variable | Public or secret | Where it lives | What it does |
 |---|---|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | Public | Vercel env vars, `.env.local` | Address of your Supabase project. Sent to every visitor's browser. |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public (by design) | Vercel env vars, `.env.local` | Lets the browser read the public view `public_listings` and request email login links. Safe because database rules (RLS) block everything else. |
-| `SUPABASE_SERVICE_ROLE_KEY` | **Secret** | Vercel env vars (Sensitive), `.env.local` | Full access to the database, ignoring RLS. Used only by server routes: `/api/listings`, `/api/listings/manage`, `/api/my/listings` and `/api/keepalive` (cleanup). |
-| `IP_HASH_SALT` | **Secret** | Vercel env vars, `.env.local` | Mixed into visitors' IP addresses before hashing, for the rate limit. Production needs 32+ characters or the routes answer 503. |
-| `MANAGE_CODE_SALT` | **Secret** | Vercel env vars, `.env.local` | Key for the HMAC hash of manage codes (the key never goes in the database). Production needs 32+ characters or the routes answer 503. Changing it invalidates every existing manage code. |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public (by design) | Vercel env vars, `.env.local` | Lets the browser read the public view `public_listings` and talk to Supabase Auth (sign up, log in with a password or an email link, reset a password). Safe because database rules (RLS) block everything else. |
+| `SUPABASE_SERVICE_ROLE_KEY` | **Secret** | Vercel env vars (Sensitive), `.env.local` | Full access to the database and storage, ignoring RLS. Used only by server routes: `/api/listings`, `/api/listings/images`, `/api/my/listings`, `/api/profile` and `/api/keepalive` (cleanup). It reads and writes the private `profiles` table (family name, mobile). |
+| `IP_HASH_SALT` | **Secret** | Vercel env vars, `.env.local` | Mixed into visitors' IP addresses before hashing, for the rate limit. Production needs 32+ characters or every write route answers 503. |
+| `MANAGE_CODE_SALT` | *Retired* | (delete it) | Manage codes no longer exist, so nothing reads this any more. You may delete it from Vercel and `.env.local`. It is never required, and a missing or short value no longer causes a 503. |
 | `CRON_SECRET` | **Secret** | Vercel env vars, `.env.local` | Proves that a call to `/api/keepalive` comes from the Vercel cron job. Required: without it the route answers 401. |
 | SMTP / email-service keys (Resend, Brevo) | **Secret** | Supabase dashboard only | Used by Supabase to send login emails. Not part of this repo. See section 7. |
 
@@ -24,13 +24,13 @@ In the Supabase dashboard open your project, then Project Settings and the API s
 - `anon` public key: use as `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 - `service_role` key: use as `SUPABASE_SERVICE_ROLE_KEY`. Treat it like a master password. Never paste it in chat, email, a screenshot or a commit.
 
-The salts and `CRON_SECRET` are not from Supabase. Make them yourself: any long random text. For example, in a terminal: `openssl rand -base64 32`.
+`IP_HASH_SALT` and `CRON_SECRET` are not from Supabase. Make them yourself: any long random text. For example, in a terminal: `openssl rand -base64 32`.
 
 ## 3. Setting secrets on Vercel
 
 Dashboard:
 1. Open your project in Vercel, then Settings, then Environment Variables.
-2. Enter the name (for example `MANAGE_CODE_SALT`) and the value.
+2. Enter the name (for example `IP_HASH_SALT`) and the value.
 3. Choose the environments: Production at least; Preview for test deployments (give it a different test value). Keep Development secrets in `.env.local` only.
 4. For secrets in Production and Preview, turn on the **Sensitive** option if it is offered (Vercel may not allow it for Development). A sensitive value can no longer be read back in the dashboard afterwards, only replaced.
 5. Save, then **redeploy**. Environment variables are read when a deployment is built, so a change does not affect an already running deployment.
@@ -38,9 +38,9 @@ Dashboard:
 Command line (needs the Vercel CLI and `vercel login` / `vercel link` once):
 
 ```
-vercel env add MANAGE_CODE_SALT production
+vercel env add IP_HASH_SALT production
 vercel env ls
-vercel env rm MANAGE_CODE_SALT production
+vercel env rm MANAGE_CODE_SALT production   # the retired variable: safe to delete
 vercel --prod
 ```
 
@@ -86,13 +86,13 @@ Use the Supabase Vault when a secret must live inside the database itself, for e
 
 ## 7. Email-service keys (Resend or Brevo)
 
-Login emails are sent by Supabase, not by this site. So the SMTP host, user and password or API key of Resend or Brevo are entered in the Supabase dashboard (Authentication settings, SMTP section), never in this repository or in Vercel. Details in `docs/LOGIN-SETUP.md`.
+Sign-up confirmation, password-reset and login-link emails are sent by Supabase, not by this site. So the SMTP host, user and password or API key of Resend or Brevo are entered in the Supabase dashboard (Authentication settings, SMTP section), never in this repository or in Vercel. Details in `docs/LOGIN-SETUP.md`.
 
 ## 8. If a key leaks
 
 1. **Supabase service role or anon key**: in Supabase, Project Settings, look for the JWT / API key settings and generate a new JWT secret or rotate the keys (the exact labels differ by dashboard version). This invalidates the old keys, and also signs out logged-in users. Then copy the new keys.
 2. Update the values in Vercel and `.env.local`, then **redeploy**.
-3. **Salts and `CRON_SECRET`**: set a new random value and redeploy. Warning: a new `MANAGE_CODE_SALT` makes all existing manage codes stop working (people can still log in, or you can edit rows in the Table Editor). A new `IP_HASH_SALT` only resets rate-limit history.
+3. **`IP_HASH_SALT` and `CRON_SECRET`**: set a new random value and redeploy. A new `IP_HASH_SALT` only resets rate-limit history. (`MANAGE_CODE_SALT` is retired and no longer matters.)
 4. **Email-service key**: create a new key at Resend or Brevo, replace it in Supabase, delete the old key at the provider.
 5. Check logs: Vercel project Logs for strange calls to `/api/*`, and Supabase logs and the `listings` table for rows you did not expect. Reject or remove any spam rows.
 6. Find out how it leaked and fix that (see section 9).
@@ -106,18 +106,25 @@ Login emails are sent by Supabase, not by this site. So the SMTP host, user and 
 
 ## 10. Rate limits and your IP header
 
-The per-IP limits (5 posts per hour, 20 manage calls per hour) use the address Vercel sets (`x-vercel-forwarded-for` / `x-real-ip`; IPv6 is grouped by /64). This is trustworthy on Vercel. If you ever put a CDN or proxy (for example Cloudflare) in front of Vercel, or self-host, the limits must be re-based on that proxy's header in `clientIp()` in `src/lib/listing-actions.ts`, otherwise everyone shares one bucket or the header can be forged.
+Every write needs a valid login, and is limited twice: per IP (generous, because many phones in Iran share one carrier address: 30 posts, 120 manage calls, 60 photo signings per hour) and per logged-in user (the real budget: 6 new ads, 60 manage calls, 12 photo signings, 30 profile calls, 10 avatar signings per hour; see `src/lib/limits.ts`). Calls without a login are refused with 401 before anything is stored. The per-IP limits use the address Vercel sets (`x-vercel-forwarded-for` / `x-real-ip`; IPv6 is grouped by /64). This is trustworthy on Vercel. If you ever put a CDN or proxy (for example Cloudflare) in front of Vercel, or self-host, the limits must be re-based on that proxy's header in `clientIp()` in `src/lib/server-guard.ts`, otherwise everyone shares one bucket or the header can be forged.
+
+## 10b. Passwords and personal data
+
+- People's **passwords** go from their browser straight to Supabase Auth over HTTPS. This site never stores, logs or forwards them; only Supabase keeps an encrypted (hashed) copy.
+- **Login sessions** (access and refresh tokens) are kept in the visitor's browser (`localStorage`), as before. A script injected into the site could read them, so keep the site free of third-party scripts you do not trust.
+- **Profiles** (first name, family name, mobile) are in `public.profiles`: no browser access at all, only the server with the service key. The mobile number is only format-checked, not verified. Never log or paste them.
 
 ## 11. Checklist
 
 - [ ] `NEXT_PUBLIC_*` variables contain only public values (URL and anon key).
-- [ ] `SUPABASE_SERVICE_ROLE_KEY`, `IP_HASH_SALT`, `MANAGE_CODE_SALT`, `CRON_SECRET` are set in Vercel for Production, marked Sensitive. The two salts are at least 32 characters (production refuses to run without).
-- [ ] Salts are long random text, not the example values.
+- [ ] `SUPABASE_SERVICE_ROLE_KEY`, `IP_HASH_SALT`, `CRON_SECRET` are set in Vercel for Production, marked Sensitive. `IP_HASH_SALT` is at least 32 characters (production refuses writes without).
+- [ ] The salt is long random text, not the example value. (`MANAGE_CODE_SALT` can be deleted.)
 - [ ] `.env.local` is not tracked by git; `git status` is clean of secrets.
 - [ ] Redeployed after every change to variables.
 - [ ] SMTP key is only in Supabase, not in the repo.
 - [ ] Secret scanning is on in GitHub.
-- [ ] You know the rotation steps (section 8) and `MANAGE_CODE_SALT` is never changed casually.
+- [ ] You know the rotation steps (section 8).
+- [ ] Migration 005 ran in Supabase **before** the new site version was deployed (`docs/LOGIN-SETUP.md`, section 0).
 
 ## New-style Supabase keys (publishable and secret)
 

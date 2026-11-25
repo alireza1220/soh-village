@@ -48,9 +48,9 @@ export function sniffKind(name: string, type: string): "image" | "no" {
 
 // ---- browser part ----
 
-type Decoded = { source: CanvasImageSource; width: number; height: number; close: () => void };
+export type Decoded = { source: CanvasImageSource; width: number; height: number; close: () => void };
 
-async function decode(file: File): Promise<Decoded> {
+export async function decode(file: File): Promise<Decoded> {
   if (typeof createImageBitmap === "function") {
     let bmp: ImageBitmap | null = null;
     try {
@@ -75,7 +75,7 @@ async function decode(file: File): Promise<Decoded> {
   }
 }
 
-function toBlob(canvas: HTMLCanvasElement, type: string, quality: number): Promise<Blob | null> {
+export function toBlob(canvas: HTMLCanvasElement, type: string, quality: number): Promise<Blob | null> {
   return new Promise((resolve) => {
     try { canvas.toBlob((b) => resolve(b), type, quality); } catch { resolve(null); }
   });
@@ -99,7 +99,7 @@ const free = (c: HTMLCanvasElement) => { c.width = 0; c.height = 0; };
 
 /** Finds out once whether this browser really writes WebP (Safari silently gives PNG/JPEG instead). */
 let webpOk: boolean | null = null;
-async function canWebp(): Promise<boolean> {
+export async function canWebp(): Promise<boolean> {
   if (webpOk !== null) return webpOk;
   const c = document.createElement("canvas");
   c.width = c.height = 2;

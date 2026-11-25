@@ -12,9 +12,9 @@ export function bannerPhoto(section: string): Photo | undefined {
 }
 
 // Inner-page banner: background photo under a deep-teal gradient (set in globals.css), breadcrumb, h1, intro, photo credit.
-export function PageBanner({ lang, title, intro, crumbs, photo, illustration }: { lang: Locale; title: string; intro?: string; crumbs: Crumb[]; photo?: Photo; illustration?: Illustration }) {
+export function PageBanner({ lang, title, intro, crumbs, photo, illustration, compact }: { lang: Locale; title: string; intro?: string; crumbs: Crumb[]; photo?: Photo; illustration?: Illustration; compact?: boolean }) {
   return (
-    <header className="page-banner pg-banner">
+    <header className={`page-banner pg-banner${compact ? " page-banner--compact" : ""}`}>
       {!photo && illustration && (
         <>
           <div className="page-banner__bg">

@@ -1,10 +1,11 @@
 import { connection } from "next/server";
 import { orphansOf, objectFilesOf } from "@/lib/listing-actions";
+import { AVATAR_BUCKET } from "@/lib/profile";
 import { listObjects, removeObjects } from "@/lib/storage";
 import { publicSupabase, serverSupabase, keyHeaders } from "@/lib/supabase";
 
 // Called once a day by Vercel Cron (vercel.json) so the free Supabase project is not paused for inactivity.
-// Also tidies old data: rate log older than 2 days, and personal fields of listings removed more than 30 days ago.
+// Also tidies old data: rate log older than 6 hours, and personal fields of listings removed more than 30 days ago.
 export async function GET(req: Request) {
   await connection(); // always run at request time, never prerender
   const secret = process.env.CRON_SECRET;
@@ -16,13 +17,14 @@ export async function GET(req: Request) {
     const r = await fetch(`${pub.url}/rest/v1/public_listings?select=id&limit=1`, { headers: keyHeaders(pub.anon) });
     if (sb) {
       const h = { ...keyHeaders(sb.key), "Content-Type": "application/json", Prefer: "return=minimal" };
-      const twoDays = new Date(Date.now() - 2 * 86_400_000).toISOString();
+      const sixHours = new Date(Date.now() - 6 * 3_600_000).toISOString(); // the rate window is 1 hour; keep 6
       const month = new Date(Date.now() - 30 * 86_400_000).toISOString();
-      await fetch(`${sb.url}/rest/v1/rate_events?created_at=lt.${encodeURIComponent(twoDays)}`, { method: "DELETE", headers: h }).catch(() => {});
-      await fetch(`${sb.url}/rest/v1/listings?status=eq.removed&updated_at=lt.${encodeURIComponent(month)}&or=(contact_value.not.is.null,poster_name.not.is.null,ip_hash.not.is.null,manage_hash.not.is.null)`, {
-        method: "PATCH", headers: h, body: JSON.stringify({ contact_value: null, poster_name: null, ip_hash: null, manage_hash: null }),
+      await fetch(`${sb.url}/rest/v1/rate_events?created_at=lt.${encodeURIComponent(sixHours)}`, { method: "DELETE", headers: h }).catch(() => {});
+      await fetch(`${sb.url}/rest/v1/listings?status=eq.removed&updated_at=lt.${encodeURIComponent(month)}&or=(contact_value.not.is.null,ip_hash.not.is.null)`, {
+        method: "PATCH", headers: h, body: JSON.stringify({ contact_value: null, ip_hash: null }),
       }).catch(() => {});
       await sweepImages(sb, h).catch(() => {});
+      await sweepAvatars(sb, h).catch(() => {});
     }
     return Response.json({ ok: r.ok });
   } catch {
@@ -69,5 +71,24 @@ async function sweepImages(sb: Sb, h: Record<string, string>) {
         }).catch(() => {});
       }
     }
+  }
+}
+
+// Avatar clean-up, at most 30 folders per run: folders of users with no profile row (account deleted, or a picture picked but the
+// profile never saved) whose files are all older than a day are removed. Folders of users with a profile are left to /api/profile.
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+async function sweepAvatars(sb: Sb, h: Record<string, string>) {
+  const top = await listObjects(sb, "", AVATAR_BUCKET);
+  if (!top) return;
+  const folders = shuffle(top.filter((o) => UUID.test(o.name))).slice(0, 30).map((o) => o.name);
+  if (!folders.length) return;
+  const res = await fetch(`${sb.url}/rest/v1/profiles?select=user_id&user_id=in.(${folders.join(",")})`, { headers: h, cache: "no-store" });
+  if (!res.ok) return;
+  const have = new Set(((await res.json()) as { user_id: string }[]).map((r) => r.user_id));
+  for (const id of folders) {
+    if (have.has(id)) continue;
+    const files = await listObjects(sb, id, AVATAR_BUCKET);
+    if (!files?.length || files.some((f) => f.ageMs === null || f.ageMs < 86_400_000)) continue;
+    await removeObjects(sb, files.map((f) => `${id}/${f.name}`), AVATAR_BUCKET);
   }
 }

@@ -16,6 +16,14 @@
 [data-cat="dairy"] { --mk-c: var(--mk-dairy); } [data-cat="crafts"] { --mk-c: var(--mk-crafts); } [data-cat="garden"] { --mk-c: var(--mk-garden); }
 [data-cat="labour"] { --mk-c: var(--mk-labour); } [data-cat="building"] { --mk-c: var(--mk-building); } [data-cat="driving"] { --mk-c: var(--mk-driving); }
 [data-cat="other"] { --mk-c: var(--mk-other); }
+/* Careers, requests and property categories reuse the same tints */
+[data-cat="farm"], [data-cat="orchard"], [data-cat="farmland"] { --mk-c: var(--mk-garden); }
+[data-cat="craft"] { --mk-c: var(--mk-crafts); }
+[data-cat="tourism"], [data-cat="guide"], [data-cat="transport"], [data-cat="house"] { --mk-c: var(--mk-driving); }
+[data-cat="repair"], [data-cat="plot"], [data-cat="shop"] { --mk-c: var(--mk-building); }
+[data-cat="remote"], [data-cat="help"] { --mk-c: var(--mk-dairy); }
+[data-cat="stay"] { --mk-c: var(--mk-bread); }
+[data-cat="food"] { --mk-c: var(--mk-nuts); }
 
 .mkb { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 .mkb *, .mkb-modal * { box-sizing: border-box; }
@@ -73,6 +81,7 @@
 
 .mkb-cats { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 4px 0 8px; }
 .mkb-cats__sep { display: none; }
+@media (max-width: 639px) { .mkb-cats { flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x proximity; padding-block-end: 12px; } }
 .mkb-cats .mkb-toggle { flex: none; scroll-snap-align: start; white-space: nowrap; }
 .mkb-cat { flex: none; scroll-snap-align: start; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 16px; border: 1px solid var(--line); border-radius: var(--radius-pill); background: var(--surface); color: var(--ink); font-size: 16px; font-weight: 600; white-space: nowrap; transition: background-color .15s, border-color .15s, transform .15s; }
 .mkb-cat .mkb-i { color: var(--mk-c, var(--action)); }
@@ -110,7 +119,8 @@
 .mkb-price--ask { font-size: 16px; font-weight: 600; color: var(--muted); }
 .mkb-price--big { font-size: 28px; }
 .mkb-price--big.mkb-price--ask { font-size: 20px; }
-.mkb-meta { margin: 0; font-size: 16px; color: var(--muted); overflow-wrap: anywhere; }
+.mkb-meta { display: flex; flex-wrap: wrap; column-gap: 0; margin: 0; font-size: 16px; color: var(--muted); overflow-wrap: anywhere; }
+.mkb-meta__i:not(:last-child)::after { content: "\00B7"; margin-inline: 6px; }
 .mkb-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 0; }
 .mkb-tag { display: inline-flex; align-items: center; gap: 5px; min-height: 28px; padding: 0 11px; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--mk-c, var(--action)) 16%, var(--surface)); color: var(--ink); font-size: 14px; font-weight: 600; }
 .mkb-tag .mkb-i { color: color-mix(in srgb, var(--mk-c) 75%, var(--ink)); }

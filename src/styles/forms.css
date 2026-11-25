@@ -1,0 +1,62 @@
+/* Gates, posting form pieces, My ads header and the header account control (prefixes gate-, frm-, myads-, acct-).
+   Tokens only; logical properties; 44px targets. */
+
+/* Gate card: "log in to post" / "one more step" */
+.gate-card { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; padding: 24px; background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--turq); }
+@media (min-width: 768px) { .gate-card { padding: 32px 40px; } }
+.gate-card h3 { margin: 0; font-size: 22px; line-height: 1.3; }
+.gate-card p { margin: 0; color: var(--text); font-size: 16px; }
+.gate-card .btn { min-block-size: 44px; }
+.gate-quiet { margin: 0; min-block-size: 44px; color: var(--muted); }
+
+/* Listing form */
+.frm-as { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0; font-size: 15px; color: var(--muted); }
+.frm-as b { color: var(--ink); }
+.frm-contact { display: flex; flex-direction: column; gap: 12px; padding: 16px; background: var(--mist); border: 1px solid var(--line); }
+.frm-contact__private { margin: 0; font-size: 14px; color: var(--muted); }
+.frm-contact__fields { display: grid; gap: 16px; grid-template-columns: 1fr; }
+@media (min-width: 640px) { .frm-contact__fields { grid-template-columns: 1fr 2fr; } }
+.frm-done { display: flex; flex-direction: column; gap: 16px; padding: 24px; background: var(--surface); border: 1px solid var(--line); border-inline-start: 4px solid var(--action); }
+.frm-done p { margin: 0; }
+.frm-sub { margin: 0; font-size: 14px; color: var(--muted); }
+.frm-chip-board { background: var(--mist); }
+
+/* My ads */
+.myads-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 16px; }
+.myads-who { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.myads-who b { display: block; color: var(--ink); overflow-wrap: anywhere; }
+.myads-who .link { display: inline-flex; align-items: center; min-block-size: 44px; font-size: 14px; }
+.myads-post { display: flex; flex-direction: column; gap: 8px; padding: 16px; background: var(--mist); border: 1px solid var(--line); }
+.myads-post h2 { margin: 0; font-size: 16px; color: var(--ink); }
+.myads-post ul { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
+.myads-post .btn { min-block-size: 44px; }
+
+/* Header account control */
+.acct { display: inline-flex; align-items: center; gap: 4px; }
+.acct__who { display: inline-flex; align-items: center; gap: 8px; max-inline-size: 190px; }
+.acct__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acct__out { background: transparent; border: 0; font: inherit; cursor: pointer; }
+@media (max-width: 639px) { .acct:not(.acct--drawer) .acct__my { display: none; } .acct:not(.acct--drawer) .acct__who { max-inline-size: 110px; } }
+.acct--drawer { flex-direction: column; align-items: stretch; gap: 4px; }
+.acct--drawer .ut-link { min-block-size: 44px; }
+.acct a:focus-visible, .acct button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .gate-card, .frm-contact { transition: none; } }
+
+/* Gate: two choices side by side, wrapping on phones */
+.gate-card__btns { display: flex; flex-wrap: wrap; gap: 12px; }
+
+/* One frame only: inside the page's posting section the gate and the form drop their own card (no card inside a card) */
+.pg-form .gate-card, .pg-form .mk-form, .pg-form .frm-done { padding: 0; background: transparent; border: 0; }
+.pg-form .frm-done { border-inline-start: 0; }
+@media (max-width: 519px) { .pg-form { padding: 16px; } }
+
+/* Header "Log in": a visible button-like link, not a small word */
+.acct__login { display: inline-flex; align-items: center; justify-content: center; min-block-size: 36px; padding-inline: 16px; border: 1px solid currentColor; font-weight: 700; }
+.acct__login:hover { background: var(--panel-2); }
+.acct__login:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* My ads: quiet delete, no jargon; the focus target after a delete */
+.myads-focus:focus { outline: none; }
+.btn--quiet-danger { background: transparent; color: var(--ink); border: 1px solid var(--field-line); }
+.btn--quiet-danger:hover { background: var(--mist); }
+.mk-actions .btn--quiet-danger { margin-inline-start: auto; }

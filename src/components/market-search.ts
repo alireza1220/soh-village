@@ -1,6 +1,7 @@
 // Client-side search for the market board. Persian-aware: Arabic letter forms, digits, ZWNJ, tatweel and diacritics are
 // normalised on both sides, every word must match (AND), a word may match the start or middle of a word, and one typo is tolerated.
-import { CATEGORY_SHORT, LISTING_CATEGORIES, LISTING_TYPE_LABELS, type Listing } from "@/lib/market";
+import { categoryLabel, typeLabel } from "@/lib/boards";
+import type { Listing } from "@/lib/market";
 
 const DROP = /[‌‍‎‏ـً-ٰٟۖ-ۭ]/;
 
@@ -42,10 +43,12 @@ function lev1(a: string, b: string) {
 export type Indexed = { l: Listing; text: string; words: string[] };
 
 export function indexListing(l: Listing): Indexed {
-  const cat = LISTING_CATEGORIES.find((c) => c.v === l.category);
-  const short = CATEGORY_SHORT[l.category];
-  const type = LISTING_TYPE_LABELS.find((t) => t.v === l.type);
-  const raw = [l.title, l.details, l.area, l.quantity, l.price, l.available, cat?.fa, cat?.en, short?.fa, short?.en, type?.fa, type?.en].filter(Boolean).join(" \n ");
+  // Both languages, so a Persian label finds an English-reading visitor's ad and the other way round.
+  const raw = [
+    l.title, l.details, l.area, l.quantity, l.price, l.available, l.poster?.firstName,
+    categoryLabel(l.board, l.category, "fa"), categoryLabel(l.board, l.category, "en"), categoryLabel(l.board, l.category, "fa", true), categoryLabel(l.board, l.category, "en", true),
+    typeLabel(l.board, l.type, "fa"), typeLabel(l.board, l.type, "en"),
+  ].filter(Boolean).join(" \n ");
   const text = norm(raw);
   return { l, text, words: text.split(/[^\p{L}\p{N}]+/u).filter(Boolean) };
 }
