@@ -122,7 +122,8 @@ async function rest(req, res, url) {
   if (!isView && !["listings", "rate_events"].includes(table)) return send(res, 404, { message: "no such table" });
   if (isView) {
     if (![SVC, ANON].includes(key)) return send(res, 401, { message: "Invalid API key" });
-  } else if (key !== SVC || bearer !== SVC) {
+  } else if (key !== SVC || (bearer !== "" && bearer !== SVC)) {
+    // New-style keys (not JWTs) arrive in the apikey header only; legacy keys also send a matching bearer.
     // Base tables are locked for anon: behave like RLS + revoke.
     return send(res, key === ANON ? 401 : 401, { message: "permission denied for table " + table });
   }

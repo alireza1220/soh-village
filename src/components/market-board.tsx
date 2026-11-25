@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Locale } from "@/lib/i18n";
 import { LISTING_CATEGORIES, LISTING_TYPE_LABELS, LISTING_TYPES, listings as localListings, type Listing, type ListingType } from "@/lib/market";
-import { publicSupabase } from "@/lib/supabase";
+import { keyHeaders, publicSupabase } from "@/lib/supabase";
 
 const T = {
   all: { fa: "همه", en: "All" },
@@ -31,7 +31,7 @@ export function MarketBoard({ lang }: { lang: Locale }) {
     const sb = publicSupabase();
     if (!sb) return;
     let cancelled = false;
-    fetch(`${sb.url}/rest/v1/public_listings?select=*&order=created_at.desc&limit=200`, { headers: { apikey: sb.anon, Authorization: `Bearer ${sb.anon}` } })
+    fetch(`${sb.url}/rest/v1/public_listings?select=*&order=created_at.desc&limit=200`, { headers: keyHeaders(sb.anon) })
       .then((r) => (r.ok ? r.json() : []))
       .then((rows: Record<string, string | null>[]) => {
         if (cancelled) return;

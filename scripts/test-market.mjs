@@ -479,7 +479,7 @@ async function scenarioNotConfigured() {
   const html = await login.text();
   check("not_configured: login page renders 200 with 'not available' note", login.status === 200 && /not available/i.test(html), `${login.status} ${/not available/i.test(html)}`);
   const home = await (await fetch(P + "/en")).text();
-  check("not_configured: header shows no Log in link", !/>\s*Log in\s*</i.test(home) && !/\/en\/login/.test(home), "login link present while Supabase is not configured");
+  check("not_configured: header keeps the Log in link (the login page explains)", /\/en\/login/.test(home), "login link missing from the header");
   try { process.kill(-p.pid, "SIGTERM"); } catch {}
 }
 
