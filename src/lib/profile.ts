@@ -46,7 +46,11 @@ export type Profile = {
   avatar: string | null;
   /** show my first name and avatar on my public ads (default true). The family name and the phone are never public. */
   showOnAds: boolean;
+  /** "admin" only when an owner set profiles.role = 'admin' in Supabase. Read-only for the site: no route ever writes it. */
+  role: Role;
 };
+
+export type Role = "user" | "admin";
 
 /** Columns of public.profiles that the server writes (snake_case). */
 export type ProfileRowPatch = {
@@ -65,6 +69,7 @@ export function profileFromRow(row: Record<string, unknown>): Profile {
     phone: String(row.phone ?? ""),
     avatar: isAvatarName(row.avatar) ? row.avatar : null,
     showOnAds: row.show_on_ads !== false,
+    role: row.role === "admin" ? "admin" : "user",
   };
 }
 

@@ -1,0 +1,89 @@
+/* Admin area (prefix adm-). Tokens only; logical properties; 44px touch targets. */
+.adm { display: flex; flex-direction: column; gap: 20px; }
+.adm-stack { display: flex; flex-direction: column; gap: 20px; }
+.adm-quiet { margin: 0; color: var(--muted); font-size: 14.5px; }
+.adm-h { margin: 0; font-size: 20px; color: var(--ink); }
+.adm-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.adm-row .btn, .adm-inline .btn, .adm-stack .btn { min-block-size: 44px; }
+.adm-end { margin-inline-start: auto; }
+.adm-inline { display: flex; gap: 8px; }
+.adm-inline .input { flex: 1; min-inline-size: 0; }
+.adm .input, .adm .select, .adm .textarea { min-block-size: 44px; }
+
+/* Tabs */
+.adm-tabs { display: flex; gap: 2px; overflow-x: auto; border-bottom: 2px solid var(--line); }
+.adm-tab { flex: none; min-block-size: 48px; padding: 0 18px; background: var(--panel); color: var(--on-panel); border: 0; font: inherit; font-weight: 600; font-size: 15px; cursor: pointer; transition: background-color .15s; }
+.adm-tab:hover { background: var(--panel-2); }
+.adm-tab[aria-selected="true"] { background: var(--action); color: var(--on-action); box-shadow: inset 0 -3px 0 var(--turq); }
+.adm-tab:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
+.adm-panel:focus { outline: none; }
+
+/* Overview */
+.adm-pending { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 20px; background: var(--surface); border: 1px solid var(--line); border-inline-start: 4px solid var(--line); }
+.adm-pending--on { background: var(--mist); border-inline-start-color: var(--amber); }
+.adm-pending h2 { margin: 0; font-size: 18px; }
+.adm-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.adm-stat { display: flex; flex-direction: column; gap: 2px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--turq); }
+.adm-stat__n { font-size: 30px; font-weight: 700; line-height: 1.1; color: var(--ink); }
+.adm-stat__l { font-size: 14px; color: var(--muted); }
+
+/* Filters */
+.adm-filters { display: grid; grid-template-columns: 1fr; gap: 12px; }
+@media (min-width: 720px) { .adm-filters { grid-template-columns: 180px 180px 1fr; align-items: end; } }
+
+/* Cards */
+.adm-list { display: grid; grid-template-columns: 1fr; gap: 14px; margin: 0; padding: 0; list-style: none; }
+@media (min-width: 900px) { .adm-list { grid-template-columns: 1fr 1fr; } }
+.adm-card { display: flex; flex-direction: column; gap: 10px; min-inline-size: 0; padding: 16px; background: var(--surface); border: 1px solid var(--line); border-inline-start: 4px solid var(--line); }
+.adm-card[data-status="pending"] { border-inline-start-color: var(--amber); }
+.adm-card[data-status="approved"] { border-inline-start-color: var(--action); }
+.adm-card[data-status="removed"] { border-inline-start-color: var(--muted); background: var(--mist); }
+.adm-card__top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.adm-card__title { margin: 0; font-size: 18px; line-height: 1.4; overflow-wrap: anywhere; }
+.adm-facts { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0; font-size: 14.5px; }
+.adm-details { margin: 0; font-size: 14.5px; white-space: pre-line; overflow-wrap: anywhere; }
+.adm-meta { display: flex; flex-direction: column; gap: 2px; margin: 0; font-size: 13.5px; color: var(--muted); }
+.adm-phone { unicode-bidi: isolate; }
+.adm-thumbs { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.adm-thumbs a { display: block; border: 1px solid var(--line); }
+.adm-thumbs a:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.adm-thumbs img { display: block; inline-size: 72px; block-size: 72px; object-fit: cover; }
+.adm-user { gap: 6px; }
+.adm-user b { margin-inline-end: 8px; }
+
+/* Badges */
+.adm-badge { display: inline-flex; align-items: center; min-block-size: 24px; padding: 0 10px; font-size: 13px; font-weight: 700; border: 1px solid var(--line); background: var(--mist); color: var(--ink); }
+.adm-badge--pending { color: var(--amber); border-color: var(--amber); }
+.adm-badge--approved { background: var(--action); color: var(--on-action); border-color: var(--action); }
+.adm-badge--rejected, .adm-badge--removed { background: var(--surface); color: var(--apple); border-color: var(--apple); }
+
+/* Dialog */
+.adm-dialog { max-inline-size: min(440px, calc(100vw - 32px)); padding: 24px; background: var(--surface); color: var(--text); border: 1px solid var(--line); border-top: 3px solid var(--turq); }
+.adm-dialog::backdrop { background: color-mix(in srgb, var(--scrim) 60%, transparent); }
+.adm-dialog h3 { margin: 0 0 8px; font-size: 20px; }
+.adm-dialog p { margin: 0 0 16px; }
+
+/* Post editor */
+.adm-editor { display: flex; flex-direction: column; gap: 16px; }
+.adm-editor__meta { display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media (min-width: 720px) { .adm-editor__meta { grid-template-columns: repeat(3, 1fr); align-items: start; } }
+.adm-langs { display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media (min-width: 900px) { .adm-langs { grid-template-columns: 1fr 1fr; } }
+.adm-lang { display: flex; flex-direction: column; gap: 14px; min-inline-size: 0; margin: 0; padding: 16px; border: 1px solid var(--line); background: var(--surface); }
+.adm-lang legend { padding-inline: 6px; font-weight: 700; color: var(--ink); }
+.adm-lang .textarea { resize: vertical; line-height: 1.7; }
+.adm-msg { margin: 0; min-block-size: 1.4em; font-weight: 600; color: var(--accent-text); }
+.adm-msg--bad { color: var(--apple); }
+
+/* Switch */
+.adm-switch { display: inline-flex; align-items: center; gap: 12px; min-block-size: 44px; cursor: pointer; font-weight: 600; position: relative; }
+.adm-switch input { position: absolute; inset-inline-start: 0; inline-size: 44px; block-size: 44px; margin: 0; opacity: 0; cursor: pointer; }
+.adm-switch__track { position: relative; flex: none; inline-size: 44px; block-size: 24px; background: var(--field-line); transition: background-color .15s; }
+.adm-switch__track::after { content: ""; position: absolute; inset-block-start: 3px; inset-inline-start: 3px; inline-size: 18px; block-size: 18px; background: var(--white); transition: inset-inline-start .15s; }
+.adm-switch input:checked + .adm-switch__track { background: var(--action); }
+.adm-switch input:checked + .adm-switch__track::after { inset-inline-start: 23px; }
+.adm-switch input:focus-visible + .adm-switch__track { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .adm-tab, .adm-switch__track, .adm-switch__track::after { transition: none; }
+}

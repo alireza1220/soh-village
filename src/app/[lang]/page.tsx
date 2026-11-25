@@ -2,12 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import "@/styles/home.css";
+import "@/styles/news.css";
 import { Credit } from "@/components/credit";
 import { HeroSlideshow, type HeroSlide } from "@/components/home/hero-slideshow";
 import { MarketTeaser } from "@/components/home/market-teaser";
 import { YearList } from "@/components/home/year-list";
 import { Arrow } from "@/components/icons";
 import { VillageMap } from "@/components/map";
+import { HomeNews } from "@/components/news/home-news";
 import { SectionMark } from "@/components/section-mark";
 import {
   entriesLabel, entryCount, findCard, hc, heroFiles, photoOf, planCards, statusLabel, yearRows,
@@ -151,6 +153,9 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
           <Link href={href("tourism")} className="link-arrow">{hc.planViewAll[lang]} <Arrow /></Link>
         </div>
       </section>
+
+      {/* NEWS AND EVENTS (renders nothing when nothing is published) */}
+      <HomeNews lang={lang} />
 
       {/* VILLAGE YEAR */}
       <section className="section section--mist" aria-labelledby="hm-year-title">

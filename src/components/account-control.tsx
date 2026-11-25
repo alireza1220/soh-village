@@ -14,6 +14,7 @@ const T = {
   my: { fa: "آگهی‌های من", en: "My ads" },
   profile: { fa: "مشخصات من", en: "My profile" },
   out: { fa: "خروج", en: "Log out" },
+  admin: { fa: "مدیریت", en: "Admin" },
 };
 
 /** Header / drawer account control. Logged out: "Log in". Logged in: avatar + first name (-> profile) and "My ads". */
@@ -33,6 +34,7 @@ export function AccountControl({ lang, className = "ut-link", variant = "bar" }:
         <bdi className="acct__name">{name}</bdi>
       </Link>
       <Link href={`/${lang}/my`} className={`${className} acct__my`}>{T.my[lang]}</Link>
+      {profile?.role === "admin" && <Link href={`/${lang}/admin`} className={`${className} acct__admin`}>{T.admin[lang]}</Link>}
       {variant === "drawer" && <button type="button" className={`${className} acct__out`} onClick={() => void signOut()}>{T.out[lang]}</button>}
     </span>
   );

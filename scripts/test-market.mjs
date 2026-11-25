@@ -328,7 +328,7 @@ async function scenarioProfile() {
 
   const r1 = await save(U, { firstName: "  Ali   Reza ", familyName: "Rezaei", phone: "09121234567", junk: "ignored", userId: "x", user_id: "y" });
   check("create: saved, 200 ok, names trimmed and collapsed", r1.status === 200 && r1.data.ok === true && r1.data.profile?.firstName === "Ali Reza", JSON.stringify(r1));
-  check("create: Profile shape {firstName, familyName, phone, avatar, showOnAds}", JSON.stringify(Object.keys(r1.data.profile ?? {}).sort()) === JSON.stringify(["avatar", "familyName", "firstName", "phone", "showOnAds"]) && r1.data.profile.avatar === null && r1.data.profile.showOnAds === true, JSON.stringify(r1.data));
+  check("create: Profile shape {firstName, familyName, phone, avatar, showOnAds}", JSON.stringify(Object.keys(r1.data.profile ?? {}).sort()) === JSON.stringify(["avatar","familyName","firstName","phone","role","showOnAds"]) && r1.data.profile.avatar === null && r1.data.profile.showOnAds === true, JSON.stringify(r1.data));
   const row = await profileRow(U.id);
   check("create: row belongs to the VERIFIED user (user_id from the token, not the body)", row?.user_id === U.id && row.show_on_ads === true && row.avatar === null, JSON.stringify(row));
   const long = await save(U, { firstName: "x".repeat(60) });

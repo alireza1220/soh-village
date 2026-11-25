@@ -73,6 +73,9 @@ Three small stylesheets, each imported only by the components that use it (token
 - `.brd-myads`: the small "my ads" link above a board's list.
 - Lists of careers / needs / property rows reuse the market card and detail classes (`.mk-*` in `market-board.css`), so photos, filters and the detail layer look the same on every board.
 
+### `src/styles/news.css` (prefix `nw-`): news, blog posts and events
+Public side of admin posts: `/[lang]/news` (filter chips, upcoming events with a calendar date block, expandable plain-text cards, `#post=<uuid>` deep link) and the home section `HomeNews` (renders nothing when no posts are published). Data comes from `use-live-posts.ts` (view `public_posts`). Tokens only.
+
 ## RTL rules
 `<html dir>` follows the route. Use logical properties only: `margin-inline`, `padding-inline`, `inset-inline-start/end`, `border-inline-*`, `text-align: start`; Tailwind `ms- me- ps- pe- start- end-`. Arrows and end chevrons use `.icon-arrow` / `.icon-chevron-end` and flip in RTL by CSS. The hanging emblem sits at the inline start. Numbers, URLs and Latin tokens inside Persian text get `dir="ltr"`. Inline Persian in English pages needs `lang="fa"`. Persian never gets uppercase or letter-spacing.
 

@@ -151,3 +151,14 @@ export async function requireProfile(sb: Sb, userId: string): Promise<Profile | 
   if (!p) return json({ error: "profile_required" }, 403);
   return p;
 }
+
+// Admin gate for every /api/admin/* route: the normal login gate (kind "admin"), then the role is read from the database
+// (never from the request). 403 forbidden for a valid user who is not an admin. Returns the verified admin or a Response.
+export async function requireAdmin(req: Request, sb: Sb): Promise<AuthOk | Response> {
+  const auth = await authenticate(req, sb, "admin");
+  if (auth instanceof Response) return auth;
+  const p = await loadProfile(sb, auth.user.id);
+  if (p === "error") return json({ error: "store_failed" }, 502);
+  if (!p || p.role !== "admin") return json({ error: "forbidden" }, 403);
+  return auth;
+}

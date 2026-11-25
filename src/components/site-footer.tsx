@@ -37,6 +37,7 @@ export function SiteFooter({ lang }: { lang: Locale }) {
         <div className="wrap site-footer__bottom-inner">
           <p>{ui.draft[lang]}</p>
           <ul>
+            <li><Link href={`/${lang}/news`}>{ui.news[lang]}</Link></li>
             <li><Link href={`/${lang}/credits`}>{ui.credits[lang]}</Link></li>
             <li><Link href={`/${lang}/contribute`}>{ui.contribute[lang]}</Link></li>
             <li><Link href={`/${lang}/my`}>{ui.my[lang]}</Link></li>

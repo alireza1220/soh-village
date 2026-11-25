@@ -165,6 +165,14 @@ const guidePages: { path: string; title: L; text: L }[] = [
     text: join([contact.note]),
   },
   {
+    path: "news",
+    title: { fa: "خبر و رویداد", en: "News & events" },
+    text: {
+      fa: "خبرها، نوشته‌ها و رویدادهای پیش‌روی سُه، با تاریخ و مکان.",
+      en: "News, blog posts and upcoming events from Soh, with dates and places.",
+    },
+  },
+  {
     path: "my",
     title: { fa: "آگهی‌های من", en: "My ads" },
     text: {

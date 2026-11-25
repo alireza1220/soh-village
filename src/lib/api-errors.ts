@@ -16,6 +16,14 @@ export const API_ERRORS = {
   not_configured: { fa: "این بخش هنوز فعال نیست.", en: "This feature is not available yet." },
   store_failed: { fa: "ذخیره نشد. کمی بعد دوباره امتحان کنید.", en: "Could not save. Try again in a little while." },
   network: { fa: "اتصال برقرار نشد. اینترنت را بررسی کنید.", en: "Could not connect. Check your internet." },
+  forbidden: { fa: "این بخش فقط برای مدیران است.", en: "This area is for admins only." },
+  // ---- admin ----
+  bad_action: { fa: "این کار شناخته نشد.", en: "That action is not known." },
+  bad_status: { fa: "وضعیت درست نیست.", en: "That status is not valid." },
+  bad_kind: { fa: "نوع مطلب را انتخاب کنید (خبر، یادداشت یا رویداد).", en: "Pick the kind of post (news, blog or event)." },
+  bad_date: { fa: "تاریخ و ساعت درست نیست.", en: "That date and time are not valid." },
+  event_date_required: { fa: "برای رویداد، تاریخ و ساعت را بنویسید.", en: "An event needs a date and time." },
+  too_long: { fa: "متن از حد مجاز بلندتر است.", en: "That text is longer than allowed." },
   // ---- listing fields ----
   bad_board: { fa: "این بخش درست نیست.", en: "That section is not valid." },
   bad_type: { fa: "نوع آگهی را انتخاب کنید.", en: "Pick the type of ad." },

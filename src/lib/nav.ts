@@ -4,11 +4,12 @@ import { sectionBySlug } from "./site";
 // Header and footer navigation data (bilingual). Add or move a link here and the header mega-menu,
 // the mobile drawer and the footer columns all follow.
 //   slug  : a section from site.ts (label comes from its title) or a standalone route
-//   label : only for standalone routes (photos, map, references, credits, contribute, my)
+//   label : only for standalone routes (news, photos, map, references, credits, contribute, my)
 export type NavDef = { slug: string; label?: L };
 export type NavGroupDef = { id: string; label: L; description: L; items: NavDef[] };
 
 const routeLabels: Record<string, L> = {
+  news: { fa: "خبر و رویداد", en: "News & events" },
   photos: { fa: "عکس‌ها و ویدیوها", en: "Photos and videos" },
   map: { fa: "نقشه", en: "Map" },
   references: { fa: "راهنما و منابع", en: "Guide and sources" },
@@ -24,7 +25,7 @@ export const navGroups: NavGroupDef[] = [
     id: "explore",
     label: { fa: "کاوش", en: "Explore" },
     description: { fa: "تاریخ، مردم، آیین‌ها، عکس‌ها و ویدیوها.", en: "History, people, traditions, photos and videos." },
-    items: [{ slug: "history" }, { slug: "tourism" }, { slug: "people" }, { slug: "traditions" }, { slug: "photos" }, { slug: "map" }],
+    items: [{ slug: "news" }, { slug: "history" }, { slug: "tourism" }, { slug: "people" }, { slug: "traditions" }, { slug: "photos" }, { slug: "map" }],
   },
   {
     id: "plan",
@@ -77,6 +78,7 @@ export const ui = {
   footerAbout: { fa: "سایت جامعه‌ی روستای سُه، اصفهان.", en: "Community site for Soh village, Isfahan." },
   draft: { fa: "پیش‌نویس از منابع عمومی؛ برچسب‌ها اعتبار هر مطلب را نشان می‌دهند.", en: "Draft from public sources; labels show how well each fact is backed." },
   credits: { fa: "منبع عکس‌ها", en: "Photo credits" },
+  news: { fa: "خبر و رویداد", en: "News & events" },
   my: { fa: "آگهی‌های من", en: "My ads" },
   profile: { fa: "مشخصات من", en: "My profile" },
 } satisfies Record<string, L>;

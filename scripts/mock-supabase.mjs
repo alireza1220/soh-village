@@ -4,7 +4,8 @@
 // What it emulates (it is NOT the real database; review the SQL files by hand and try them once in the real SQL Editor):
 //   Auth     signup (Confirm email switchable), token grant_type=password and refresh_token, otp (magic link), recover, user GET/PUT.
 //            Tokens are "tok-<email>" and refresh tokens "ref-<email>", so test code can mint a session for any email without signing up.
-//   REST     tables listings, profiles, rate_events (service key only; the anon key gets 401) and the view public_listings (anon allowed).
+//   REST     tables listings, profiles (with role), posts, rate_events (service key only; the anon key gets 401) and the views public_listings + public_posts (anon allowed).
+//            Filters: eq neq gt gte lt lte in is like ilike and or=(...); order, limit, offset, Range, Prefer count=exact / return=representation.
 //            Unknown columns are refused like PostgREST does. Check constraints and the owner_id insert trigger are emulated.
 //   Storage  buckets "listing-images" (600 KB, webp/jpeg) and "avatars" (20 KB, webp/jpeg): signed upload, public GET, list, remove.
 // Admin helpers (GET, test only): /__admin/dump, seed, reset, clear-rate, approve, set, put-object, mkuser, link, set-confirm, confirm,
@@ -31,7 +32,7 @@ const SVC = "svc-key";
 const ANON = "anon-key";
 const DAY = 86_400_000;
 
-const db = { listings: [], rate_events: [], profiles: [] };
+const db = { listings: [], rate_events: [], profiles: [], posts: [] };
 let rateSeq = 0;
 const otpLog = []; // magic-link requests
 const mails = []; // every mail Supabase would have sent: { kind: "magiclink"|"signup"|"recovery", email, redirect_to, at }
@@ -41,11 +42,14 @@ const authState = { confirm: false, fail: null }; // confirm = "Confirm email" s
 // Columns that exist (an unknown column is a 400 in PostgREST, so a stale query shows up in tests).
 const COLUMNS = {
   listings: ["id", "board", "type", "category", "title", "quantity", "price", "area", "available", "details", "contact_kind", "contact_value", "contact_public", "ip_hash", "owner_id", "status", "renewals", "images", "created_at", "updated_at", "approved_at", "expires_at"],
-  profiles: ["user_id", "first_name", "family_name", "phone", "avatar", "show_on_ads", "created_at", "updated_at"],
+  profiles: ["user_id", "first_name", "family_name", "phone", "avatar", "show_on_ads", "role", "created_at", "updated_at"],
+  posts: ["id", "kind", "title_fa", "title_en", "body_fa", "body_en", "event_at", "place_fa", "place_en", "published", "published_at", "author_id", "created_at", "updated_at"],
   rate_events: ["id", "ip_hash", "user_id", "kind", "created_at"],
 };
 const PUBLIC_COLS = ["id", "type", "category", "title", "quantity", "price", "area", "available", "details", "contact_kind", "contact_value", "created_at", "expires_at", "images", "board", "poster_first_name", "poster_avatar"];
 COLUMNS.public_listings = PUBLIC_COLS;
+const PUBLIC_POST_COLS = ["id", "kind", "title_fa", "title_en", "body_fa", "body_en", "event_at", "place_fa", "place_en", "published_at", "created_at"];
+COLUMNS.public_posts = PUBLIC_POST_COLS; // the view: no author_id, no published flag, published rows only
 const TYPES = ["sell", "need", "service", "seeking", "hiring", "offer", "rent"];
 const BOARD_IDS = ["market", "careers", "needs", "property"];
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -90,8 +94,40 @@ function cmp(a, b) {
   return String(a) < String(b) ? -1 : String(a) > String(b) ? 1 : 0;
 }
 
+// PostgREST pattern ("*" = any text, "\\%" and "\\_" = literal) -> RegExp. Same rules Postgres applies to LIKE after PostgREST maps * to %.
+function likeRegex(pat, ci) {
+  let re = "";
+  for (let i = 0; i < pat.length; i++) {
+    const c = pat[i];
+    if (c === "\\" && i + 1 < pat.length) re += pat[++i].replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    else if (c === "*" || c === "%") re += "[\\s\\S]*";
+    else if (c === "_") re += "[\\s\\S]";
+    else re += c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+  return new RegExp("^" + re + "$", ci ? "i" : "");
+}
+// or=(a.ilike."*x*",b.eq.y): split on commas outside double quotes, unquote ("\\\"" and "\\\\" inside quotes), evaluate each part.
+function orMatches(row, expr) {
+  const inner = expr.replace(/^\(|\)$/g, "");
+  const parts = [];
+  let cur = "", q = false;
+  for (let i = 0; i < inner.length; i++) {
+    const c = inner[i];
+    if (q && c === "\\" && (inner[i + 1] === '"' || inner[i + 1] === "\\")) { cur += inner[++i]; continue; }
+    if (c === '"') { q = !q; continue; }
+    if (c === "," && !q) { parts.push(cur); cur = ""; continue; }
+    cur += c;
+  }
+  parts.push(cur);
+  return parts.some((p) => {
+    const d = p.indexOf(".");
+    return matches(row, [[p.slice(0, d), p.slice(d + 1)]]);
+  });
+}
+
 function matches(row, filters) {
   for (const [col, expr] of filters) {
+    if (col === "or") { if (!orMatches(row, expr)) return false; continue; }
     const dot = expr.indexOf(".");
     const op = expr.slice(0, dot);
     const val = expr.slice(dot + 1);
@@ -112,6 +148,8 @@ function matches(row, filters) {
       if (!(cmp(v, val) < 0)) return false;
     } else if (op === "in") {
       if (!val.replace(/^\(|\)$/g, "").split(",").includes(String(v))) return false;
+    } else if (op === "ilike" || op === "like") {
+      if (v == null || !likeRegex(val, op === "ilike").test(String(v))) return false;
     } else if (op === "is") {
       if (val === "null" ? v != null : v == null) return false;
     }
@@ -143,6 +181,10 @@ const publicView = () =>
       return Object.fromEntries(PUBLIC_COLS.map((c) => [c, row[c]]));
     });
 
+// public.public_posts: published rows only, explicit columns (no author_id, no published flag, no drafts).
+const postsView = () => db.posts.filter((r) => r.published === true).map((r) => Object.fromEntries(PUBLIC_POST_COLS.map((c) => [c, r[c] ?? null])));
+const VIEWS = { public_listings: publicView, public_posts: postsView };
+
 function project(rows, select) {
   if (!select || select === "*") return rows;
   const cols = select.split(",").map((s) => s.trim());
@@ -160,17 +202,31 @@ const validListing = (r) => {
   if (r.images !== undefined && (!Array.isArray(r.images) || r.images.length > 10)) return "images";
   return null;
 };
+// posts: the table's CHECKs (title lengths, at least one title, kind, event needs a date, body / place lengths).
+const validPost = (r) => {
+  if (!["news", "blog", "event"].includes(r.kind)) return "kind";
+  for (const k of ["title_fa", "title_en"]) if (typeof r[k] !== "string" || r[k].length > 140) return k;
+  for (const k of ["body_fa", "body_en"]) if (typeof r[k] !== "string" || r[k].length > 10000) return k;
+  for (const k of ["place_fa", "place_en"]) if (r[k] != null && (typeof r[k] !== "string" || r[k].length > 120)) return k;
+  if (!r.title_fa && !r.title_en) return "posts_has_title";
+  if (r.kind === "event" && !r.event_at) return "posts_event_needs_date";
+  if (r.event_at != null && Number.isNaN(Date.parse(r.event_at))) return "event_at";
+  if (typeof r.published !== "boolean") return "published";
+  if (r.author_id != null && !(typeof r.author_id === "string" && UUID_RE.test(r.author_id))) return "author_id";
+  return null;
+};
 const validProfile = (r) => {
   if (typeof r.user_id !== "string" || !UUID_RE.test(r.user_id)) return "user_id";
   for (const k of ["first_name", "family_name"]) if (typeof r[k] !== "string" || r[k].length < 1 || r[k].length > 40) return k;
   if (typeof r.phone !== "string" || !/^09[0-9]{9}$/.test(r.phone)) return "phone";
   if (r.avatar != null && !/^[a-z0-9]{10,16}\.(webp|jpg)$/.test(r.avatar)) return "avatar";
+  if (!["user", "admin"].includes(r.role)) return "role"; // profiles_role_check
   if (typeof r.show_on_ads !== "boolean") return "show_on_ads";
   return null;
 };
 
 function touchOnUpdate(table, oldRow, newRow) {
-  if (table === "listings" && newRow.status === "approved" && oldRow.status !== "approved") {
+  if (table === "listings" && newRow.status === "approved" && oldRow.status !== "approved" && oldRow.approved_at == null) {
     newRow.approved_at = new Date().toISOString();
     newRow.expires_at = new Date(Date.now() + 30 * DAY).toISOString();
   }
@@ -182,8 +238,8 @@ async function rest(req, res, url) {
   const table = url.pathname.replace("/rest/v1/", "");
   const key = req.headers["apikey"];
   const bearer = (req.headers["authorization"] || "").replace(/^Bearer\s+/i, "");
-  const isView = table === "public_listings";
-  if (!isView && !["listings", "rate_events", "profiles"].includes(table)) return send(res, 404, { message: "no such table" });
+  const isView = table in VIEWS;
+  if (!isView && !["listings", "rate_events", "profiles", "posts"].includes(table)) return send(res, 404, { message: "no such table" });
   if (isView) {
     if (![SVC, ANON].includes(key)) return send(res, 401, { message: "Invalid API key" });
   } else if (key !== SVC || (bearer !== "" && bearer !== SVC)) {
@@ -202,7 +258,7 @@ async function rest(req, res, url) {
     const sel = sp.get("select");
     const bad = unknown([...(sel && sel !== "*" ? sel.split(",").map((s) => s.trim()) : []), ...filters.map(([k]) => k).filter((k) => !["or", "and", "not"].includes(k)), ...(sp.get("order") ? [sp.get("order").split(".")[0]] : [])]);
     if (bad) return badCol(bad);
-    let rows = (isView ? publicView() : db[table]).filter((r) => matches(r, filters));
+    let rows = (isView ? VIEWS[table]() : db[table]).filter((r) => matches(r, filters));
     const order = sp.get("order");
     if (order) {
       const [col, dir] = order.split(".");
@@ -246,8 +302,17 @@ async function rest(req, res, url) {
         if (bad) return send(res, 400, { code: "23514", message: "check violation: " + bad });
         if (!row.owner_id) return send(res, 400, { code: "23502", message: "listings.owner_id is required: a listing belongs to a logged-in user" }); // listing_require_owner trigger
         out.push(row);
+      } else if (table === "posts") {
+        const row = {
+          title_fa: "", title_en: "", body_fa: "", body_en: "", event_at: null, place_fa: null, place_en: null, published: false, published_at: null, author_id: null,
+          ...Object.fromEntries(Object.entries(it).filter(([k]) => k !== "id")), id: randomUUID(), created_at: now, updated_at: now,
+        };
+        const bad = validPost(row);
+        if (bad) return send(res, 400, { code: "23514", message: "check violation: " + bad });
+        if (row.author_id && ![...users.values()].some((u) => u.id === row.author_id)) return send(res, 409, { code: "23503", message: "violates foreign key constraint: auth.users" });
+        out.push(row);
       } else if (table === "profiles") {
-        const row = { avatar: null, show_on_ads: true, created_at: now, updated_at: now, ...it };
+        const row = { avatar: null, show_on_ads: true, role: "user", created_at: now, updated_at: now, ...it };
         const bad = validProfile(row);
         if (bad) return send(res, 400, { code: bad === "user_id" || bad === "phone" || bad === "avatar" ? "23514" : "23514", message: "check violation: " + bad });
         if (![...users.values()].some((u) => u.id === row.user_id)) return send(res, 409, { code: "23503", message: "violates foreign key constraint: auth.users" });
@@ -279,7 +344,7 @@ async function rest(req, res, url) {
     const hit = db[table].filter((r) => matches(r, filters));
     for (const r of hit) {
       const merged = { ...r, ...body };
-      const bad = table === "listings" ? validListing(merged) : table === "profiles" ? validProfile(merged) : null;
+      const bad = table === "listings" ? validListing(merged) : table === "profiles" ? validProfile(merged) : table === "posts" ? validPost(merged) : null;
       if (bad) return send(res, 400, { code: "23514", message: "check violation: " + bad });
     }
     for (const r of hit) {
@@ -548,7 +613,7 @@ function seed() {
         BUCKETS.avatars.store.set(`${u.id}/${avatar}`, { buf: avatarBuf(pics[i % pics.length]), type: "image/jpeg", at: Date.now() });
       }
       const now = new Date().toISOString();
-      db.profiles.push({ user_id: u.id, first_name: d.first, family_name: d.family, phone: d.phone, avatar, show_on_ads: d.show, created_at: now, updated_at: now });
+      db.profiles.push({ user_id: u.id, first_name: d.first, family_name: d.family, phone: d.phone, avatar, show_on_ads: d.show, role: "user", created_at: now, updated_at: now });
     }
     i++;
   }
@@ -599,7 +664,7 @@ function admin(req, res, url) {
   const flag = (v) => v === "1" || v === "true";
   if (p === "/__admin/dump") {
     return send(res, 200, {
-      listings: db.listings, rate_events: db.rate_events, profiles: db.profiles,
+      listings: db.listings, rate_events: db.rate_events, profiles: db.profiles, posts: db.posts,
       users: [...users.values()].map((u) => ({ id: u.id, email: u.email, has_password: !!u.password, confirmed: u.confirmed })),
       otp: otpLog, mails, confirm_email: authState.confirm,
       storage: [...BUCKETS["listing-images"].store.keys()], avatars: [...BUCKETS.avatars.store.keys()],
@@ -613,7 +678,7 @@ function admin(req, res, url) {
     return send(res, 200, { ok: true });
   }
   if (p === "/__admin/reset") {
-    db.listings.length = 0; db.rate_events.length = 0; db.profiles.length = 0; otpLog.length = 0; mails.length = 0; users.clear(); tokens.clear();
+    db.listings.length = 0; db.rate_events.length = 0; db.profiles.length = 0; db.posts.length = 0; otpLog.length = 0; mails.length = 0; users.clear(); tokens.clear();
     for (const b of Object.values(BUCKETS)) b.store.clear();
     authState.fail = null;
     return send(res, 200, { ok: true });
@@ -633,11 +698,11 @@ function admin(req, res, url) {
     return send(res, 200, { hash: `#access_token=${jwtLike(email)}&refresh_token=ref-${email}&expires_in=3600&token_type=bearer&type=${sp.get("type") || "magiclink"}` });
   }
   if (p === "/__admin/confirm") { const u = users.get(normEmail(sp.get("email"))); if (!u) return send(res, 404, { error: "no user" }); u.confirmed = true; return send(res, 200, { ok: true }); }
-  if (p === "/__admin/mkprofile") { // email, first, family, phone, avatar (file name), show (1|0): replaces any profile of that user
+  if (p === "/__admin/mkprofile") { // email, first, family, phone, avatar (file name), show (1|0), role (user|admin): replaces any profile of that user
     const u = addUser(normEmail(sp.get("email")), null, true);
     db.profiles = db.profiles.filter((x) => x.user_id !== u.id);
     const now = new Date().toISOString();
-    const row = { user_id: u.id, first_name: sp.get("first") || "Test", family_name: sp.get("family") || "User", phone: sp.get("phone") || "09120000000", avatar: sp.get("avatar") || null, show_on_ads: sp.get("show") === null ? true : flag(sp.get("show")), created_at: now, updated_at: now };
+    const row = { user_id: u.id, first_name: sp.get("first") || "Test", family_name: sp.get("family") || "User", phone: sp.get("phone") || "09120000000", avatar: sp.get("avatar") || null, show_on_ads: sp.get("show") === null ? true : flag(sp.get("show")), role: sp.get("role") || "user", created_at: now, updated_at: now };
     db.profiles.push(row);
     return send(res, 200, row);
   }
