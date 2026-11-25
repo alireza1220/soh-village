@@ -7,6 +7,7 @@ import { Avatar } from "./avatar";
 import "@/styles/boards.css";
 import { CameraI, CatIcon, ChevL, ChevR, HeartI, hasCatIcon } from "./market-icons";
 import { VerifiedBadge } from "./verified-badge";
+import { SellerRibbon } from "./seller-ribbon";
 import { highlight } from "./market-search";
 import { T } from "./market-text";
 import { num, relativeDay } from "./market-utils";
@@ -80,6 +81,7 @@ function ListRowBase(p: CardProps) {
         <PhotoBadge n={n} lang={lang} />
       </div>
       <div className="mkb-row__body">
+        <SellerRibbon verified={l.verified} lang={lang} />
         <h3 className="mkb-title">
           <bdi dir="auto"><a href={`#ad=${l.id}`} className="mkb-stretch" onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.button) return; e.preventDefault(); p.onOpen(l.id); }}>
             <Hl text={l.title} toks={toks} />
@@ -92,7 +94,7 @@ function ListRowBase(p: CardProps) {
           {(p.board !== "market" || isAsk(l.type)) && <span className={`mkb-tag${isAsk(l.type) ? " mkb-tag--need" : ""}`}>{typeLabel(l.board ?? p.board, l.type, lang)}</span>}
           <span className="mkb-tag" data-cat={hasCatIcon(l.category) ? l.category : "other"}><CatIcon cat={l.category} size={14} />{categoryLabel(l.board ?? p.board, l.category, lang, true)}</span>
         </p>
-        <PosterLine poster={l.poster} verified={l.verified} lang={lang} compact />
+        <PosterLine poster={l.poster} lang={lang} compact />
       </div>
       <SaveBtn {...p} />
     </li>
@@ -111,6 +113,7 @@ function GalleryCardBase(p: CardProps) {
   const cur = imgs[Math.min(i, n - 1)];
   return (
     <li className="mkb-gc">
+      <SellerRibbon verified={l.verified} lang={lang} />
       <div
         className="mkb-gc__media"
         onPointerMove={(e) => {
@@ -151,7 +154,7 @@ function GalleryCardBase(p: CardProps) {
         </h3>
         <p className={`mkb-price${l.price ? "" : " mkb-price--ask"}`}><bdi dir="auto">{l.price ?? (l.type === "sell" ? T.noPrice[lang] : typeLabel(l.board ?? p.board, l.type, lang))}</bdi></p>
         <Meta l={l} lang={lang} today={p.today} />
-        <PosterLine poster={l.poster} verified={l.verified} lang={lang} compact />
+        <PosterLine poster={l.poster} lang={lang} compact />
       </div>
     </li>
   );

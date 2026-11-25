@@ -34,10 +34,10 @@ export async function GET(req: Request) {
 
 // Photo clean-up, at most 20 listings per run, picked at random from the candidates so a listing that keeps failing cannot starve the rest:
 //  1. listings that are over (removed / rejected): all photos go;
-//  2. approved listings expired more than 14 days ago (renewing stops before that, see listing-actions): all photos go;
+//  2. approved / archived listings expired more than 14 days ago (renewing stops before that, see listing-actions): all photos go;
 //  3. removed / rejected listings from 3 hours to 3 days ago: anything still in the folder (a signed upload link outlives the
 //     listing for about 2 hours, so a late upload could re-create files);
-//  4. active listings (pending / approved): files no saved photo refers to that are older than a day (abandoned uploads).
+//  4. active listings (pending / approved / archived): files no saved photo refers to that are older than a day (abandoned uploads).
 type Sb = NonNullable<ReturnType<typeof serverSupabase>>;
 const hoursAgo = (h: number) => encodeURIComponent(new Date(Date.now() - h * 3_600_000).toISOString());
 const shuffle = <T,>(a: T[]) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -51,9 +51,9 @@ async function sweepImages(sb: Sb, h: Record<string, string>) {
   const SWEEP_MAX = 20;
   const groups: { q: string; whole: boolean; ageMs: number }[] = [
     { q: `status=in.(removed,rejected)&images=neq.%7B%7D`, whole: true, ageMs: 0 },
-    { q: `status=eq.approved&expires_at=lt.${hoursAgo(14 * 24)}&images=neq.%7B%7D`, whole: true, ageMs: 0 },
+    { q: `status=in.(approved,archived)&expires_at=lt.${hoursAgo(14 * 24)}&images=neq.%7B%7D`, whole: true, ageMs: 0 },
     { q: `status=in.(removed,rejected)&updated_at=lt.${hoursAgo(3)}&updated_at=gt.${hoursAgo(72)}`, whole: true, ageMs: 0 },
-    { q: `status=in.(pending,approved)&images=neq.%7B%7D`, whole: false, ageMs: 86_400_000 },
+    { q: `status=in.(pending,approved,archived)&images=neq.%7B%7D`, whole: false, ageMs: 86_400_000 },
   ];
   let done = 0;
   for (const g of groups) {

@@ -117,7 +117,7 @@ const adm = (path, body, u, o = {}) => api(path, body, { token: u?.token, ...o }
 async function mkListing(owner, over = {}, photos = 0) {
   const res = await svcRest("listings", {
     method: "POST",
-    body: JSON.stringify({ board: "market", type: "sell", category: "fruit", title: "Cherries", area: "Soh", details: "fresh", contact_kind: "phone", contact_value: "09121111111", owner_id: owner.id, images: [], ...over }),
+    body: JSON.stringify({ board: "market", type: "sell", category: "fruit", title: "Cherries", area: "Soh", details: "fresh", contact_kind: "phone", contact_value: "09121111111", owner_id: owner.id, images: [], status: "pending", ...over }),
   });
   const row = (await res.json())[0];
   const names = [];
@@ -231,9 +231,11 @@ async function scenarioListings() {
   const noOwnerProfile = await mkUser("ghost", { profile: false });
   const e = await mkListing(noOwnerProfile, { title: "No profile ad" });
 
-  const l1 = await adm("/api/admin/listings", { action: "list" }, boss);
+  const l1 = await adm("/api/admin/listings", { action: "list", status: "pending" }, boss);
+  const ldef = await adm("/api/admin/listings", { action: "list" }, boss);
+  check("list: default shows live (approved) ads, moderation is after the fact", ldef.status === 200 && (ldef.data.listings || []).every((x) => x.status === "approved") && (ldef.data.listings || []).some((x) => x.id === c.id));
   const ids1 = (l1.data.listings || []).map((x) => x.id);
-  check("list: default shows pending ones only", l1.status === 200 && ids1.includes(a.id) && ids1.includes(b.id) && !ids1.includes(c.id) && l1.data.total === 3, JSON.stringify(l1.data).slice(0, 300));
+  check("list: status pending shows pending ones only", l1.status === 200 && ids1.includes(a.id) && ids1.includes(b.id) && !ids1.includes(c.id) && l1.data.total === 3, JSON.stringify(l1.data).slice(0, 300));
   const first = (l1.data.listings || []).find((x) => x.id === a.id);
   check("list: poster has user id, names and phone", first?.poster?.userId === maryam.id && first.poster.firstName === "Firstmaryam" && first.poster.familyName === "Familymaryam" && /^0912/.test(first.poster.phone), JSON.stringify(first?.poster));
   check("list: a listing whose owner has no profile has poster null", (l1.data.listings.find((x) => x.id === e.id) || {}).poster === null);
@@ -242,6 +244,15 @@ async function scenarioListings() {
   check("list: status all -> every listing, newest first", all.data.total === 4 && all.data.listings[0].id === e.id, JSON.stringify(all.data.listings?.map((x) => x.title)));
   const careers = await adm("/api/admin/listings", { action: "list", status: "all", board: "careers" }, boss);
   check("list: board filter", careers.data.total === 1 && careers.data.listings[0].id === b.id);
+  await svcRest(`listings?id=eq.${c.id}`, { method: "PATCH", body: JSON.stringify({ status: "archived" }) });
+  const arch = await adm("/api/admin/listings", { action: "list", status: "archived" }, boss);
+  check("list: status archived filters archived ads (admins can see them)", arch.status === 200 && arch.data.total === 1 && arch.data.listings[0].id === c.id && arch.data.listings[0].status === "archived", JSON.stringify(arch.data).slice(0, 200));
+  const archSet = await adm("/api/admin/listings", { action: "set_status", id: c.id, status: "approved" }, boss);
+  const archKeep = await listingRow(c.id);
+  check("set_status: archived -> approved works and keeps the existing expiry (no reset)", archSet.status === 200 && archSet.data.listing.status === "approved" && Math.abs(Date.parse(archKeep.expires_at) - (Date.now() + 50 * DAY)) < 120_000, archKeep.expires_at);
+  const toArch = await adm("/api/admin/listings", { action: "set_status", id: c.id, status: "archived" }, boss);
+  check("set_status: archived accepted", toArch.status === 200 && toArch.data.listing.status === "archived");
+  await adm("/api/admin/listings", { action: "set_status", id: c.id, status: "approved" }, boss);
   const q1 = await adm("/api/admin/listings", { action: "list", status: "all", q: "WALNUT" }, boss);
   check("list: q matches title case-insensitively", q1.data.total === 1 && q1.data.listings[0].id === a.id, JSON.stringify(q1.data).slice(0, 200));
   const q2 = await adm("/api/admin/listings", { action: "list", status: "all", q: "dry (new)" }, boss);
@@ -263,7 +274,7 @@ async function scenarioListings() {
   check("list: offset pages (4 in total, offset 3 -> 1 row, total still 4)", page2.data.listings.length === 1 && page2.data.total === 4);
 
   // many rows -> 50 per page
-  for (let i = 0; i < 52; i++) await svcRest("listings", { method: "POST", body: JSON.stringify({ board: "market", type: "sell", category: "fruit", title: "Bulk " + i, area: "Soh", owner_id: reza.id }) });
+  for (let i = 0; i < 52; i++) await svcRest("listings", { method: "POST", body: JSON.stringify({ board: "market", type: "sell", category: "fruit", title: "Bulk " + i, area: "Soh", owner_id: reza.id, status: "pending" }) });
   const big1 = await adm("/api/admin/listings", { action: "list", status: "all" }, boss);
   const big2 = await adm("/api/admin/listings", { action: "list", status: "all", offset: 50 }, boss);
   check("list: 50 per page, total counts everything", big1.data.listings.length === 50 && big1.data.total === 56 && big2.data.listings.length === 6, `${big1.data.listings?.length} ${big1.data.total} ${big2.data.listings?.length}`);
@@ -318,7 +329,7 @@ async function scenarioListings() {
   // overview
   const ov = await adm("/api/admin/overview", {}, boss);
   const k = ov.data.counts;
-  check("overview: listing counts per status add up", k.listings.removed === 1 && k.listings.approved === 2 && k.listings.pending >= 50 && k.users === 3 && k.admins === 1, JSON.stringify(k));
+  check("overview: counts include archived (0 here) and add up", k.listings.archived === 0 && k.listings.removed === 1 && k.listings.approved === 2 && k.listings.pending >= 50 && k.users === 3 && k.admins === 1, JSON.stringify(k));
 }
 
 async function scenarioPosts() {

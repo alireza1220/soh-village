@@ -14,7 +14,7 @@ import { imageUrl, isImageName } from "@/lib/listing-images";
 import { pendingUploads, plural, savePhotos, type NewPhoto, type PhotoAuth, type PhotoItem, type Progress } from "@/lib/photo-upload";
 
 export type RunResult = { ok: boolean; listing?: ManagedListing; error?: string };
-export type RunAction = (action: "update" | "renew" | "delete", id: string, fields?: Record<string, unknown>) => Promise<RunResult>;
+export type RunAction = (action: "update" | "renew" | "delete" | "archive" | "unarchive", id: string, fields?: Record<string, unknown>) => Promise<RunResult>;
 
 const T = {
   edit: { fa: "ویرایش", en: "Edit" },
@@ -25,12 +25,18 @@ const T = {
   cancel: { fa: "انصراف", en: "Cancel" },
   save: { fa: "ذخیره", en: "Save" },
   saving: { fa: "در حال ذخیره...", en: "Saving..." },
-  saved: { fa: "ذخیره شد. آگهی تأییدشده دوباره بررسی می‌شود.", en: "Saved. Approved listings get rechecked." },
+  saved: { fa: "ذخیره شد. تغییرها همین حالا روی آگهی است.", en: "Saved. Your changes are live now." },
+  archive: { fa: "بایگانی", en: "Archive" },
+  restore: { fa: "بازگرداندن", en: "Restore" },
+  archived: { fa: "آگهی بایگانی شد و دیگر دیده نمی‌شود. عکس‌ها و نوشته‌هایش می‌ماند؛ هر وقت خواستید «بازگرداندن» را بزنید.", en: "Ad archived. It is hidden from visitors, but its text and photos are kept. Press Restore any time." },
+  restored: { fa: "آگهی بازگردانده شد و دوباره منتشر است.", en: "Ad restored. It is live again." },
+  restoreExpired: { fa: "این آگهی منقضی شده و سهمیه‌ی تمدیدش هم تمام است، پس بازگردانده نمی‌شود. یک آگهی تازه بگذارید.", en: "This ad has expired and its renewals are used up, so it cannot be restored. Please post a new ad." },
+  archivedNote: { fa: "این آگهی بایگانی است: برای بازدیدکنندگان دیده نمی‌شود.", en: "This ad is archived: visitors cannot see it." },
   renewed: { fa: "۳۰ روز تمدید شد.", en: "Renewed for 30 days." },
   deleted: { fa: "آگهی حذف شد.", en: "Listing deleted." },
   expires: { fa: "انقضا", en: "Expires" },
   renewals: { fa: "تمدیدها", en: "Renewals" },
-  editNote: { fa: "با هر ویرایش، حتی فقط تغییر عکس، آگهی دوباره بررسی می‌شود.", en: "Editing (even just photos) sends an approved listing back for review." },
+  editNote: { fa: "تغییرها همان لحظه ذخیره روی آگهی می‌آید و نیازی به تأیید مدیر نیست.", en: "Changes go live the moment you save. No admin approval is needed." },
   waitPhotos: { fa: "عکس‌ها هنوز آماده می‌شوند...", en: "Photos are still getting ready..." },
   sendingPhoto: { fa: "عکس {i} از {n} در حال ارسال...", en: "Sending photo {i} of {n}..." },
   savingPhotos: { fa: "عکس‌ها در حال ذخیره‌اند...", en: "Saving your photos..." },
@@ -42,15 +48,18 @@ const T = {
   photosOf: { fa: "عکس‌های آگهی", en: "Listing photos" },
 };
 const STATUS: Record<string, { fa: string; en: string }> = {
-  pending: { fa: "در انتظار بررسی", en: "Pending check" },
-  approved: { fa: "تأییدشده", en: "Approved" },
+  approved: { fa: "منتشرشده", en: "Live" },
+  archived: { fa: "بایگانی‌شده", en: "Archived" },
   rejected: { fa: "ردشده", en: "Rejected" },
   removed: { fa: "حذف‌شده", en: "Removed" },
   expired: { fa: "منقضی", en: "Expired" },
 };
 
 
+/** "pending" is legacy (no review queue any more): such an ad counts as live. */
+const isLive = (l: ManagedListing) => l.status === "approved" || l.status === "pending";
 function effectiveStatus(l: ManagedListing): string {
+  if (l.status === "pending") return "approved";
   if (l.status === "approved" && l.expiresAt && new Date(l.expiresAt).getTime() < Date.now()) return "expired";
   return l.status;
 }
@@ -94,13 +103,27 @@ function ListingCard({ lang, item, run, onChange, onRemoved, photoAuth }: { lang
   const locked = item.status === "removed" || item.status === "rejected";
   const pre = `lm-${item.id}`;
   const yesRef = useRef<HTMLButtonElement>(null);
+  const headRef = useRef<HTMLHeadingElement>(null);
+  const archived = item.status === "archived";
   useEffect(() => { if (mode === "confirm") yesRef.current?.focus(); }, [mode]);
 
-  const doRun = async (action: "update" | "renew" | "delete", fields?: Record<string, unknown>) => {
+  const doRun = async (action: "update" | "renew" | "delete" | "archive" | "unarchive", fields?: Record<string, unknown>) => {
     setBusy(true); setMsg(null);
     const r = await run(action, item.id, fields);
     setBusy(false);
-    if (!r.ok) { setMsg({ ok: false, text: errorText(r.error, lang), code: r.error }); return; }
+    if (!r.ok) {
+      const text = action === "unarchive" && r.error === "cannot_renew" ? T.restoreExpired[lang] : errorText(r.error, lang);
+      setMsg({ ok: false, text, code: r.error });
+      return;
+    }
+    if (action === "archive" || action === "unarchive") {
+      onChange(r.listing ?? { ...item, status: action === "archive" ? "archived" : "approved" });
+      setMode("view");
+      setMsg({ ok: true, text: action === "archive" ? T.archived[lang] : T.restored[lang] });
+      // The pressed button is replaced (Archive <-> Restore) and the card may move: keep keyboard focus on the ad's title.
+      window.setTimeout(() => headRef.current?.focus(), 0);
+      return;
+    }
     if (action === "delete") { setMsg({ ok: true, text: T.deleted[lang] }); setMode("view"); onRemoved(item.id); return; }
     if (r.listing) { onChange(r.listing); if (action === "update") setPhotos(storedFrom(item.id, namesOf(r.listing))); }
     setMode("view");
@@ -153,11 +176,12 @@ function ListingCard({ lang, item, run, onChange, onRemoved, photoAuth }: { lang
         <span className="chip">{typeLabel(board, item.type, lang)}</span>
         <span className="chip">{categoryLabel(board, item.category, lang)}</span>
       </div>
-      <h3>{item.title}</h3>
+      <h3 ref={headRef} tabIndex={-1} className="mk-listing__h">{item.title}</h3>
       <p className="mk-expiry">
         {T.expires[lang]}: {fmtDate(item.expiresAt, lang)}{(item.renewals ?? 0) > 0 && <> · {T.renewals[lang]}: {(item.renewals ?? 0).toLocaleString(lang === "fa" ? "fa-IR" : "en")}</>}
       </p>
 
+      {archived && mode !== "edit" && <p className="mk-msg">{T.archivedNote[lang]}</p>}
       {mode !== "edit" && namesOf(item).length > 0 && (
         <ul className="ph-strip" aria-label={T.photosOf[lang]}>
           {namesOf(item).map((n, i) => (
@@ -170,7 +194,7 @@ function ListingCard({ lang, item, run, onChange, onRemoved, photoAuth }: { lang
 
       {mode === "edit" && (
         <form className="mk-editform" onSubmit={(e) => { e.preventDefault(); void save(); }} aria-label={T.edit[lang]}>
-          {item.status === "approved" && <p className="mk-msg">{T.editNote[lang]}</p>}
+          {isLive(item) && <p className="mk-msg">{T.editNote[lang]}</p>}
           <ListingFieldset
             lang={lang} board={board} idp={pre} v={f} set={set}
             keepType={!bc.types.some((o) => o.v === item.type) && (
@@ -209,7 +233,9 @@ function ListingCard({ lang, item, run, onChange, onRemoved, photoAuth }: { lang
 
       {mode === "view" && (
         <div className="mk-actions">
-          {!locked && <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => { setMsg(null); setMode("edit"); }}>{T.edit[lang]}</button>}
+          {!locked && !archived && <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => { setMsg(null); setMode("edit"); }}>{T.edit[lang]}</button>}
+          {archived && <button type="button" className="btn btn--primary" disabled={busy} onClick={() => void doRun("unarchive")}>{busy ? T.saving[lang] : T.restore[lang]}</button>}
+          {isLive(item) && <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => void doRun("archive")}>{busy ? T.saving[lang] : T.archive[lang]}</button>}
           {canRenew(item) && <button type="button" className="btn btn--primary" disabled={busy} onClick={() => void doRun("renew")}>{busy ? T.saving[lang] : T.renew[lang]}</button>}
           {item.status !== "removed" && <button type="button" className="btn btn--quiet-danger" disabled={busy} onClick={() => { setMsg(null); setMode("confirm"); }}>{T.del[lang]}</button>}
         </div>
@@ -228,7 +254,8 @@ export function ListingManager({ lang, items, run, onRemoved, empty, photoAuth }
   const [gone, setGone] = useState<string[]>([]);
   const [removedNote, setRemovedNote] = useState(false);
   const focusRef = useRef<HTMLDivElement>(null);
-  const shown = list.filter((l) => !gone.includes(l.id));
+  // Archived ads come after the live ones (stable: the server's order is kept inside each group).
+  const shown = list.filter((l) => !gone.includes(l.id)).sort((a, b) => Number(a.status === "archived") - Number(b.status === "archived"));
   const note = <p className="mk-msg mk-msg--ok" role="status">{removedNote ? T.deleted[lang] : ""}</p>;
   if (!shown.length) return <div ref={focusRef} tabIndex={-1} className="myads-focus">{note}<p className="muted">{empty ?? (lang === "fa" ? "آگهی‌ای نیست." : "No listings.")}</p></div>;
   return (

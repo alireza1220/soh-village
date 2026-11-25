@@ -489,7 +489,8 @@ async function scenarioCreate() {
   check("create: 200 {ok:true, id}", r.status === 200 && r.data.ok === true && typeof r.data.id === "string" && r.data.id.length > 10, JSON.stringify(r));
   check("create: response has no manage code or secrets", leaks(r.data).length === 0 && Object.keys(r.data).sort().join() === "id,ok", JSON.stringify(r.data));
   const row = await rowOf(r.data.id);
-  check("create: stored pending on the market board, owned by the verified user", row?.status === "pending" && row.board === "market" && row.owner_id === U.id && row.renewals === 0, JSON.stringify(row));
+  check("create: stored LIVE (approved, 30-day expiry set now) on the market board, owned by the verified user", row?.status === "approved" && Math.abs(Date.parse(row.approved_at) - Date.now()) < 120_000 && Math.abs(Date.parse(row.expires_at) - (Date.now() + 30 * 86400000)) < 120_000 && row.board === "market" && row.owner_id === U.id && row.renewals === 0, JSON.stringify(row));
+  check("create: appears in the public view at once (no approval step)", (await viewRows()).some((x) => x.id === r.data.id));
   check("create: ip_hash is a hash, not the address", typeof row?.ip_hash === "string" && row.ip_hash.length >= 16 && !/^\d+\.\d+\.\d+\.\d+$/.test(row.ip_hash));
   check("create: no contact typed -> the profile phone, kind phone, PRIVATE", row?.contact_kind === "phone" && row.contact_value === "09121110000" && row.contact_public === false, JSON.stringify(row));
   check("create: row has no manage_hash / poster_name columns", !("manage_hash" in row) && !("poster_name" in row));
@@ -524,7 +525,7 @@ async function scenarioCreate() {
 
   const mass = await create(U, { title: "mass", status: "approved", owner_id: "x", ownerId: "x", ip_hash: "z", expires_at: "2099-01-01T00:00:00Z", renewals: 3, images: ["abcdefghijkl.jpg"], user_id: "x", manage_hash: "y" });
   const mrow = await rowOf(mass.data.id);
-  check("create: cannot set status / owner / hash / expiry / images through the body", mass.status === 200 && mrow.status === "pending" && mrow.owner_id === U.id && mrow.ip_hash !== "z" && mrow.expires_at === null && mrow.renewals === 0 && mrow.images.length === 0, JSON.stringify(mrow));
+  check("create: cannot set status / owner / hash / expiry / images through the body", mass.status === 200 && mrow.status === "approved" && mrow.owner_id === U.id && mrow.ip_hash !== "z" && Math.abs(Date.parse(mrow.expires_at) - (Date.now() + 30 * 86400000)) < 120_000 && mrow.renewals === 0 && mrow.images.length === 0, JSON.stringify(mrow));
   const honey = await create(U, { title: "stale client", website: "http://spam.example", openedMs: 100 });
   check("create: honeypot / openedMs fields are ignored (no too_fast, not dropped)", honey.status === 200 && !!(await rowOf(honey.data.id)), JSON.stringify(honey));
 
@@ -542,21 +543,30 @@ async function scenarioCreate() {
     }
   }
   const cats = { market: [["other", true], ["nuts", true], ["farm", false], ["craft", false], ["house", false]], careers: [["farm", true], ["craft", true], ["crafts", false], ["fruit", false], ["house", false]], needs: [["stay", true], ["guide", true], ["fruit", false], ["house", false]], property: [["orchard", true], ["shop", true], ["fruit", false], ["farm", false]] };
+  const UC = await mkUser("cats"); // a fresh account: U is near the 20 live-ads cap by now
   for (const board of BOARDS) {
     for (const [category, ok] of cats[board]) {
-      const x = await create(U, { board, category, title: `${board}-${category}` });
+      const x = await create(UC, { board, category, title: `${board}-${category}` });
       check(`${board}: category ${category} ${ok ? "accepted" : "refused (bad_category)"}`, ok ? x.status === 200 : x.status === 400 && x.data.error === "bad_category", JSON.stringify(x));
     }
   }
+  const CAP = await mkUser("cap");
+  let capIds = [];
+  for (let i = 0; i < 20; i++) capIds.push((await create(CAP, { title: "cap" + i })).data.id);
+  const over20 = await create(CAP, { title: "cap21" });
+  check("cap: 20 live ads allowed, the 21st -> 429 too_many_listings", capIds.every(Boolean) && over20.status === 429 && over20.data.error === "too_many_listings", JSON.stringify(over20));
+  await clearRate();
+  await post("/api/my/listings", { action: "archive", id: capIds[0] }, { token: CAP.token });
+  check("cap: archiving one frees a slot", (await create(CAP, { title: "cap-again" })).status === 200);
   const cr = await rowOf((await create(U, { board: "careers", quantity: "part", title: "arrangement stored" })).data.id);
   check("careers: arrangement code stored in quantity", cr.quantity === "part" && cr.board === "careers", JSON.stringify(cr));
   for (const bad of [undefined, "", "weekly", "Seasonal", "x".repeat(90)]) {
     const x = await create(U, { board: "careers", quantity: bad });
     check(`careers: quantity ${JSON.stringify(bad)?.slice(0, 20)} -> bad_arrangement`, x.status === 400 && x.data.error === "bad_arrangement", JSON.stringify(x));
   }
-  for (const code of ["seasonal", "part", "full", "once"]) check(`careers: arrangement ${code} accepted`, (await create(U, { board: "careers", quantity: code, title: "c-" + code })).status === 200);
-  const marketQ = await create(U, { board: "market", quantity: "anything goes here" });
-  const propQ = await rowOf((await create(U, { board: "property", quantity: "2000 m2", available: "full title", title: "prop facts" })).data.id);
+  for (const code of ["seasonal", "part", "full", "once"]) check(`careers: arrangement ${code} accepted`, (await create(UC, { board: "careers", quantity: code, title: "c-" + code })).status === 200);
+  const marketQ = await create(UC, { board: "market", quantity: "anything goes here" });
+  const propQ = await rowOf((await create(UC, { board: "property", quantity: "2000 m2", available: "full title", title: "prop facts" })).data.id);
   check("other boards take free text in quantity (no arrangement rule)", marketQ.status === 200 && propQ.quantity === "2000 m2" && propQ.available === "full title");
 
   section("create: rate limits (per user AND per IP)");
@@ -608,7 +618,7 @@ async function scenarioMy() {
   check("list: newest first", titles.indexOf("A careers") < titles.indexOf("A two") && titles.indexOf("A two") < titles.indexOf("A one"), titles.join());
   const own = list.data.listings.find((l) => l.id === a3);
   const OWN_KEYS = ["id", "board", "type", "category", "title", "quantity", "price", "area", "available", "details", "contactKind", "contactValue", "contactPublic", "status", "createdAt", "expiresAt", "renewals", "images"];
-  check("list: OwnListing shape, no secrets", OWN_KEYS.every((k) => k in own) && own.board === "careers" && own.status === "pending" && leaks(list.data).length === 0, Object.keys(own).join());
+  check("list: OwnListing shape, no secrets", OWN_KEYS.every((k) => k in own) && own.board === "careers" && own.status === "approved" && leaks(list.data).length === 0, Object.keys(own).join());
   const lb = await post("/api/my/listings", { action: "list" }, { token: B.token });
   check("list: another user sees only theirs", lb.data.listings.length === 1 && lb.data.listings[0].id === b1);
 
@@ -626,13 +636,13 @@ async function scenarioMy() {
   check("update / renew with a profile that lost its address -> 403 profile_required; list still works", noAdr.status === 403 && noAdr.data.error === "profile_required" && noAdrRenew.status === 403 && noAdrList.status === 200, JSON.stringify([noAdr, noAdrRenew]));
   await admin(`approve?id=${a1}`);
   const u2 = await post("/api/my/listings", { action: "update", id: a1, fields: { title: "A one again" } }, { token: A.token });
-  check("update: an approved ad goes back to pending", u2.data.listing?.status === "pending" && (await rowOf(a1)).status === "pending", JSON.stringify(u2));
-  check("update: the edited ad vanished from the public view", !(await viewRows()).some((r) => r.id === a1));
+  check("update: a live ad stays live (no re-review)", u2.data.listing?.status === "approved" && (await rowOf(a1)).status === "approved", JSON.stringify(u2));
+  check("update: the edited ad is still in the public view", (await viewRows()).some((r) => r.id === a1));
   const ux = await post("/api/my/listings", { action: "update", id: a1, fields: { title: "hijack" } }, { token: B.token });
   const rx = await post("/api/my/listings", { action: "renew", id: a1 }, { token: B.token });
   const dx = await post("/api/my/listings", { action: "delete", id: a1 }, { token: B.token });
   check("another user: update / renew / delete -> 404 not_found", [ux, rx, dx].every((x) => x.status === 404 && x.data.error === "not_found"), JSON.stringify([ux.data, rx.data, dx.data]));
-  check("another user changed nothing", (await rowOf(a1)).title === "A one again" && (await rowOf(a1)).status === "pending");
+  check("another user changed nothing", (await rowOf(a1)).title === "A one again" && (await rowOf(a1)).status === "approved");
   await admin(`set?id=${a2}&field=owner_id&value=null`);
   const orphan = await post("/api/my/listings", { action: "delete", id: a2 }, { token: A.token });
   check("an ownerless legacy row is not deletable by anyone", orphan.status === 404, JSON.stringify(orphan));
@@ -655,9 +665,9 @@ async function scenarioMy() {
   const legacyKeep = await post("/api/my/listings", { action: "update", id: a1, fields: { title: "legacy type kept", type: "service" } }, { token: A.token });
   const legacyMove = await post("/api/my/listings", { action: "update", id: a1, fields: { type: "hiring" } }, { token: A.token });
   check("update: an older type already on the row stays allowed, switching to a foreign one does not", legacyKeep.status === 200 && legacyKeep.data.listing.type === "service" && legacyMove.data.error === "bad_type", JSON.stringify([legacyKeep.data.error, legacyMove.data]));
-  await post("/api/my/listings", { action: "update", id: a1, fields: { status: "approved", owner_id: "x", ip_hash: "z", expires_at: "2099-01-01T00:00:00Z", renewals: 0, user_id: "q" } }, { token: A.token });
+  await post("/api/my/listings", { action: "update", id: a1, fields: { status: "removed", owner_id: "x", ip_hash: "z", expires_at: "2099-01-01T00:00:00Z", renewals: 0, user_id: "q" } }, { token: A.token });
   const srow = await rowOf(a1);
-  check("update: cannot set status / owner / hash / expiry through fields", srow.status === "pending" && srow.owner_id === A.id && srow.ip_hash !== "z" && srow.expires_at !== "2099-01-01T00:00:00Z", JSON.stringify(srow));
+  check("update: cannot set status / owner / hash / expiry through fields", srow.status === "approved" && srow.owner_id === A.id && srow.ip_hash !== "z" && srow.expires_at !== "2099-01-01T00:00:00Z", JSON.stringify(srow));
   await post("/api/my/listings", { action: "update", id: a1, fields: { details: "q".repeat(1500) } }, { token: A.token });
   check("update: details clipped to 800", (await rowOf(a1)).details.length === 800);
   for (const st of ["rejected", "removed"]) {
@@ -673,6 +683,7 @@ async function scenarioMy() {
 
   section("my ads: renew rules");
   const renew = (u, id) => post("/api/my/listings", { action: "renew", id }, { token: u.token });
+  await admin(`set?id=${a3}&field=status&value=pending`); // legacy pending row
   const rp = await renew(A, a3);
   check("renew: pending -> 409 cannot_renew", rp.status === 409 && rp.data.error === "cannot_renew", JSON.stringify(rp));
   const early = await mk(A, "renew-early"); await admin(`approve?id=${early}`);
@@ -704,7 +715,65 @@ async function scenarioMy() {
   check("delete: removed rows are not listed any more", !(await post("/api/my/listings", { action: "list" }, { token: A.token })).data.listings.some((l) => l.id === del));
   const du = await post("/api/my/listings", { action: "update", id: del, fields: { title: "zombie" } }, { token: A.token });
   check("delete: update afterwards 409 not_editable, renew 409, repeat delete harmless", du.data.error === "not_editable" && (await renew(A, del)).status === 409 && (await post("/api/my/listings", { action: "delete", id: del }, { token: A.token })).status === 200, JSON.stringify(du));
-  check("my: stray b1 still intact", (await rowOf(b1)).status === "pending");
+  check("my: stray b1 still intact", (await rowOf(b1)).status === "approved");
+}
+
+async function scenarioArchive() {
+  section("my ads: archive / unarchive");
+  const A = await mkUser("arch"), B = await mkUser("archb");
+  const my = (u, action, id) => post("/api/my/listings", { action, id }, { token: u.token });
+  const id = await mk(A, "to-archive");
+  check("archive: the live ad is public before", (await viewRows()).some((r) => r.id === id));
+  const ar = await my(A, "archive", id);
+  check("archive: 200, status archived, expiry kept, response is an OwnListing", ar.status === 200 && ar.data.ok === true && ar.data.listing?.status === "archived" && (await rowOf(id)).status === "archived" && leaks(ar.data).length === 0, JSON.stringify(ar));
+  check("archive: gone from the public view", !(await viewRows()).some((r) => r.id === id));
+  const rv = await post("/api/listings/contact", { id });
+  check("archive: contact reveal -> 404 not_found", rv.status === 404 && rv.data.error === "not_found", JSON.stringify(rv));
+  const lst = (await my(A, "list", undefined)).data.listings.find((l) => l.id === id);
+  check("archive: still in the owner's list with status archived", lst?.status === "archived");
+  check("archive: twice is fine (idempotent)", (await my(A, "archive", id)).status === 200 && (await rowOf(id)).status === "archived");
+  const ed = await post("/api/my/listings", { action: "update", id, fields: { title: "edited while archived" } }, { token: A.token });
+  check("archive: editing an archived ad -> 409 not_editable, stays archived", ed.status === 409 && ed.data.error === "not_editable" && (await rowOf(id)).status === "archived" && !(await viewRows()).some((r) => r.id === id));
+  const bx = await Promise.all([my(B, "archive", id), my(B, "unarchive", id)]);
+  check("archive / unarchive by a non-owner -> 404 not_found, nothing changed", bx.every((x) => x.status === 404 && x.data.error === "not_found") && (await rowOf(id)).status === "archived", JSON.stringify(bx.map((x) => x.data)));
+  const un = await my(A, "unarchive", id);
+  check("unarchive: 200, live again and public, expiry and renewals untouched", un.status === 200 && un.data.listing.status === "approved" && (await viewRows()).some((r) => r.id === id) && (await rowOf(id)).renewals === 0, JSON.stringify(un));
+  check("unarchive: an ad that is not archived is fine (idempotent)", (await my(A, "unarchive", id)).status === 200);
+  const rv2 = await post("/api/listings/contact", { id });
+  check("unarchive: contact reveal works again", rv2.status === 200);
+
+  // expired while archived: uses a renewal slot
+  const ex = await mk(A, "archived-expired"); await my(A, "archive", ex);
+  await admin(`set?id=${ex}&field=expires_at&value=${encodeURIComponent(new Date(Date.now() - 3 * 86400000).toISOString())}`);
+  const ue = await my(A, "unarchive", ex);
+  const exRow = await rowOf(ex);
+  check("unarchive: expired ad -> 200, uses a renewal, expires_at about now + 30 days", ue.status === 200 && exRow.status === "approved" && exRow.renewals === 1 && Math.abs(Date.parse(exRow.expires_at) - (Date.now() + 30 * 86400000)) < 5 * 60000, JSON.stringify(exRow));
+  const lim = await mk(A, "archived-expired-limit"); await admin(`approve?id=${lim}&renewals=4`); await my(A, "archive", lim);
+  await admin(`set?id=${lim}&field=expires_at&value=${encodeURIComponent(new Date(Date.now() - 3 * 86400000).toISOString())}`);
+  const ul = await my(A, "unarchive", lim);
+  check("unarchive: expired ad at 4 renewals -> 409 cannot_renew, stays archived", ul.status === 409 && ul.data.error === "cannot_renew" && (await rowOf(lim)).status === "archived", JSON.stringify(ul));
+  const lo = await mk(A, "archived-too-old"); await my(A, "archive", lo);
+  await admin(`set?id=${lo}&field=expires_at&value=${encodeURIComponent(new Date(Date.now() - 20 * 86400000).toISOString())}`);
+  check("unarchive: expired 20 days ago -> 409 cannot_renew", (await my(A, "unarchive", lo)).status === 409);
+
+  // other states
+  const pe = await mk(A, "arch-pending"); await admin(`set?id=${pe}&field=status&value=pending`);
+  const rj = await mk(A, "arch-rejected"); await admin(`set?id=${rj}&field=status&value=rejected`);
+  const bad = [await my(A, "archive", pe), await my(A, "archive", rj), await my(A, "unarchive", pe), await my(A, "unarchive", rj)];
+  check("archive of pending / rejected and unarchive of non-archived -> 409 not_editable", bad.every((x) => x.status === 409 && x.data.error === "not_editable"), JSON.stringify(bad.map((x) => x.data)));
+
+  // profile gate and delete
+  const N = await mkUser("arch-np", { profile: false });
+  const np = await my(N, "archive", id);
+  check("archive without a profile -> 403 profile_required (checked before the row)", np.status === 403 && np.data.error === "profile_required", JSON.stringify(np));
+  const unp = await my(N, "unarchive", id);
+  check("unarchive without a profile -> 403 profile_required", unp.status === 403 && unp.data.error === "profile_required");
+  const mal = await my(A, "archive", "not-a-uuid");
+  check("archive: malformed id -> 404", mal.status === 404);
+  await my(A, "archive", id);
+  const dl = await my(A, "delete", id);
+  check("delete works on an archived ad", dl.status === 200 && (await rowOf(id)).status === "removed");
+  check("a removed ad cannot be unarchived", (await my(A, "unarchive", id)).status === 409);
 }
 
 async function scenarioReveal() {
@@ -726,12 +795,13 @@ async function scenarioReveal() {
   const viaSave = await post("/api/profile", { action: "save", fields: { phone: "09121230000" } }, { token: U.token });
   check("reveal: after the owner changes the phone in the profile", viaSave.status === 200 && (await reveal(id)).data.contact?.value === "09121230000");
 
-  const pend = await mk(U, "rv-pending");
+  const pend = await mk(U, "rv-pending"); await admin(`set?id=${pend}&field=status&value=pending`); // legacy row
+  const arch = await mk(U, "rv-archived"); await post("/api/my/listings", { action: "archive", id: arch }, { token: U.token });
   const rej = await mk(U, "rv-rejected"); await admin(`set?id=${rej}&field=status&value=rejected`);
   const rem = await mk(U, "rv-removed"); await admin(`approve?id=${rem}`); await admin(`set?id=${rem}&field=status&value=removed`);
   const exp = await mk(U, "rv-expired"); await admin(`approve?id=${exp}&expires_in_days=-2`);
   const ghost = "22222222-2222-4222-8222-222222222222";
-  for (const [name, x] of [["pending", pend], ["rejected", rej], ["removed", rem], ["expired", exp], ["unknown", ghost], ["not a uuid", "nope"], ["sql-ish", "1' or '1'='1"], ["number", 5], ["missing", undefined]]) {
+  for (const [name, x] of [["pending", pend], ["archived", arch], ["rejected", rej], ["removed", rem], ["expired", exp], ["unknown", ghost], ["not a uuid", "nope"], ["sql-ish", "1' or '1'='1"], ["number", 5], ["missing", undefined]]) {
     const q = await reveal(x);
     check(`reveal: ${name} id -> 404 not_found, no phone`, q.status === 404 && JSON.stringify(q.data) === JSON.stringify({ error: "not_found" }), JSON.stringify(q));
   }
@@ -780,7 +850,7 @@ async function scenarioPublicView() {
   const noName = await mkApproved(U2, "view-no-name");
   const noProfile = await mkApproved(U2, "view-no-profile");
   await admin(`set?id=${noProfile}&field=owner_id&value=${U3.id}`);
-  const pend = await mk(U1, "view-pending", { contactPublic: true });
+  const pend = await mk(U1, "view-pending", { contactPublic: true }); await admin(`set?id=${pend}&field=status&value=pending`); // legacy row
   const exp = await mk(U1, "view-expired"); await admin(`approve?id=${exp}&expires_in_days=-2`);
   const perBoard = {};
   for (const board of BOARDS) perBoard[board] = await mkApproved(U1, `view-board-${board}`, { board });
@@ -906,7 +976,7 @@ async function scenarioPhotos() {
   const anonSign = await fetch(`${MOCK}/storage/v1/object/upload/sign/listing-images/${id}/aaaaaaaaaaaa.jpg`, { method: "POST", headers: { apikey: ANON } });
   check("images: anon key cannot list, delete or sign (no-policy bucket)", anonList.status === 401 && anonDel.status === 401 && anonSign.status === 401);
   const drop = await setImages(U, id, [reorder[0]]);
-  check("images: changing photos on an approved ad -> pending", drop.status === 200 && drop.data.listing.status === "pending");
+  check("images: changing photos on a live ad keeps it live", drop.status === 200 && drop.data.listing.status === "approved");
   const left = (await stored()).filter((k) => k.startsWith(id + "/"));
   check("images: dropped photos removed from storage (both files)", left.length === 2 && left.every((k) => k.includes(reorder[0].split(".")[0])), left.join());
   const clear = await setImages(U, id, []);
@@ -1028,7 +1098,9 @@ async function scenarioPhotos() {
   };
   const has = async (x) => (await stored()).some((k) => k.startsWith(x + "/"));
   const active = await mkPhoto("sweep active"); await admin(`approve?id=${active}`);
-  const pendingP = await mkPhoto("sweep pending");
+  const pendingP = await mkPhoto("sweep pending"); await admin(`set?id=${pendingP}&field=status&value=pending`);
+  const archivedP = await mkPhoto("sweep archived"); await post("/api/my/listings", { action: "archive", id: archivedP }, { token: D.token });
+  const archivedOld = await mkPhoto("sweep archived expired 20d"); await post("/api/my/listings", { action: "archive", id: archivedOld }, { token: D.token }); await admin(`set?id=${archivedOld}&field=expires_at&value=${encodeURIComponent(new Date(Date.now() - 20 * 86400000).toISOString())}`);
   const rejected = await mkPhoto("sweep rejected"); await admin(`set?id=${rejected}&field=status&value=rejected`);
   const removed = await mkPhoto("sweep removed"); await admin(`set?id=${removed}&field=status&value=removed`);
   const longGone = await mkPhoto("sweep expired 20d"); await admin(`approve?id=${longGone}&expires_in_days=-20`);
@@ -1039,7 +1111,8 @@ async function scenarioPhotos() {
   const ka = await fetch(`${APP}/api/keepalive`, { headers: { Authorization: "Bearer cron-t" } });
   check("keepalive: 200 with the secret", ka.status === 200 && (await ka.json()).ok === true);
   check("sweep: removed / rejected / expired>14d photos deleted and images cleared", !(await has(removed)) && !(await has(rejected)) && !(await has(longGone)) && (await rowOf(removed)).images.length === 0 && (await rowOf(longGone)).images.length === 0);
-  check("sweep: expired only 5 days ago, active and pending listings untouched", (await has(justGone)) && (await has(active)) && (await has(pendingP)));
+  check("sweep: expired only 5 days ago, active, pending and archived listings untouched", (await has(justGone)) && (await has(active)) && (await has(pendingP)) && (await has(archivedP)));
+  check("sweep: an archived ad expired more than 14 days ago loses its photos like an approved one", !(await has(archivedOld)) && (await rowOf(archivedOld)).images.length === 0);
   const many = [];
   for (let i = 0; i < 23; i++) { const x = await mkPhoto("bulk " + i); await admin(`set?id=${x}&field=status&value=removed`); many.push(x); }
   await fetch(`${APP}/api/keepalive`, { headers: { Authorization: "Bearer cron-t" } });
@@ -1150,6 +1223,7 @@ async function main() {
     await scenarioAvatar();
     await scenarioCreate();
     await scenarioMy();
+    await scenarioArchive();
     await scenarioPublicView();
     await scenarioReveal();
     await scenarioPhotos();

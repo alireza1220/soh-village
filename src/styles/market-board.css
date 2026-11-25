@@ -227,3 +227,7 @@
 
 /* Poster text uses dir="auto"; make sure alignment follows the text direction, not an inherited left/right. */
 .mkb-title, .mkb-price, .mkb-details, .mkb-dlg__title, .mkb-facts dd { text-align: start; }
+
+/* Ribbon strip at the top of a card: fixed height so the grid never shifts */
+.mkb-gc > .sr-ribbon, .mkb-row__body > .sr-ribbon { margin-block-end: 2px; }
+.mkb-gc > .sr-ribbon { padding: 6px 12px 0; order: -1; }

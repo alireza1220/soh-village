@@ -21,8 +21,8 @@ const T = {
   retry: { fa: "تلاش دوباره", en: "Try again" },
   shown: { fa: "نمایش", en: "Showing" },
   of: { fa: "از", en: "of" },
-  st: { pending: { fa: "در انتظار", en: "Pending" }, approved: { fa: "تأییدشده", en: "Approved" }, rejected: { fa: "ردشده", en: "Rejected" }, removed: { fa: "برداشته‌شده", en: "Removed" } },
-  done: { pending: { fa: "آگهی به انتظار برگشت.", en: "Ad is back to pending." }, approved: { fa: "آگهی تأیید شد.", en: "Ad approved." }, rejected: { fa: "آگهی رد شد.", en: "Ad rejected." }, removed: { fa: "آگهی برداشته شد.", en: "Ad removed." } },
+  st: { pending: { fa: "قدیمی: در انتظار", en: "Legacy: pending" }, approved: { fa: "منتشرشده", en: "Live" }, archived: { fa: "بایگانی‌شده", en: "Archived" }, rejected: { fa: "پایین‌آورده‌شده", en: "Taken down" }, removed: { fa: "برداشته‌شده", en: "Removed" } },
+  done: { pending: { fa: "آگهی به حالت قدیمی «در انتظار» رفت.", en: "Ad set to legacy pending." }, approved: { fa: "آگهی دوباره منتشر شد.", en: "Ad is live again." }, archived: { fa: "آگهی بایگانی شد.", en: "Ad archived." }, rejected: { fa: "آگهی پایین آورده شد و دیگر دیده نمی‌شود.", en: "Ad taken down. It is no longer public." }, removed: { fa: "آگهی برداشته شد.", en: "Ad removed." } },
   rmTitle: { fa: "این آگهی برداشته شود؟", en: "Remove this ad?" },
   rmText: { fa: "آگهی و عکس‌هایش برداشته می‌شود و برگشتی ندارد.", en: "This removes the ad and its photos. It cannot be undone." },
   rmGo: { fa: "بله، بردار", en: "Yes, remove" },
@@ -91,7 +91,7 @@ export function AdsTab({ lang, initialStatus, onForbidden }: { lang: Locale; ini
         <div className="field">
           <label className="label" htmlFor="adm-f-status">{T.status[lang]}</label>
           <select id="adm-f-status" className="select" value={status} onChange={(e) => setStatus(e.target.value as Filter)}>
-            {LISTING_STATUSES.map((s) => <option key={s} value={s}>{T.st[s][lang]}</option>)}
+            {LISTING_STATUSES.filter((s) => s !== "pending" || status === "pending").map((s) => <option key={s} value={s}>{T.st[s][lang]}</option>)}
             <option value="all">{T.all[lang]}</option>
           </select>
         </div>

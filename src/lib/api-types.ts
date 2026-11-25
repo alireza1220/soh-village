@@ -19,7 +19,8 @@ export type OwnListing = {
   contactKind: string | null;
   contactValue: string | null;
   contactPublic: boolean;
-  status: "pending" | "approved" | "rejected" | "removed";
+  /** "approved" = LIVE (new ads go live at once, nobody checks them first); "archived" = hidden by the owner, can be restored; "pending" is legacy (no longer created); "rejected" / "removed" = taken down. */
+  status: "pending" | "approved" | "archived" | "rejected" | "removed";
   createdAt: string | null;
   expiresAt: string | null;
   renewals: number;
@@ -47,11 +48,12 @@ export type ListingFields = {
   images?: string[];
 };
 
-// POST /api/listings            body ListingFields (board required)        -> { ok: true, id }
+// POST /api/listings            body ListingFields (board required)        -> { ok: true, id }   the ad is LIVE at once (status approved, expires in 30 days); admins can still take it down
 // POST /api/listings/images     body { listingId, items: {ext: "webp"|"jpg"}[] } -> { ok: true, files: SignedPhoto[] }
 // POST /api/my/listings         body { action: "list" }                    -> { ok: true, listings: OwnListing[] }
 //                               body { action: "update", id, fields: ListingFields } -> { ok: true, listing: OwnListing }
-//                               body { action: "renew" | "delete", id }    -> { ok: true, listing?: OwnListing }
+//                               body { action: "renew" | "delete" | "archive" | "unarchive", id }    -> { ok: true, listing?: OwnListing }
+//                                 archive: approved -> archived (hidden, photos kept); unarchive: archived -> approved (an already expired ad needs a renewal slot: 409 cannot_renew otherwise)
 // POST /api/listings/contact    body { id }  (PUBLIC, no login, rate limited per IP, kind "reveal")
 //                               -> { ok: true, contact: { kind: "phone", value: "09XXXXXXXXX" } }  the poster's CURRENT profile phone, only for an approved, unexpired ad.
 //                                  404 not_found (unknown / not public ad), 429 rate_limited, 503 not_configured. The phone is never in any public listing response.

@@ -117,8 +117,8 @@ Open https://supabase.com/dashboard → project **soh-village** for all of these
 ## 6. Check that everything is connected
 1. Vercel → **Deployments**: the latest row says **Ready**.
 2. Open `https://soh-village.site/en/market`: you can read everything, and the form asks you to log in first. Create an account (email + password), fill the profile (name, family name, mobile), then post a test ad.
-3. Supabase → **Table Editor** → `listings`: one new row with `status = pending` and your `owner_id`; `profiles`: your row. Nothing readable about a manage code exists any more.
-4. In the listing row change `status` to `approved` and save. Reload the market page: the ad appears within a minute with your first name. Its contact is shown only if you ticked permission on that ad.
+3. Supabase → **Table Editor** → `listings`: one new row with `status = approved`, `approved_at` and `expires_at` set, and your `owner_id`; `profiles`: your row. Nothing readable about a manage code exists any more.
+4. Reload the market page: the ad is already there (with the "Not verified by admin" ribbon unless your profile is verified). Its contact is shown only if you ticked permission on that ad.
 5. Open `/en/my` (also reachable as `/en/manage`): the ad is listed and edit, renew and delete work.
 6. Vercel → **Settings** → **Cron Jobs**: `/api/keepalive` is listed; **Run** returns 200.
 7. Email checks: "Forgot password" on `/en/login` sends a mail whose link opens `/en/reset-password`; the email-link login lands on `/en/login` signed in.

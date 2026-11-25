@@ -222,3 +222,5 @@
 @media (prefers-reduced-motion: no-preference) { .hm-ad--skeleton { animation: hm-pulse 1.4s ease-in-out infinite; } }
 @keyframes hm-pulse { 50% { opacity: .55; } }
 @media (prefers-reduced-motion: reduce) { .hm-ad { transition: none; } }
+
+.hm-ad__ribbon { padding: 8px 12px 0; }

@@ -56,6 +56,7 @@
 
 /* Badges */
 .adm-badge { display: inline-flex; align-items: center; min-block-size: 24px; padding: 0 10px; font-size: 13px; font-weight: 700; border: 1px solid var(--line); background: var(--mist); color: var(--ink); }
+.adm-badge--archived { background: var(--mist); color: var(--muted); border-style: dashed; }
 .adm-badge--pending { color: var(--amber); border-color: var(--amber); }
 .adm-badge--approved { background: var(--action); color: var(--on-action); border-color: var(--action); }
 .adm-badge--rejected, .adm-badge--removed { background: var(--surface); color: var(--apple); border-color: var(--apple); }

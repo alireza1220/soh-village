@@ -39,7 +39,7 @@ Authentication, Sign In / Providers, Email, **Confirm email**.
 
 Recommendation:
 - **With custom SMTP (section 5): keep Confirm email ON.**
-- **Before custom SMTP works: turn it OFF** so sign-up is not blocked, and turn it ON once real email delivery is tested. Posts still wait for Al's approval either way, so a fake address cannot publish anything by itself.
+- **Before custom SMTP works: turn it OFF** so sign-up is not blocked, and turn it ON once real email delivery is tested. Ads go live at once (no approval step), so a fake address can publish an ad; the ribbon "Not verified by admin" tells readers it was not checked, and you can take it down afterwards.
 
 The site handles both settings without any code change. With ON, signing up again with an address that already exists looks the same as a first sign-up ("check your email"): that is Supabase hiding which addresses have accounts, on purpose.
 
@@ -157,16 +157,16 @@ Do this on `http://localhost:3000` against a **development** Supabase project, t
 1. Set the environment variables (`docs/SECRETS.md`), run `npm run dev`.
 2. **Sign up**: `/en/login`, "Create account", email + password (8+ characters). With Confirm email ON, open the email and click the link (you land on `/en/login`), then log in. With it OFF you go straight on.
 3. **Profile**: you are sent to `/en/profile`. Fill first name, family name, mobile (try `0912 123 4567`, `+98 912 123 4567` and Persian digits: all save as `09121234567`). Pick a picture: it is cropped, shrunk to 96x96 and uploaded; the file is under 12 KB. Save. You continue to where you wanted to go (or My ads).
-4. **Post**: open `/en/market`, `/en/careers`, `/en/needs` or `/en/property`, fill the form, send. It appears in "My ads" as *waiting for approval*. In Supabase, Table Editor, `listings`: one new row with `status = pending` and your `owner_id`.
-5. **Approve**: set `status` to `approved`. Reload the board: the ad appears with your first name and picture (unless you switched that off on your profile). Your phone is **not** shown unless you ticked "show my contact on this ad".
-6. **Edit / renew / delete** from My ads. Editing an approved ad sends it back to `pending`.
+4. **Post**: open `/en/market`, `/en/careers`, `/en/needs` or `/en/property`, fill the form, send. It is live at once and appears in "My ads". In Supabase, Table Editor, `listings`: one new row with `status = approved`, a 30-day `expires_at` and your `owner_id`.
+5. **Check**: reload the board: the ad is already there (with the "Not verified by admin" ribbon unless your profile is verified) with your first name and picture (unless you switched that off on your profile). Your phone is **not** shown unless you ticked "show my contact on this ad".
+6. **Edit / renew / delete** from My ads. Editing keeps it live. **Archive** hides it (photos kept) and **Restore** brings it back.
 7. **Forgot password**: log out, `/en/login`, "Forgot password", enter the email. The mail's link opens `/en/reset-password`; choose a new password; log in with it. An expired or already-used link shows a friendly "link expired" message.
 8. **Set a password after a link login**: log in with an email link, open `/en/profile`, section Password: set one. Log out and log in with email + password.
 9. **Logged out**: open a board in a private window: you can read everything; the form is replaced by "To post an ad, log in first". After logging in you come back to that board.
 10. Check the **Redirect URLs** if any link fails (section 4). Links are single-use and expire; request a new one.
 
 ## 9. Admin: approving and hand-inserting rows
-Approval is unchanged: new and edited ads are `pending` until you set `status` to `approved` in the Table Editor (a trigger starts the 30-day expiry). `rejected` or `removed` hides an ad.
+There is no approval step any more (migration 009): new and edited ads are live at once and you moderate afterwards. `rejected` or `removed` hides an ad; `archived` is the owner's own hide. Rows you insert by hand should set `status`, `approved_at` and `expires_at` yourself (the trigger only runs on update).
 
 If you **insert a row by hand** in the Table Editor it now needs an **`owner_id`** (any user id from Authentication, Users; any uuid works). A database trigger refuses rows without one, because every ad belongs to a logged-in user.
 

@@ -7,6 +7,7 @@ import type { Listing } from "@/lib/market";
 import { useRevealContact } from "@/lib/use-reveal-contact";
 import { isAsk, Placeholder, PosterLine } from "./market-card";
 import { CatIcon, ChevL, ChevR, CloseI, CopyI, HeartI, PhoneI, ShareI, ZoomI } from "./market-icons";
+import { SellerCaution, SellerRibbon } from "./seller-ribbon";
 import { T } from "./market-text";
 import { copyText, telHref, fmtDate, num, relativeDay } from "./market-utils";
 
@@ -145,6 +146,7 @@ export function MarketDetail({ l, board, lang, today, saved, pos, onToggleSave, 
           </div>
 
           <div className="mkb-dlg__info">
+            <SellerRibbon verified={l.verified} lang={lang} />
             <p className="mkb-tags">
               <span className={`mkb-tag${isAsk(l.type) ? " mkb-tag--need" : ""}`}>{typeName}</span>
               <span className="mkb-tag" data-cat={l.category}><CatIcon cat={l.category} size={14} />{categoryLabel(b, l.category, lang)}</span>
@@ -154,7 +156,8 @@ export function MarketDetail({ l, board, lang, today, saved, pos, onToggleSave, 
             <dl className="mkb-facts">
               {facts.map((f) => (<Fragment key={f.label}><dt>{f.label}</dt><dd><bdi dir="auto">{f.value}</bdi></dd></Fragment>))}
             </dl>
-            <PosterLine poster={l.poster} size={40} label={T.postedBy[lang]} verified={l.verified} lang={lang} />
+            {!l.verified && <SellerCaution lang={lang} />}
+            <PosterLine poster={l.poster} size={40} label={T.postedBy[lang]} lang={lang} />
             {l.details && <p className="mkb-details" dir="auto">{l.details}</p>}
             <p className="mkb-dates">{T.posted[lang]} {fmtDate(l.postedAt, lang)} ({relativeDay(l.postedAt, today, lang)}) · {T.until[lang]} {fmtDate(l.expiresAt, lang)}</p>
 

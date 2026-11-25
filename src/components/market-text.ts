@@ -32,7 +32,7 @@ export const T = {
   errTitle: { fa: "آگهی‌ها بارگیری نشد", en: "Ads could not load" },
   errText: { fa: "مشکل از اینترنت یا از سرور است. دوباره امتحان کنید.", en: "It may be your connection or our server. Please try again." },
   retry: { fa: "دوباره امتحان کنید", en: "Try again" },
-  source: { fa: "آگهی‌ها پس از بررسی منتشر می‌شوند و بعد از ۳۰ روز برداشته می‌شوند.", en: "Ads are published after a check and removed after 30 days." },
+  source: { fa: "آگهی‌ها بی‌درنگ منتشر می‌شوند و بعد از ۳۰ روز برداشته می‌شوند. مدیر همه‌ی آن‌ها را پیش از انتشار بررسی نمی‌کند.", en: "Ads go live at once and are removed after 30 days. An admin does not check each one first." },
   gone: { fa: "این آگهی دیگر روی تابلو نیست.", en: "That ad is no longer on the board." },
   save: { fa: "ذخیره", en: "Save" },
   unsave: { fa: "برداشتن از ذخیره‌ها", en: "Remove from saved" },

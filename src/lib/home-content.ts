@@ -69,7 +69,7 @@ export const hc = {
 
   marketEyebrow: { fa: "از بازارچه‌ی روستا", en: "From the village market" },
   marketTitle: { fa: "تازه‌ترین آگهی‌ها", en: "Latest listings" },
-  marketIntro: { fa: "فقط آگهی‌های بررسی‌شده. پرداخت بیرون از سایت است.", en: "Checked listings only. Payment happens off-site." },
+  marketIntro: { fa: "آگهی‌ها بی‌درنگ و بدون بررسی مدیر منتشر می‌شوند. پرداخت بیرون از سایت است.", en: "Ads go live without an admin check. Payment happens off-site." },
   marketEmpty: { fa: "هنوز آگهی‌ای نیست. اولین نفر باشید.", en: "No listings yet. Be the first." },
   marketExample: { fa: "نمونه‌ی آگهی (واقعی نیست)", en: "Sample listing (not real)" },
   marketExampleTitle: { fa: "گیلاس تازه‌ی باغ", en: "Fresh orchard cherries" },
@@ -96,8 +96,8 @@ export const hc = {
 
   ctaTitle: { fa: "به ساختن این سایت کمک کنید", en: "Help build this site" },
   ctaText: {
-    fa: "عکس، واژه، خاطره، اصلاح یا آگهی ملک دارید؟ پیش از انتشار بررسی می‌شود.",
-    en: "A photo, word, memory, correction or property listing? All is checked before publishing.",
+    fa: "عکس، واژه، خاطره یا اصلاحی دارید؟ پیش از انتشار بررسی می‌شود. آگهی را خودتان در بخش آگهی‌ها بگذارید؛ بی‌درنگ منتشر می‌شود.",
+    en: "A photo, word, memory or correction? It is checked before publishing. Post ads yourself on the ad boards; they go live at once.",
   },
   ctaButton: { fa: "مشارکت", en: "Contribute" },
 } satisfies Record<string, L>;

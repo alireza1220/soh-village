@@ -4,8 +4,8 @@
 -- listings.manage_hash and listings.poster_name columns, which cannot be undone).
 --
 -- Everyone can LOOK at approved ads (view public_listings); every WRITE goes through the site's server routes, which need a
--- logged-in user. Rows arrive as 'pending'. Approve them in Table Editor by setting status = 'approved'; the trigger below then
--- sets approved_at and a 30-day expiry. Only approved, unexpired rows are public. A contact is shown only if the poster ticked
+-- logged-in user. Ads go live at once (status 'approved', 30-day expiry set by the server on insert); there is no review queue.
+-- Admins take ads down afterwards (rejected / removed); owners can hide their own ('archived'). Only approved, unexpired rows are public. A contact is shown only if the poster ticked
 -- it for that ad (contact_public). The poster's first name and avatar are shown only if profiles.show_on_ads.
 -- Rows you insert by hand in the Table Editor need an owner_id (any uuid) because of the listing_require_owner trigger.
 
@@ -52,7 +52,7 @@ create table if not exists public.listings (
   contact_value  text check (char_length(contact_value) <= 60),
   contact_public boolean not null default false,                -- the poster's permission (per ad)
   ip_hash        text,                                          -- spam control only, never public
-  status         text not null default 'pending' check (status in ('pending','approved','rejected','removed')),
+  status         text not null default 'approved' check (status in ('pending','approved','archived','rejected','removed')),
   created_at     timestamptz not null default now(),
   approved_at    timestamptz,
   expires_at     timestamptz,
@@ -326,3 +326,35 @@ revoke all on public.public_listings from anon, authenticated;
 grant select on public.public_listings to anon, authenticated;
 
 grant all on public.profiles to service_role;
+
+-- Migration 009 (same SQL as database/migrations/009-ads-live-archive.sql): ads go live at once + owners can archive. Safe to run more than once.
+-- Run in Supabase > SQL Editor AFTER migration 008, and BEFORE the new site code goes live.
+--   1. listings.status       gains 'archived' (the owner hid the ad; photos and data are kept; not public; can be restored).
+--   2. pending rows          become 'approved' (new policy: there is no review queue; admins take ads down afterwards).
+--      approved_at / expires_at are filled in when empty (now / now + 30 days) so those ads are public and expire normally.
+--   3. status default        'approved' (the site also sets status, approved_at and expires_at itself on insert, because the
+--                            listing_on_approve trigger only runs on UPDATE).
+-- public_listings is unchanged: it already shows only status = 'approved' (and unexpired), so archived ads are never public.
+
+-- 1. Allow 'archived' (find the real constraint name, whatever it was called) -----------------------------------------------
+do $$ declare c record; begin
+  for c in
+    select conname from pg_constraint
+    where conrelid = 'public.listings'::regclass and contype = 'c' and pg_get_constraintdef(oid) ilike '%status%'
+      and pg_get_constraintdef(oid) ilike '%pending%'
+  loop
+    execute format('alter table public.listings drop constraint %I', c.conname);
+  end loop;
+  alter table public.listings add constraint listings_status_check
+    check (status in ('pending','approved','archived','rejected','removed'));
+end $$;
+
+-- 2. No review queue: pending ads go live -----------------------------------------------------------------------------------
+update public.listings
+   set status = 'approved',
+       approved_at = coalesce(approved_at, now()),
+       expires_at = coalesce(expires_at, now() + interval '30 days')
+ where status = 'pending';
+
+-- 3. New rows are live by default -------------------------------------------------------------------------------------------
+alter table public.listings alter column status set default 'approved';

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Arrow } from "@/components/icons";
 import { BOARD_IDS, BOARDS, categoryLabel, typeLabel, type BoardId } from "@/lib/boards";
 import type { L, Locale } from "@/lib/i18n";
-import { VerifiedBadge } from "@/components/verified-badge";
+import { SellerRibbon } from "@/components/seller-ribbon";
 import { useLatestListings } from "@/lib/use-latest-listings";
 
 const T = {
@@ -61,6 +61,7 @@ export function LatestAds({ lang }: { lang: Locale }) {
                       return (
                         <li key={a.id} className="hm-ad">
                           <Link href={`${base}#ad=${a.id}`} className="hm-ad__link">
+                            <SellerRibbon verified={a.verified} lang={lang} className="hm-ad__ribbon" />
                             {a.thumb ? (
                               // eslint-disable-next-line @next/next/no-img-element -- remote public storage thumbnail with a fixed aspect box
                               <img className="hm-ad__img" src={a.thumb} alt="" width={400} height={300} loading="lazy" decoding="async" />
@@ -75,7 +76,6 @@ export function LatestAds({ lang }: { lang: Locale }) {
                                 <span className="chip">{categoryLabel(b, a.category, lang, true)}</span>
                               </span>
                               <bdi dir="auto" className="hm-ad__title">{a.title}</bdi>
-                              {a.verified && <VerifiedBadge lang={lang} compact className="hm-ad__vb" />}
                               {meta && <bdi dir="auto" className="muted hm-ad__meta">{meta}</bdi>}
                             </span>
                           </Link>

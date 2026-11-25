@@ -619,7 +619,7 @@ export const sections: Section[] = [
       en: "Ask the village for what you need, and offer what you have.",
     },
     blocks: [
-      { t: "p", text: { fa: "مثل تابلوی نیازمندی‌های روستاست. وارد شوید و نیاز یا پیشنهادتان را بنویسید. آگهی‌ها بررسی می‌شوند؛ شماره‌ی تماس فقط با اجازه‌ی شما دیده می‌شود.", en: "Like the village notice board. Log in and write your need or offer. Posts are checked; your number is shown only with permission." } },
+      { t: "p", text: { fa: "مثل تابلوی نیازمندی‌های روستاست. وارد شوید و نیاز یا پیشنهادتان را بنویسید. آگهی‌ها بی‌درنگ و بدون بررسی مدیر منتشر می‌شوند؛ شماره‌ی تماس فقط با اجازه‌ی شما دیده می‌شود.", en: "Like the village notice board. Log in and write your need or offer. Posts go live without an admin check; your number is shown only with permission." } },
       { t: "tags", label: { fa: "نمونه‌ی نیازمندی‌ها", en: "Examples of what people ask for" }, items: [
         { fa: "اتاق یا خانه برای اقامت", en: "A room or house to stay" },
         { fa: "راننده یا وسیله‌ی رفت‌وآمد", en: "A driver or a ride" },

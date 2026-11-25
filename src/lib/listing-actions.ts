@@ -108,9 +108,9 @@ export async function purgeImages(sb: Sb, row: Row): Promise<boolean> {
   }
 }
 
-export type Action = "update" | "renew" | "delete";
+export type Action = "update" | "renew" | "archive" | "unarchive" | "delete";
 
-// Applies update / renew / delete to a row the caller has already proven they own.
+// Applies update / renew / archive / unarchive / delete to a row the caller has already proven they own.
 export async function applyAction(sb: Sb, row: Row, action: Action, fields: unknown): Promise<Response> {
   const status = String(row.status);
 
@@ -124,7 +124,7 @@ export async function applyAction(sb: Sb, row: Row, action: Action, fields: unkn
   }
 
   if (action === "update") {
-    if (status === "removed" || status === "rejected") return json({ error: "not_editable" }, 409);
+    if (status === "removed" || status === "rejected" || status === "archived") return json({ error: "not_editable" }, 409);
     if (!fields || typeof fields !== "object" || Array.isArray(fields)) return json({ error: "bad_fields" }, 400);
     const board = isBoard(row.board) ? row.board : "market";
     const parsed = parseListingInput(fields as Record<string, unknown>, "update", {
@@ -148,7 +148,7 @@ export async function applyAction(sb: Sb, row: Row, action: Action, fields: unkn
       toRemove = checked.present.filter((o) => !keep.has(o.name) && (wasSaved.has(o.name) || o.ageMs === null || o.ageMs >= ORPHAN_MIN_AGE_MS)).map((o) => o.name);
     }
     if (Object.keys(patch).length === 0) return json({ ok: true, listing: publicRow(row) });
-    if (status === "approved") patch.status = "pending"; // edits are re-checked
+    // Edits keep a live ad live (nobody reviews ads first). Archived ads cannot be edited: restore first.
     const out = await patchRow(sb, row, patch);
     if (out === "error") return storeFailed();
     if (!out) return json({ error: "conflict" }, 409);
@@ -156,6 +156,34 @@ export async function applyAction(sb: Sb, row: Row, action: Action, fields: unkn
       const id = String(row.id);
       await removeObjects(sb, toRemove.map((n) => `${id}/${n}`));
     }
+    return json({ ok: true, listing: publicRow(out) });
+  }
+
+  if (action === "archive") {
+    if (status === "archived") return json({ ok: true, listing: publicRow(row) });
+    if (status !== "approved") return json({ error: "not_editable" }, 409);
+    const out = await patchRow(sb, row, { status: "archived" });
+    if (out === "error") return storeFailed();
+    if (!out) return json({ error: "conflict" }, 409);
+    return json({ ok: true, listing: publicRow(out) });
+  }
+
+  if (action === "unarchive") {
+    if (status === "approved") return json({ ok: true, listing: publicRow(row) });
+    if (status !== "archived") return json({ error: "not_editable" }, 409);
+    const renewals = typeof row.renewals === "number" ? row.renewals : 0;
+    const exp = typeof row.expires_at === "string" ? Date.parse(row.expires_at) : NaN;
+    const now = Date.now();
+    const patch: Row = { status: "approved" };
+    if (!Number.isNaN(exp) && exp <= now) {
+      // Expired while archived: coming back uses a renewal slot, exactly like renew.
+      if (exp < now - RENEW_LAST_DAYS * DAY || renewals >= MAX_RENEWALS) return json({ error: "cannot_renew" }, 409);
+      patch.expires_at = new Date(now + RENEW_EXTEND_MS).toISOString();
+      patch.renewals = renewals + 1;
+    }
+    const out = await patchRow(sb, row, patch);
+    if (out === "error") return storeFailed();
+    if (!out) return json({ error: "conflict" }, 409);
     return json({ ok: true, listing: publicRow(out) });
   }
 

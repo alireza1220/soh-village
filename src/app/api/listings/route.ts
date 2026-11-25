@@ -2,7 +2,10 @@ import { boardOf, parseListingInput } from "@/lib/listing-validation";
 import { authenticate, failure, json, readBody, requireProfile, sbHeaders } from "@/lib/server-guard";
 import { serverSupabase } from "@/lib/supabase";
 
-// Creates a listing for the logged-in poster, status "pending". Nothing is public until an admin approves it in Supabase.
+const MAX_LIVE_ADS = 20;
+
+// Creates a listing for the logged-in poster. It goes LIVE AT ONCE (status "approved", 30-day expiry): nobody reviews it first.
+// Admins take ads down afterwards. The DB trigger listing_on_approve runs on UPDATE only, so approved_at / expires_at are set here.
 // Gate: Bearer token (401) > IP + user rate limits (429) > profile complete (403 profile_required).
 export async function POST(req: Request) {
   const sb = serverSupabase();
@@ -20,11 +23,21 @@ export async function POST(req: Request) {
   const parsed = parseListingInput(b, "create", { board, profilePhone: profile.phone });
   if (!parsed.ok) return json({ error: parsed.error }, 400);
 
+  const now = new Date();
   try {
+    // Cap on live ads per account (ads go public at once, so one account must not flood the board).
+    const nowIso = encodeURIComponent(now.toISOString());
+    const cnt = await fetch(
+      `${sb.url}/rest/v1/listings?select=id&owner_id=eq.${auth.user.id}&status=eq.approved&or=(expires_at.is.null,expires_at.gt.${nowIso})`,
+      { headers: { ...sbHeaders(sb), Prefer: "count=exact", Range: "0-0" }, cache: "no-store" },
+    );
+    if (!cnt.ok) return failure("listing_count", cnt);
+    const live = Number(cnt.headers.get("content-range")?.split("/")[1] ?? 0);
+    if (live >= MAX_LIVE_ADS) return json({ error: "too_many_listings" }, 429);
     const res = await fetch(`${sb.url}/rest/v1/listings`, {
       method: "POST",
       headers: { ...sbHeaders(sb), "Content-Type": "application/json", Prefer: "return=representation" },
-      body: JSON.stringify({ ...parsed.value, board, ip_hash: auth.ipHash, owner_id: auth.user.id }),
+      body: JSON.stringify({ ...parsed.value, board, ip_hash: auth.ipHash, owner_id: auth.user.id, status: "approved", approved_at: now.toISOString(), expires_at: new Date(now.getTime() + 30 * 86_400_000).toISOString() }),
       cache: "no-store",
     });
     if (!res.ok) return failure("listing_insert", res);

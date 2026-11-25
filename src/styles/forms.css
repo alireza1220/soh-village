@@ -95,3 +95,9 @@
 .vb__icon { flex: none; color: var(--accent-text); }
 .vb--compact { padding: 2px; }
 .vb__text--sr { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* Top ribbon of a public ad: "Not verified by admin" (calm amber) or the verified badge (sr-) */
+.sr-ribbon { display: flex; align-items: center; margin: 0; min-block-size: 28px; }
+.sr-ribbon__t { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; background: var(--mist); color: var(--amber); border: 1px solid var(--amber); font-size: 12.5px; font-weight: 700; line-height: 1.6; }
+.sr-ribbon__i { flex: none; }
+.sr-caution { margin: 0; padding: 8px 12px; background: var(--mist); color: var(--ink); border-inline-start: 4px solid var(--amber); font-size: 14px; line-height: 1.7; }

@@ -196,6 +196,7 @@ function project(rows, select) {
 // CHECK constraints of the real tables.
 const validListing = (r) => {
   if (!BOARD_IDS.includes(r.board)) return "board";
+  if (!["pending", "approved", "archived", "rejected", "removed"].includes(r.status)) return "listings_status_check"; // migration 009
   if (!TYPES.includes(r.type)) return "type";
   if (typeof r.category !== "string") return "category";
   if (typeof r.title !== "string" || r.title.length < 1 || r.title.length > 120) return "title";
@@ -299,7 +300,7 @@ async function rest(req, res, url) {
       const now = new Date().toISOString();
       if (table === "listings") {
         const row = {
-          id: randomUUID(), board: "market", status: "pending", renewals: 0, images: [], contact_public: false, created_at: now, updated_at: now,
+          id: randomUUID(), board: "market", status: "approved", renewals: 0, images: [], contact_public: false, created_at: now, updated_at: now,
           approved_at: null, expires_at: null, owner_id: null, ip_hash: null,
           quantity: null, price: null, available: null, details: null, contact_kind: null, contact_value: null,
           ...Object.fromEntries(Object.entries(it).filter(([k]) => k !== "id")),

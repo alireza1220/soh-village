@@ -62,17 +62,17 @@ export type Listing = {
   /** the poster is a "verified seller" (an admin confirmed them). Shown even when the poster hides their name. */
   verified?: boolean;
   postedAt: string; // YYYY-MM-DD
-  expiresAt: string; // YYYY-MM-DD, 30 days after approval unless renewed
+  expiresAt: string; // YYYY-MM-DD, 30 days after publishing unless renewed
   images?: ListingImage[]; // up to 10 photos, first = cover (see listing-images.ts)
 };
 
-// Approved listings. Add one object per approved post (see README, "Approving posts").
+// Hand-written listings (the live ones come from Supabase).
 // Never add a phone number or name unless the poster agreed to publish it.
 export const listings: Listing[] = [];
 
 export const marketNote: L = {
-  fa: "آگهی‌ها فقط پس از بررسی منتشر می‌شوند و بعد از ۳۰ روز برداشته می‌شوند.",
-  en: "Listings are published only after a check and removed after 30 days.",
+  fa: "آگهی‌ها بی‌درنگ منتشر می‌شوند و بعد از ۳۰ روز برداشته می‌شوند.",
+  en: "Listings go live at once and are removed after 30 days.",
 };
 
 // Short category names for filter chips (the full names above stay for forms and detail pages).

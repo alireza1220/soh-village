@@ -8,15 +8,14 @@ import { VerifiedBadge } from "@/components/verified-badge";
 import { fmtDate } from "./admin-api";
 
 const T = {
-  status: { pending: { fa: "در انتظار", en: "Pending" }, approved: { fa: "تأییدشده", en: "Approved" }, rejected: { fa: "ردشده", en: "Rejected" }, removed: { fa: "برداشته‌شده", en: "Removed" } },
-  approve: { fa: "تأیید", en: "Approve" },
-  reject: { fa: "رد کردن", en: "Reject" },
-  remove: { fa: "برداشتن", en: "Remove" },
-  restore: { fa: "برگرداندن به انتظار", en: "Back to pending" },
+  status: { pending: { fa: "قدیمی: در انتظار", en: "Legacy: pending" }, approved: { fa: "منتشرشده", en: "Live" }, archived: { fa: "بایگانی‌شده (توسط آگهی‌دهنده)", en: "Archived (by the poster)" }, rejected: { fa: "پایین‌آورده‌شده", en: "Taken down" }, removed: { fa: "برداشته‌شده", en: "Removed" } },
+  takeDown: { fa: "پایین آوردن", en: "Take down" },
+  remove: { fa: "حذف کامل", en: "Remove" },
+  restore: { fa: "بازگرداندن به انتشار", en: "Restore" },
   poster: { fa: "آگهی‌دهنده", en: "Posted by" },
   unknown: { fa: "نامشخص", en: "Unknown" },
   created: { fa: "ثبت", en: "Created" },
-  approvedAt: { fa: "تأیید", en: "Approved" },
+  approvedAt: { fa: "انتشار", en: "Published" },
   expires: { fa: "انقضا", en: "Expires" },
   photo: { fa: "عکس", en: "Photo" },
   details: { fa: "توضیحات", en: "Details" },
@@ -60,9 +59,8 @@ export function AdRow({ lang, ad, busy, onSet }: { lang: Locale; ad: AdminListin
         <span>{T.expires[lang]}: {fmtDate(ad.expiresAt, lang)}</span>
       </p>
       <div className="adm-row">
-        {s !== "approved" && s !== "removed" && <button type="button" className="btn btn--primary" disabled={busy} onClick={() => onSet(ad, "approved")}>{T.approve[lang]}</button>}
-        {s !== "rejected" && s !== "removed" && <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => onSet(ad, "rejected")}>{T.reject[lang]}</button>}
-        {s !== "pending" && <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => onSet(ad, "pending")}>{T.restore[lang]}</button>}
+        {(s === "rejected" || s === "pending") && <button type="button" className="btn btn--primary" disabled={busy} onClick={() => onSet(ad, "approved")}>{T.restore[lang]}</button>}
+        {s !== "rejected" && s !== "removed" && <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => onSet(ad, "rejected")}>{T.takeDown[lang]}</button>}
         {s !== "removed" && <button type="button" className="btn btn--quiet-danger adm-end" disabled={busy} onClick={() => onSet(ad, "removed")}>{T.remove[lang]}</button>}
       </div>
     </li>

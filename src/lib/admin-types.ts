@@ -6,7 +6,7 @@ import type { OwnListing } from "@/lib/api-types";
 import type { AdminPost, PostFields } from "@/lib/posts";
 import type { Role } from "@/lib/profile";
 
-export const LISTING_STATUSES = ["pending", "approved", "rejected", "removed"] as const;
+export const LISTING_STATUSES = ["pending", "approved", "archived", "rejected", "removed"] as const;
 export type ListingStatus = (typeof LISTING_STATUSES)[number];
 export const isListingStatus = (v: unknown): v is ListingStatus => typeof v === "string" && (LISTING_STATUSES as readonly string[]).includes(v);
 

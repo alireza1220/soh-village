@@ -6,7 +6,7 @@ import { parseListingInput } from "@/lib/listing-validation";
 import { failure, json, sbHeaders, UUID, type Row, type Sb } from "@/lib/server-guard";
 
 // POST /api/admin/listings  (admins only; see src/lib/admin-types.ts)
-//   list: status (default "pending", or "all"), board, q (title / details), offset; 50 per page, newest first.
+//   list: status (default "approved", or "all"; "archived" and the others work too), board, q (title / details), offset; 50 per page, newest first.
 //   set_status: approve / reject / remove / put back to pending. update: fix the text fields (photos are not touched here).
 export async function POST(req: Request) {
   const ctx = await adminGate(req);
@@ -33,6 +33,7 @@ export async function POST(req: Request) {
         if (status === "removed") await purgeImages(sb, row); // a retry of a remove that left photos behind
         return answer(row);
       }
+      if (status === "archived" && (row.status === "rejected" || row.status === "removed")) return json({ error: "conflict" }, 409);
       const patch: Row = { status };
       if (status === "approved") {
         // Like the DB trigger: only the FIRST approval starts the clock; a re-approval after an edit must not renew the ad.
@@ -73,7 +74,7 @@ export async function POST(req: Request) {
 }
 
 async function list({ sb, body: b }: { sb: Sb; body: Record<string, unknown> }): Promise<Response> {
-  const status = b.status === undefined ? "pending" : b.status;
+  const status = b.status === undefined ? "approved" : b.status; // ads go live at once; admins moderate after the fact
   if (status !== "all" && !isListingStatus(status)) return json({ error: "bad_status" }, 400);
   if (b.board !== undefined && b.board !== null && b.board !== "all" && !isBoard(b.board)) return json({ error: "bad_board" }, 400);
   let filter = "";

@@ -1,6 +1,6 @@
 # Admin area: how it works and how to use it
 
-An admin is a normal account that you have marked as "admin" in Supabase. Admins get an extra area on the site where they can approve or remove ads, see all users, and write news, blog posts and events for the main page. Nobody can make themselves an admin from the website.
+An admin is a normal account that you have marked as "admin" in Supabase. Admins get an extra area on the site where they can take down (reject or remove) or restore ads, see all users, and write news, blog posts and events for the main page. Nobody can make themselves an admin from the website.
 
 ## 1. Run migration 006 (once)
 
@@ -37,7 +37,7 @@ From that moment the person is refused by every admin function.
 
 ## 4. What an admin can do
 
-- **Listings:** see ads waiting for approval (or all ads), search them, filter by section, see who posted each one (name and phone, which the public never sees). Approve (30 days, a longer existing expiry is kept), reject, put back to pending, or remove (the photos are deleted too). Fix typos in an ad. Photos are not edited from here.
+- **Listings:** see live ads (the default), archived ones, or all ads, search them, filter by section, see who posted each one (name and phone, which the public never sees). Ads are NOT reviewed before they go live; you moderate afterwards. Reject or remove an ad that breaks the rules, or set it back to approved (the first approval sets 30 days; a longer or still-running expiry is never reset). Archived ads are ones the owner hid; you can see and filter them. Remove (the photos are deleted too). Fix typos in an ad. Photos are not edited from here.
 - **News, blog and events:** write, edit, publish, unpublish and delete. A post can be a draft first. Events have a date, time and place. Persian and English text are separate; one language is enough.
 - **Users:** see everybody who has a profile, with phone, home address, role, verified status and how many ads they have. Search by name or phone, filter verified or not, and switch **Verified seller** on or off per person (section 12). Roles are read only.
 - **Overview:** counts of ads by status, users, admins and posts.

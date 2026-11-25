@@ -8,11 +8,12 @@ import { adminCall } from "./admin-api";
 const T = {
   loading: { fa: "در حال بارگذاری...", en: "Loading..." },
   retry: { fa: "تلاش دوباره", en: "Try again" },
-  pending: { fa: "آگهی در انتظار تأیید", en: "Ads waiting for approval" },
-  review: { fa: "بررسی آگهی‌ها", en: "Review ads" },
-  none: { fa: "آگهی‌ای در انتظار نیست.", en: "Nothing is waiting." },
-  approved: { fa: "تأییدشده", en: "Approved" },
-  rejected: { fa: "ردشده", en: "Rejected" },
+  pending: { fa: "آگهی قدیمی در انتظار (دیگر بررسی لازم نیست؛ بازگردانید تا منتشر شود)", en: "Legacy ads still pending (no review is needed now; restore them to publish)" },
+  review: { fa: "دیدن آگهی‌ها", en: "Show ads" },
+  live: { fa: "آگهی منتشرشده. آگهی‌ها بی‌درنگ منتشر می‌شوند؛ هر وقت لازم بود از زبانه‌ی آگهی‌ها پایینشان بیاورید.", en: "ads live. Ads go public at once; take one down from the Ads tab when needed." },
+  approved: { fa: "منتشرشده", en: "Live" },
+  archived: { fa: "بایگانی‌شده", en: "Archived" },
+  rejected: { fa: "پایین‌آورده‌شده", en: "Taken down" },
   removed: { fa: "برداشته‌شده", en: "Removed" },
   users: { fa: "کاربران", en: "Users" },
   admins: { fa: "مدیران", en: "Admins" },
@@ -44,18 +45,19 @@ export function OverviewTab({ lang, onOpenPending, onForbidden }: { lang: Locale
   const card = (label: string, v: number) => (
     <li className="adm-stat" key={label}><span className="adm-stat__n">{n.format(v)}</span><span className="adm-stat__l">{label}</span></li>
   );
-  const p = counts.listings.pending;
+  const p = counts.listings.pending ?? 0;
+  const live = counts.listings.approved ?? 0;
   return (
     <div className="adm-stack">
       <section className={`adm-pending${p > 0 ? " adm-pending--on" : ""}`} aria-labelledby="adm-pend">
         <div>
-          <span className="adm-stat__n">{n.format(p)}</span>
-          <h2 id="adm-pend">{p > 0 ? T.pending[lang] : T.none[lang]}</h2>
+          <span className="adm-stat__n">{n.format(p > 0 ? p : live)}</span>
+          <h2 id="adm-pend">{p > 0 ? T.pending[lang] : T.live[lang]}</h2>
         </div>
         {p > 0 && <button type="button" className="btn btn--primary" onClick={onOpenPending}>{T.review[lang]}</button>}
       </section>
       <h2 className="adm-h">{T.h1[lang]}</h2>
-      <ul className="adm-stats">{card(T.approved[lang], counts.listings.approved)}{card(T.rejected[lang], counts.listings.rejected)}{card(T.removed[lang], counts.listings.removed)}</ul>
+      <ul className="adm-stats">{card(T.approved[lang], live)}{card(T.archived[lang], counts.listings.archived ?? 0)}{card(T.rejected[lang], counts.listings.rejected)}{card(T.removed[lang], counts.listings.removed)}</ul>
       <h2 className="adm-h">{T.h2[lang]}</h2>
       <ul className="adm-stats">
         {card(T.users[lang], counts.users)}{card(T.admins[lang], counts.admins)}

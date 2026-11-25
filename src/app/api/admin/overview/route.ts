@@ -21,10 +21,10 @@ export async function POST(req: Request) {
     if (bad) return bad;
     const n = out as number[];
     const counts: AdminCounts = {
-      listings: { pending: n[0], approved: n[1], rejected: n[2], removed: n[3] },
-      users: n[4],
-      admins: n[5],
-      posts: { news: n[6], blog: n[7], event: n[8], drafts: n[9] },
+      listings: Object.fromEntries(LISTING_STATUSES.map((s, i) => [s, n[i]])) as AdminCounts["listings"],
+      users: n[LISTING_STATUSES.length],
+      admins: n[LISTING_STATUSES.length + 1],
+      posts: { news: n[LISTING_STATUSES.length + 2], blog: n[LISTING_STATUSES.length + 3], event: n[LISTING_STATUSES.length + 4], drafts: n[LISTING_STATUSES.length + 5] },
     };
     return json({ ok: true, counts });
   } catch (e) {

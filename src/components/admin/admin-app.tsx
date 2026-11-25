@@ -45,7 +45,7 @@ export function AdminApp({ lang }: { lang: Locale }) {
   const [tab, setTab] = useState<Tab>(fromHash);
   const [visited, setVisited] = useState<Tab[]>(() => [fromHash()]);
   const [adsKey, setAdsKey] = useState(0);
-  const [adsStatus, setAdsStatus] = useState<ListingStatus | "all">("pending");
+  const [adsStatus, setAdsStatus] = useState<ListingStatus | "all">("approved");
   const [forbidden, setForbidden] = useState(false);
   const refs = useRef<Record<string, HTMLButtonElement | null>>({});
 

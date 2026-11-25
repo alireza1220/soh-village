@@ -4,7 +4,7 @@ import { authenticate, failure, json, readBody, requireProfile, sbHeaders, UUID,
 import { serverSupabase } from "@/lib/supabase";
 
 // The logged-in poster's own listings. Every row is matched on owner_id = the verified user id (another user's id answers 404).
-// list and delete need only login; update and renew also need a complete profile (403 profile_required).
+// list and delete need only login; update, renew, archive and unarchive also need a complete profile (403 profile_required).
 export async function POST(req: Request) {
   const sb = serverSupabase();
   if (!sb) return json({ error: "not_configured" }, 503);
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     }
   }
 
-  if (action !== "update" && action !== "renew" && action !== "delete") return json({ error: "bad_action" }, 400);
+  if (action !== "update" && action !== "renew" && action !== "archive" && action !== "unarchive" && action !== "delete") return json({ error: "bad_action" }, 400);
   if (action !== "delete") {
     const profile = await requireProfile(sb, user.id);
     if (profile instanceof Response) return profile;
