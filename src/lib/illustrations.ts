@@ -1,7 +1,6 @@
 import type { L } from "./i18n";
 
 // AI-generated illustrations (25 Nov 2026). They are NOT photographs and do not show real places or people.
-// Every place that shows one must carry <IllustrationLabel /> (see docs/DESIGN.md).
 export type Illustration = { file: string; width: number; height: number; alt: L };
 
 const W = 1536;

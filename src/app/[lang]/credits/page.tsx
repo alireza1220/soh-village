@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Credit } from "@/components/credit";
-import { IllustrationLabel } from "@/components/illustration-label";
 import { MsBanner } from "@/components/ms-banner";
 import { hasLocale, locales } from "@/lib/i18n";
 import { photos } from "@/lib/photos";
@@ -55,7 +54,6 @@ export default async function Credits({ params }: PageProps<"/[lang]/credits">) 
               ? "تصویرسازی‌های این سایت در ۲۵ نوامبر ۲۰۲۶ با یک ابزار تصویرسازی هوش مصنوعی ساخته شده‌اند. عکس نیستند و جای واقعی یا آدم واقعی را نشان نمی‌دهند."
               : "The illustrations on this site were made with an AI image tool on 25 Nov 2026. They are not photographs, and they do not show real places or people."}
           </p>
-          <p><IllustrationLabel lang={lang} /></p>
         </section>
       </div>
     </article>

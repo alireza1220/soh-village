@@ -8,7 +8,6 @@ import { MarketTeaser } from "@/components/home/market-teaser";
 import { YearList } from "@/components/home/year-list";
 import { Arrow } from "@/components/icons";
 import { VillageMap } from "@/components/map";
-import { IllustrationLabel } from "@/components/illustration-label";
 import { SectionMark } from "@/components/section-mark";
 import {
   entriesLabel, entryCount, findCard, hc, heroFiles, photoOf, planCards, statusLabel, yearRows,
@@ -172,7 +171,6 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
                       ) : f.ill ? (
                         <>
                           <Image src={illustrationSrc(f.ill)} alt={f.ill.alt[lang]} fill sizes="(max-width: 1023px) 100vw, 600px" className="object-cover" />
-                          <IllustrationLabel lang={lang} overlay />
                         </>
                       ) : (
                         <div className="hm-card__placeholder"><SectionMark slug={f.slug} /></div>
@@ -242,7 +240,6 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
                       ) : illustrationFor(g.slug) ? (
                         <>
                           <Image src={illustrationSrc(illustrationFor(g.slug)!)} alt={illustrationFor(g.slug)!.alt[lang]} fill sizes="(max-width: 767px) 100vw, 400px" className="object-cover" />
-                          <IllustrationLabel lang={lang} overlay />
                         </>
                       ) : (
                         <div className="hm-card__placeholder"><SectionMark slug={g.slug} /></div>

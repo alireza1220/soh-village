@@ -5,7 +5,6 @@ import { photos, type Photo } from "@/lib/photos";
 import { Breadcrumb, type Crumb } from "./breadcrumb";
 import { illustrationSrc, type Illustration } from "@/lib/illustrations";
 import { Credit } from "./credit";
-import { IllustrationLabel } from "./illustration-label";
 
 /** The banner photo of a section: its first photo, else the Karkas mountain photo (a region photo, labelled). */
 export function bannerPhoto(section: string): Photo | undefined {
@@ -21,7 +20,6 @@ export function PageBanner({ lang, title, intro, crumbs, photo, illustration }: 
           <div className="page-banner__bg">
             <Image src={illustrationSrc(illustration)} alt={illustration.alt[lang]} width={illustration.width} height={illustration.height} priority sizes="100vw" />
           </div>
-          <div className="page-banner__credit"><IllustrationLabel lang={lang} /></div>
         </>
       )}
       {photo && (
