@@ -5,7 +5,6 @@ import "@/styles/home.css";
 import "@/styles/news.css";
 import { Credit } from "@/components/credit";
 import { HeroSlideshow, type HeroSlide } from "@/components/home/hero-slideshow";
-import { MarketTeaser } from "@/components/home/market-teaser";
 import { YearList } from "@/components/home/year-list";
 import { Arrow } from "@/components/icons";
 import { VillageMap } from "@/components/map";
@@ -19,7 +18,6 @@ import {
 } from "@/lib/home-content";
 import { dirOf, hasLocale } from "@/lib/i18n";
 import { illustrationFor, illustrationSrc } from "@/lib/illustrations";
-import { LISTING_CATEGORIES, LISTING_TYPES } from "@/lib/market";
 import { population, sectionBySlug, sections, siteName, stats } from "@/lib/site";
 
 export default async function Home({ params }: PageProps<"/[lang]">) {
@@ -76,8 +74,6 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
   ];
 
   const max = Math.max(...population.map((p) => p.people));
-  const typeSell = LISTING_TYPES.find((o) => o.v === "sell")?.[lang] ?? "";
-  const catFruit = LISTING_CATEGORIES.find((o) => o.v === "fruit")?.[lang] ?? "";
 
   return (
     <>
@@ -208,28 +204,6 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
               items={yearItems} filters={yearFilters} dir={dir} label={hc.filterLabel[lang]}
               showing={hc.showing[lang]} of={hc.showingOf[lang]}
             />
-          </div>
-        </div>
-      </section>
-
-      {/* VILLAGE MARKET */}
-      <section className="section" aria-labelledby="hm-market-title">
-        <div className="wrap">
-          <div className="hm-head">
-            <p className="eyebrow">{hc.marketEyebrow[lang]}</p>
-            <h2 id="hm-market-title" className="hm-display hm-section-h">{hc.marketTitle[lang]}</h2>
-            <p className="muted hm-head__intro">{hc.marketIntro[lang]}</p>
-          </div>
-          <MarketTeaser
-            lang={lang} href={href("market")}
-            labels={{
-              empty: hc.marketEmpty[lang], example: hc.marketExample[lang], exampleTitle: hc.marketExampleTitle[lang], exampleMeta: hc.marketExampleMeta[lang],
-              readMore: hc.readMore[lang], area: hc.area[lang], until: hc.until[lang], typeSell, catFruit,
-            }}
-          />
-          <div className="hm-actions">
-            <Link href={href("market")} className="btn btn--primary">{hc.marketCta[lang]}</Link>
-            <Link href={href("needs")} className="link-arrow">{hc.marketPost[lang]} <Arrow /></Link>
           </div>
         </div>
       </section>

@@ -58,7 +58,7 @@
 .adm-badge--rejected, .adm-badge--removed { background: var(--surface); color: var(--apple); border-color: var(--apple); }
 
 /* Dialog */
-.adm-dialog { max-inline-size: min(440px, calc(100vw - 32px)); padding: 24px; background: var(--surface); color: var(--text); border: 1px solid var(--line); border-top: 3px solid var(--turq); }
+.adm-dialog { margin: auto; max-inline-size: min(440px, calc(100vw - 32px)); padding: 24px; background: var(--surface); color: var(--text); border: 1px solid var(--line); border-top: 3px solid var(--turq); }
 .adm-dialog::backdrop { background: color-mix(in srgb, var(--scrim) 60%, transparent); }
 .adm-dialog h3 { margin: 0 0 8px; font-size: 20px; }
 .adm-dialog p { margin: 0 0 16px; }
