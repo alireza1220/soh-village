@@ -6,22 +6,22 @@ export type PhotoLink = { label: L; url: string; note?: L };
 export const ownedPhotoLinks: PhotoLink[] = [
   {
     "label": {
-      "fa": "کجارو: حدود ده‌ها عکس از جاذبه‌ها، با نام عکاس‌ها",
-      "en": "Kojaro Soh page (about a dozen photos, credited to Ali Safaei, Mohammad Eshaq, Nader Naderi Sohi, Masoud Safavi, Maryam Khadem Jalil)"
+      "fa": "کجارو: حدود ده عکس، با نام عکاسان",
+      "en": "Kojaro (about a dozen photos: Ali Safaei, Mohammad Eshaq, Nader Naderi Sohi, Masoud Safavi, Maryam Khadem Jalil)"
     },
     "url": "https://www.kojaro.com/attraction/64660-isfahan-soh-village/"
   },
   {
     "label": {
-      "fa": "اینستاگرام soh_village: عکس و ویدیوی روزانه",
-      "en": "Instagram @soh_village (daily photos and videos)"
+      "fa": "اینستاگرام soh_village: عکس و ویدیو",
+      "en": "Instagram @soh_village (photos, videos)"
     },
     "url": "https://www.instagram.com/soh_village/"
   },
   {
     "label": {
-      "fa": "صفحه‌ی مکان «Soh, Esfahan, Iran» در اینستاگرام (حدود ۱۸۰۰ پست)",
-      "en": "Instagram location page \"Soh, Esfahan, Iran\" (about 1,800 tagged posts)"
+      "fa": "صفحه‌ی مکان «Soh, Esfahan, Iran» (حدود ۱۸۰۰ پست)",
+      "en": "Instagram location \"Soh, Esfahan, Iran\" (about 1,800 posts)"
     },
     "url": "https://www.instagram.com/explore/locations/317820428/soh-esfahan-iran/"
   },
@@ -34,36 +34,36 @@ export const ownedPhotoLinks: PhotoLink[] = [
   },
   {
     "label": {
-      "fa": "Facebook public group (old photos; Media tab not opened)",
+      "fa": "گروه عمومی فیسبوک (عکس‌های قدیمی؛ زبانه‌ی رسانه باز نشد)",
       "en": "Facebook public group (old photos; Media tab not opened)"
     },
     "url": "https://www.facebook.com/groups/250924961607462/"
   },
   {
     "label": {
-      "fa": "کانال تلگرام esfahansohi (عکس و ویدیو از اهالی)",
-      "en": "Telegram channel esfahansohi (photos and videos of villagers)"
+      "fa": "تلگرام esfahansohi (عکس و ویدیوی اهالی)",
+      "en": "Telegram esfahansohi (villagers' photos, videos)"
     },
     "url": "https://t.me/s/esfahansohi"
   },
   {
     "label": {
-      "fa": "گزارش خبر صدا و سیما با ویدیو و ۹ عکس (۱۴۰۰)",
-      "en": "IRIB News report with a video and 9 photos (May 2021)"
+      "fa": "خبر صدا و سیما: ویدیو و ۹ عکس (۱۴۰۰)",
+      "en": "IRIB News: video and 9 photos (May 2021)"
     },
     "url": "https://www.irib-news.ir/fa/news/3114741/"
   },
   {
     "label": {
-      "fa": "گزارش مهر درباره‌ی آیین‌های محرم (عکس)",
-      "en": "Mehr News Muharram report (photos)"
+      "fa": "مهر: آیین‌های محرم (عکس)",
+      "en": "Mehr News: Muharram (photos)"
     },
     "url": "https://www.mehrnews.com/news/5842144/"
   },
   {
     "label": {
-      "fa": "خبر دانا: سوگواری سُه با عکس (از این‌جا بسته است)",
-      "en": "Dana news: Soh mourning with photos (blocked from here)"
+      "fa": "خبر دانا: سوگواری سُه (از این‌جا بسته است)",
+      "en": "Dana news: Soh mourning (blocked from here)"
     },
     "url": "https://khabarban.com/14931144"
   },
@@ -90,29 +90,29 @@ export const ownedPhotoLinks: PhotoLink[] = [
   },
   {
     "label": {
-      "fa": "بین‌آبین: گزارش سفر با عکس",
-      "en": "Beinabein travel report (photos)"
+      "fa": "بین‌آبین: گزارش سفر",
+      "en": "Beinabein: travel report"
     },
     "url": "https://beinabein.com/%DA%A9%D8%A7%D8%B1%D9%88%D8%A7%D9%86%D8%B3%D8%B1%D8%A7%DB%8C-%D8%B3%D9%87-%D8%A7%D8%B5%D9%81%D9%87%D8%A7%D9%86/"
   },
   {
     "label": {
-      "fa": "پروژه‌ی کاروانسرای دیجیتال: برگه‌ی کاروانسرای سُه",
-      "en": "Digital Caravanserai project, Soh Caravanserai entry"
+      "fa": "کاروانسرای دیجیتال: برگه‌ی سُه",
+      "en": "Digital Caravanserai: Soh entry"
     },
     "url": "https://itu-mbl-heritage.github.io/Digital-Caravanserai-web/IRAN2/index.html"
   },
   {
     "label": {
-      "fa": "پست فیسبوک: نقشه‌ی ۱۹۶۲ کاروانسرای سُه از ماکسیم سیرو (در همان گروه)",
-      "en": "Facebook post: 1962 plan of Soh caravanserai by Maxime Siroux (in the group above)"
+      "fa": "فیسبوک: نقشه‌ی ۱۹۶۲ کاروانسرا از ماکسیم سیرو (همان گروه)",
+      "en": "Facebook: 1962 caravanserai plan by Maxime Siroux (same group)"
     },
     "url": "https://www.facebook.com/groups/250924961607462/"
   },
   {
     "label": {
-      "fa": "رده‌ی مورچه‌خورت در ویکی‌مدیا کامنز (بدون عکس سُه)",
-      "en": "Commons category Murcheh Khvort (no Soh files)"
+      "fa": "رده‌ی مورچه‌خورت در کامنز (بدون عکس سُه)",
+      "en": "Commons: Murcheh Khvort (no Soh files)"
     },
     "url": "https://commons.wikimedia.org/wiki/Category:Murcheh_Khvort"
   }

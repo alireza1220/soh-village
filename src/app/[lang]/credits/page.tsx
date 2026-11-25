@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Credit } from "@/components/credit";
+import { IllustrationLabel } from "@/components/illustration-label";
 import { MsBanner } from "@/components/ms-banner";
 import { hasLocale, locales } from "@/lib/i18n";
 import { photos } from "@/lib/photos";
@@ -20,8 +21,9 @@ export default async function Credits({ params }: PageProps<"/[lang]/credits">) 
         file="karkas-peak.jpg"
         title={fa ? "منبع عکس‌ها و مجوزها" : "Photo credits and licences"}
         intro={fa
-          ? "عکس‌های این سایت از ویکی‌مدیا کامنز با مجوز آزاد گرفته شده‌اند. نام عکاس و مجوز هر عکس را در همین‌جا و زیر خود عکس می‌بینید. عکس‌های کجارو و اینستاگرام کپی نشده‌اند چون حق نشر دارند."
-          : "Photos on this site come from Wikimedia Commons under free licences. Each photo's author and licence are shown here and under the photo. Photos from Kojaro and Instagram were not copied because they are protected by copyright."}
+          ? "عکس‌ها از ویکی‌مدیا کامنز با مجوز آزادند. عکاس و مجوز زیر هر عکس آمده است. عکس‌های کجارو و اینستاگرام حق نشر دارند و کپی نشده‌اند."
+          : "Photos are from Wikimedia Commons under free licences, with author and licence shown. Kojaro and Instagram photos are copyrighted and not copied."
+      }
       />
       <div className="wrap ms-body">
         <section className="ms-block ms-read" aria-labelledby="all-credits">
@@ -42,6 +44,18 @@ export default async function Credits({ params }: PageProps<"/[lang]/credits">) 
               </li>
             ))}
           </ul>
+        </section>
+        <section className="ms-block ms-read" aria-labelledby="ill-credits">
+          <div className="ms-head">
+            <p className="eyebrow">{fa ? "تصویرسازی" : "Illustrations"}</p>
+            <h2 id="ill-credits">{fa ? "تصویرسازی‌ها" : "Illustrations"}</h2>
+          </div>
+          <p>
+            {fa
+              ? "تصویرسازی‌های این سایت در ۲۵ نوامبر ۲۰۲۶ با یک ابزار تصویرسازی هوش مصنوعی ساخته شده‌اند. عکس نیستند و جای واقعی یا آدم واقعی را نشان نمی‌دهند."
+              : "The illustrations on this site were made with an AI image tool on 25 Nov 2026. They are not photographs, and they do not show real places or people."}
+          </p>
+          <p><IllustrationLabel lang={lang} /></p>
         </section>
       </div>
     </article>

@@ -11,7 +11,7 @@ export function generateStaticParams() {
 export default async function Page({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
-  const title = lang === "fa" ? "مدیریت آگهی با کد" : "Manage a listing with your code";
+  const title = lang === "fa" ? "مدیریت آگهی" : "Manage your listing";
   return (
     <>
       <PageBanner lang={lang} title={title} crumbs={[{ label: lang === "fa" ? "خانه" : "Home", href: `/${lang}` }, { label: title }]} />

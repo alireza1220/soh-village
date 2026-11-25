@@ -28,12 +28,12 @@ export const hc = {
   welcomeEyebrow: { fa: "به روستای سُه خوش آمدید", en: "Welcome to Soh village" },
   welcomeTitle: { fa: "روستایی در دامنه‌ی کوه‌های کرکس", en: "A mountain village in the Karkas range" },
   welcomeP1: {
-    fa: "راهنمای روستای سُه: کجاست، چه دارد، و چطور مطلب یا آگهی اضافه کنید. هر مطلب منبع دارد و اگر تأیید نشده باشد برچسب خورده است.",
-    en: "A guide to Soh: where it is, what is there, and how to add a note or a listing. Every fact has a source, and anything not checked is labelled.",
+    fa: "راهنمای سُه: کجاست و چه دارد. هر مطلب منبع دارد؛ تأییدنشده‌ها برچسب دارند.",
+    en: "A guide to Soh and what is in it. Every fact has a source; unchecked ones are labelled.",
   },
   welcomeP2: {
-    fa: "در دامنه‌ی کوه‌های کرکس، با کاروانسرایی قاجاری، دو امامزاده‌ی گنبدفیروزه‌ای و باغ‌های سیب.",
-    en: "On the slopes of the Karkas mountains, with a Qajar caravanserai, two turquoise-domed shrines and apple orchards.",
+    fa: "کاروانسرایی قاجاری، دو امامزاده‌ی گنبدفیروزه‌ای و باغ‌های سیب.",
+    en: "A Qajar caravanserai, two turquoise-domed shrines and apple orchards.",
   },
   welcomeCta: { fa: "گشت در سُه", en: "Explore Soh" },
 
@@ -50,8 +50,8 @@ export const hc = {
   yearEyebrow: { fa: "سال در روستا", en: "The village year" },
   yearTitle: { fa: "آیین‌ها و فصل‌ها", en: "Traditions and seasons" },
   yearIntro: {
-    fa: "این‌ها تاریخ دقیق رویداد نیستند. هر ردیف همان چیزی را می‌گوید که منبع نوشته و منبعش کنارش آمده است.",
-    en: "These are not exact event dates. Each row says what its source says, and the source is named beside it.",
+    fa: "تاریخ دقیق نیست؛ هر ردیف را منبعش می‌گوید.",
+    en: "Not exact dates. Each row follows its source.",
   },
   filterLabel: { fa: "فیلتر ردیف‌ها", en: "Filter rows" },
   fAll: { fa: "همه", en: "All" },
@@ -69,9 +69,9 @@ export const hc = {
 
   marketEyebrow: { fa: "از بازارچه‌ی روستا", en: "From the village market" },
   marketTitle: { fa: "تازه‌ترین آگهی‌ها", en: "Latest listings" },
-  marketIntro: { fa: "فقط آگهی‌های بررسی‌شده. سایت پول نمی‌گیرد؛ خریدار و فروشنده بیرون از سایت با هم توافق می‌کنند.", en: "Checked listings only. The site takes no payment; buyer and seller agree outside the site." },
-  marketEmpty: { fa: "فعلاً آگهی‌ای نمایش داده نمی‌شود. اولین نفر باشید.", en: "No listings are showing right now. Be the first." },
-  marketExample: { fa: "نمونه‌ی یک آگهی (واقعی نیست)", en: "What a listing looks like (not a real listing)" },
+  marketIntro: { fa: "فقط آگهی‌های بررسی‌شده. پرداخت بیرون از سایت است.", en: "Checked listings only. Payment happens off-site." },
+  marketEmpty: { fa: "هنوز آگهی‌ای نیست. اولین نفر باشید.", en: "No listings yet. Be the first." },
+  marketExample: { fa: "نمونه‌ی آگهی (واقعی نیست)", en: "Sample listing (not real)" },
   marketExampleTitle: { fa: "گیلاس تازه‌ی باغ", en: "Fresh orchard cherries" },
   marketExampleMeta: { fa: "سُه، تحویل در باغ", en: "Soh, pickup at the orchard" },
   marketCta: { fa: "بازارچه", en: "Browse the market" },
@@ -90,14 +90,14 @@ export const hc = {
   popTitle: { fa: "جمعیت", en: "Population" },
   households: { fa: "خانوار", en: "households" },
   popNote: {
-    fa: "مرکز آمار ایران، از ویکی‌پدیا. کجارو می‌نویسد در بهار و تابستان حدود ۱۰۰۰ نفر در روستا هستند و گردشنامه تا ۵۰۰۰ نفر در نوروز، محرم و تابستان (سرشماری نیست و دو عدد با هم نمی‌خوانند).",
-    en: "Statistical Centre of Iran, via Wikipedia. Kojaro says about 1,000 people are in the village in spring and summer, and Gardeshnama up to 5,000 at Nowruz, Muharram and in summer (not census figures, and they disagree).",
+    fa: "مرکز آمار ایران، از ویکی‌پدیا. کجارو: حدود ۱۰۰۰ نفر در بهار و تابستان؛ گردشنامه: تا ۵۰۰۰ در اوج سفر. سرشماری نیستند و با هم نمی‌خوانند.",
+    en: "Statistical Centre of Iran, via Wikipedia. Visitors: Kojaro says about 1,000 in spring and summer, Gardeshnama up to 5,000 at peaks. Not census; they disagree.",
   },
 
   ctaTitle: { fa: "به ساختن این سایت کمک کنید", en: "Help build this site" },
   ctaText: {
-    fa: "عکس، واژه‌ی محلی، خاطره، اصلاح اشتباه یا آگهی ملک دارید؟ همه‌چیز پیش از انتشار بررسی می‌شود.",
-    en: "Have a photo, a local word, a memory, a correction or a property listing? Everything is checked before it is published.",
+    fa: "عکس، واژه، خاطره، اصلاح یا آگهی ملک دارید؟ پیش از انتشار بررسی می‌شود.",
+    en: "A photo, word, memory, correction or property listing? All is checked before publishing.",
   },
   ctaButton: { fa: "مشارکت", en: "Contribute" },
 } satisfies Record<string, L>;
@@ -111,8 +111,8 @@ export const yearRows: YearRow[] = [
     id: "muharram", filters: ["traditions"], big: { fa: "۸ تا ۱۰", en: "8-10" }, small: { fa: "محرم", en: "Muharram" },
     title: { fa: "عماری، نخل و علم‌ها", en: "Amari, palm and standards" },
     text: {
-      fa: "عماری روز هشتم، نخل و هفت علم در تاسوعا؛ اوج مراسم هشتم تا دهم محرم است.",
-      en: "The amari on the 8th, the palm and seven standards on Tasua; the peak is the 8th to the 10th of Muharram.",
+      fa: "عماری روز هشتم، نخل و هفت علم در تاسوعا.",
+      en: "Amari on the 8th, palm and seven standards on Tasua.",
     },
     source: { fa: "مهر نیوز (۲۰۲۳)، فقط یک منبع", en: "Mehr News (2023), single source" }, section: "traditions",
   },
@@ -120,8 +120,8 @@ export const yearRows: YearRow[] = [
     id: "spring", filters: ["seasons", "visit"], big: { fa: "بهار", en: "Spring" }, small: { fa: "تا اوایل تابستان", en: "to early summer" },
     title: { fa: "بهترین زمان سفر", en: "Best time to visit" },
     text: {
-      fa: "بهار و اوایل تابستان. گردشنامه فروردین را بهترین فصل می‌نویسد.",
-      en: "Spring and early summer. Gardeshnama names Farvardin (spring) as the best season.",
+      fa: "بهار و اوایل تابستان؛ گردشنامه فروردین را بهترین می‌داند.",
+      en: "Spring and early summer; Gardeshnama picks Farvardin.",
     },
     source: { fa: "کجارو، گردشنامه", en: "Kojaro, Gardeshnama" }, section: "tourism", wordy: true,
   },
@@ -129,8 +129,8 @@ export const yearRows: YearRow[] = [
     id: "crowds", filters: ["seasons", "visit"], big: { fa: "نوروز", en: "Nowruz" }, small: { fa: "محرم و تابستان", en: "Muharram, summer" },
     title: { fa: "وقتی جمعیت بالا می‌رود", en: "When the village fills up" },
     text: {
-      fa: "کجارو در بهار و تابستان حدود ۱۰۰۰ نفر می‌نویسد و گردشنامه تا ۵۰۰۰ نفر در نوروز، محرم و تابستان. سرشماری نیست و دو عدد با هم نمی‌خوانند.",
-      en: "Kojaro says about 1,000 people in spring and summer; Gardeshnama says up to 5,000 at Nowruz, Muharram and in summer. Not census figures, and they disagree.",
+      fa: "کجارو: حدود ۱۰۰۰ در بهار و تابستان. گردشنامه: تا ۵۰۰۰ در نوروز، محرم و تابستان. سرشماری نیستند و با هم نمی‌خوانند.",
+      en: "Kojaro: about 1,000 in spring and summer. Gardeshnama: up to 5,000 at Nowruz, Muharram and summer. Not census; they disagree.",
     },
     source: { fa: "کجارو، گردشنامه", en: "Kojaro, Gardeshnama" }, section: "population", wordy: true,
   },
@@ -163,10 +163,10 @@ export const entriesLabel = (n: number, lang: Locale) =>
   lang === "fa" ? `${n.toLocaleString("fa-IR")} مطلب` : `${n} entries`;
 
 /** Plan-your-visit cards: title, one line, target section/route. */
-export const planCards: { slug: string; title: L; text: L; thumb: "map" | "mark"; mark?: string }[] = [
-  { slug: "map", title: { fa: "چطور برسیم", en: "Getting there" }, text: { fa: "نقشه، جاده و مسیرها", en: "Map, road and routes" }, thumb: "map" },
-  { slug: "stay", title: { fa: "کجا بمانیم", en: "Where to stay" }, text: { fa: "اقامت در سُه و اطراف", en: "Stays in and near Soh" }, thumb: "mark", mark: "stay" },
-  { slug: "banks", title: { fa: "بانک‌ها", en: "Banks" }, text: { fa: "بانک و خودپرداز نزدیک", en: "Banks and ATMs nearby" }, thumb: "mark", mark: "banks" },
-  { slug: "tourism", title: { fa: "بهترین زمان سفر", en: "Best time to visit" }, text: { fa: "بهار و اوایل تابستان", en: "Spring and early summer" }, thumb: "mark", mark: "tourism" },
-  { slug: "shop", title: { fa: "خرید", en: "Where to buy" }, text: { fa: "آنچه سُه می‌کارد و می‌سازد", en: "What Soh grows and makes" }, thumb: "mark", mark: "shop" },
+export const planCards: { slug: string; title: L; text: L; thumb: "map" | "mark"; mark?: string; ill?: string }[] = [
+  { slug: "map", title: { fa: "چطور برسیم", en: "Getting there" }, text: { fa: "نقشه و مسیرها", en: "Map and routes" }, thumb: "map", ill: "resources" },
+  { slug: "stay", title: { fa: "کجا بمانیم", en: "Where to stay" }, text: { fa: "اقامت در سُه و اطراف", en: "Stays in and near Soh" }, thumb: "mark", mark: "stay", ill: "stay" },
+  { slug: "banks", title: { fa: "بانک‌ها", en: "Banks" }, text: { fa: "بانک و خودپرداز نزدیک", en: "Banks and ATMs nearby" }, thumb: "mark", mark: "banks", ill: "banks" },
+  { slug: "tourism", title: { fa: "بهترین زمان سفر", en: "Best time to visit" }, text: { fa: "بهار و اوایل تابستان", en: "Spring and early summer" }, thumb: "mark", mark: "tourism", ill: "tourism" },
+  { slug: "shop", title: { fa: "خرید", en: "Where to buy" }, text: { fa: "محصولات سُه", en: "What Soh grows and makes" }, thumb: "mark", mark: "shop", ill: "shop" },
 ];

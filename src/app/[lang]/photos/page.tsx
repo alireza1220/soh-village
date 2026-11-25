@@ -27,8 +27,8 @@ export default async function Photos({ params }: PageProps<"/[lang]/photos">) {
         file="opening.jpg"
         title={fa ? "عکس‌ها" : "Photos"}
         intro={fa
-          ? "عکس صفحه‌ی اول را برای همین سایت فرستاده‌اند. بقیه‌ی عکس‌ها از منطقه‌ی اطراف است، مجوز آزاد دارند و برچسب «نه سُه» دارند. عکس‌هایی که هنوز از خود روستا لازم داریم پایین صفحه آمده است."
-          : "The opening photo was supplied for this site. The other pictures are freely licensed photos of the surrounding area, and each one is labelled “not Soh”. The photos we still need from the village are listed at the bottom."}
+          ? "عکس صفحه‌ی اول برای این سایت فرستاده شده. بقیه از منطقه‌اند و برچسب «نه سُه» دارند."
+          : "The opening photo was sent for this site. The rest show the region and are labelled “not Soh”."}
       />
       <div className="wrap ms-body">
         {groups.map((g) => (
@@ -45,7 +45,7 @@ export default async function Photos({ params }: PageProps<"/[lang]/photos">) {
           <div className="ms-head">
             <p className="eyebrow">{fa ? "پیوند" : "Links"}</p>
             <h2 id="owned">{fa ? "عکس‌های دیگرِ سُه در اینترنت" : "More photos of Soh online"}</h2>
-            <p>{fa ? "این عکس‌ها مال صاحبانشان است و این‌جا کپی نشده‌اند؛ فقط پیوند آمده. برای استفاده، از عکاس اجازه بگیرید." : "These photos belong to their owners and are not copied here, only linked. Ask the photographer before using one."}</p>
+            <p>{fa ? "فقط پیوند است؛ عکس‌ها مال صاحبانشان است. برای استفاده اجازه بگیرید." : "Linked only; the photos belong to their owners. Ask before using one."}</p>
           </div>
           <ul className="ms-links">
             {ownedPhotoLinks.map((l) => (
@@ -83,7 +83,7 @@ export default async function Photos({ params }: PageProps<"/[lang]/photos">) {
           <div className="ms-head">
             <p className="eyebrow">Wikimedia Commons</p>
             <h2 id="free">{fa ? "عکس‌های آزاد از منطقه (در سایت نیست)" : "Free-licence photos of the area (not on the site)"}</h2>
-            <p>{fa ? "همه در ویکی‌مدیا کامنز با مجوز آزاد؛ هیچ‌کدام سُه نیست." : "All on Wikimedia Commons under free licences; none shows Soh."}</p>
+            <p>{fa ? "مجوز آزاد؛ هیچ‌کدام سُه نیست." : "Free licence; none shows Soh."}</p>
           </div>
           <details className="ms-details">
             <summary>{fa ? `نمایش ${freeAreaPhotoLinks.length} پیوند` : `Show ${freeAreaPhotoLinks.length} links`}</summary>
@@ -126,7 +126,7 @@ export default async function Photos({ params }: PageProps<"/[lang]/photos">) {
             ))}
           </ul>
           <p className="ms-read">
-            {fa ? "عکس‌ها را با نام عکاس و اجازه‌ی انتشار بفرستید. " : "Send photos with the photographer's name and permission to publish. "}
+            {fa ? "با نام عکاس و اجازه‌ی انتشار بفرستید. " : "Send with photographer's name and permission. "}
             <Link className="link-arrow" href={`/${lang}/contribute`}>{fa ? "راه ارسال" : "How to send"} <Arrow /></Link>
           </p>
         </section>

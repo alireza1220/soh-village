@@ -382,7 +382,7 @@
   /* ---------- 11. Inner-page banner and breadcrumb ---------- */
   .page-banner { position: relative; display: flex; align-items: flex-end; min-height: 320px; overflow: hidden; background: var(--panel); }
   @media (min-width: 768px) { .page-banner { min-height: 340px; } }
-  .page-banner__bg { position: absolute; inset: 0; z-index: 0; }
+  .page-banner__bg { position: absolute; inset: 0; z-index: 0; background: var(--panel); }
   .page-banner__bg img { width: 100%; height: 100%; object-fit: cover; }
   /* Photo stays visible: a light wash overall, a deeper wash behind the text on the start side and along the bottom edge. */
   .page-banner::after {
@@ -395,6 +395,21 @@
     background:
       linear-gradient(0deg, color-mix(in srgb, var(--panel) 92%, transparent) 0%, color-mix(in srgb, var(--panel) 62%, transparent) 38%, transparent 72%),
       linear-gradient(270deg, color-mix(in srgb, var(--panel) 78%, transparent) 0%, color-mix(in srgb, var(--panel) 42%, transparent) 55%, color-mix(in srgb, var(--panel) 18%, transparent) 100%);
+  }
+  /* Phones: a short top scrim keeps the breadcrumb and credit readable over bright art. */
+  @media (max-width: 639px) {
+    .page-banner::after {
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--panel) 70%, transparent) 0%, transparent 38%),
+        linear-gradient(0deg, color-mix(in srgb, var(--panel) 92%, transparent) 0%, color-mix(in srgb, var(--panel) 62%, transparent) 38%, transparent 72%),
+        linear-gradient(90deg, color-mix(in srgb, var(--panel) 78%, transparent) 0%, color-mix(in srgb, var(--panel) 42%, transparent) 55%, color-mix(in srgb, var(--panel) 18%, transparent) 100%);
+    }
+    [dir="rtl"] .page-banner::after {
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--panel) 70%, transparent) 0%, transparent 38%),
+        linear-gradient(0deg, color-mix(in srgb, var(--panel) 92%, transparent) 0%, color-mix(in srgb, var(--panel) 62%, transparent) 38%, transparent 72%),
+        linear-gradient(270deg, color-mix(in srgb, var(--panel) 78%, transparent) 0%, color-mix(in srgb, var(--panel) 42%, transparent) 55%, color-mix(in srgb, var(--panel) 18%, transparent) 100%);
+    }
   }
   .page-banner__inner { position: relative; z-index: 2; width: 100%; padding-block: 40px 44px; }
   .page-banner h1 { margin: 12px 0 0; color: var(--on-panel); }

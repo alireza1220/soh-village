@@ -22,18 +22,18 @@ export type ManagedListing = {
 };
 
 const ERRORS: Record<string, { fa: string; en: string }> = {
-  not_found: { fa: "آگهی پیدا نشد. کد را دوباره بررسی کنید.", en: "Listing not found. Please check the code." },
-  rate_limited: { fa: "تلاش‌های زیادی شد. کمی بعد دوباره امتحان کنید.", en: "Too many attempts. Please try again a little later." },
-  cannot_renew: { fa: "هنوز نمی‌شود تمدید کرد. تمدید فقط برای آگهی تأییدشده و در هفته‌ی آخر اعتبار (یا پس از پایان آن) ممکن است و بیش از ۴ بار نمی‌شود.", en: "This listing cannot be renewed yet. Renewal works only for approved listings in their last 7 days (or after they expire), up to 4 times." },
+  not_found: { fa: "آگهی پیدا نشد. کد را بررسی کنید.", en: "Listing not found. Check the code." },
+  rate_limited: { fa: "تلاش‌های زیادی شد. بعداً امتحان کنید.", en: "Too many attempts. Try again later." },
+  cannot_renew: { fa: "هنوز قابل تمدید نیست. فقط آگهی تأییدشده، در هفته‌ی آخر اعتبار یا پس از آن، حداکثر ۴ بار.", en: "Cannot renew yet. Approved listings only, in the last 7 days or after expiry, up to 4 times." },
   not_editable: { fa: "این آگهی دیگر قابل ویرایش نیست.", en: "This listing can no longer be edited." },
-  unauthorized: { fa: "نشست شما تمام شده است. دوباره وارد شوید.", en: "Your session has ended. Please log in again." },
-  not_configured: { fa: "این بخش هنوز فعال نشده است.", en: "This feature is not available yet." },
-  network: { fa: "اتصال برقرار نشد. اینترنت را بررسی کنید و دوباره امتحان کنید.", en: "Could not connect. Check your internet and try again." },
-  contact_required: { fa: "راه تماس لازم است.", en: "A way to contact you is required." },
-  bad_email: { fa: "نشانی ایمیل درست نیست.", en: "That email address does not look right." },
-  send_failed: { fa: "ارسال لینک ورود ممکن نشد. کمی بعد دوباره امتحان کنید.", en: "Could not send the login link. Please try again later." },
+  unauthorized: { fa: "نشست تمام شد. دوباره وارد شوید.", en: "Session ended. Log in again." },
+  not_configured: { fa: "این بخش هنوز فعال نیست.", en: "This feature is not available yet." },
+  network: { fa: "اتصال برقرار نشد. اینترنت را بررسی کنید.", en: "Could not connect. Check your internet." },
+  contact_required: { fa: "راه تماس لازم است.", en: "A contact method is required." },
+  bad_email: { fa: "نشانی ایمیل درست نیست.", en: "Invalid email address." },
+  send_failed: { fa: "لینک ورود ارسال نشد. بعداً امتحان کنید.", en: "Could not send the link. Try later." },
 };
-const GENERIC = { fa: "مشکلی پیش آمد. دوباره امتحان کنید.", en: "Something went wrong. Please try again." };
+const GENERIC = { fa: "مشکلی پیش آمد. دوباره امتحان کنید.", en: "Something went wrong. Try again." };
 
 export function errorText(code: string | undefined, lang: Locale): string {
   return (code && ERRORS[code] ? ERRORS[code] : GENERIC)[lang];

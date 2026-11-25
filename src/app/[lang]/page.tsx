@@ -9,11 +9,13 @@ import { MarketTeaser } from "@/components/home/market-teaser";
 import { YearList } from "@/components/home/year-list";
 import { Arrow } from "@/components/icons";
 import { VillageMap } from "@/components/map";
+import { IllustrationLabel } from "@/components/illustration-label";
 import { SectionMark } from "@/components/section-mark";
 import {
   entriesLabel, entryCount, findCard, hc, heroFiles, photoOf, planCards, statusLabel, yearRows,
 } from "@/lib/home-content";
 import { dirOf, hasLocale } from "@/lib/i18n";
+import { illustrationFor, illustrationSrc } from "@/lib/illustrations";
 import { LISTING_CATEGORIES, LISTING_TYPES } from "@/lib/market";
 import { population, sectionBySlug, sections, siteName, stats } from "@/lib/site";
 
@@ -63,8 +65,8 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
   const tasua = findCard("traditions", "Tasua palm carrying");
   const caravanserai = (["history", "tourism"] as const).map((s) => findCard(s, "Soh Caravanserai")).find(Boolean);
   const features = [
-    { key: "traditions", slug: "traditions", button: hc.cardTraditions[lang], photo: photoOf("nakhl-gardani-mehriz.jpg"), title: tasua?.title[lang] ?? sec("traditions")?.title[lang] ?? "", text: tasua?.text[lang] ?? sec("traditions")?.intro[lang] ?? "", status: tasua?.status, source: tasua?.source },
-    { key: "history", slug: "history", button: hc.cardHistory[lang], photo: opening, title: caravanserai?.title[lang] ?? sec("history")?.title[lang] ?? "", text: caravanserai?.text[lang] ?? sec("history")?.intro[lang] ?? "", status: caravanserai?.status, source: caravanserai?.source },
+    { key: "traditions", slug: "traditions", button: hc.cardTraditions[lang], photo: photoOf("nakhl-gardani-mehriz.jpg"), title: tasua?.title[lang] ?? sec("traditions")?.title[lang] ?? "", text: tasua?.text[lang] ?? sec("traditions")?.intro[lang] ?? "", status: tasua?.status, source: tasua?.source, ill: illustrationFor("tasua") },
+    { key: "history", slug: "history", button: hc.cardHistory[lang], photo: opening, title: caravanserai?.title[lang] ?? sec("history")?.title[lang] ?? "", text: caravanserai?.text[lang] ?? sec("history")?.intro[lang] ?? "", status: caravanserai?.status, source: caravanserai?.source, ill: undefined },
   ];
 
   // Guide cards: History, Words and dialect, Resources.
@@ -127,7 +129,16 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
               {planCards.map((c) => (
                 <li key={c.slug}>
                   <Link href={href(c.slug)} className="navy-card">
-                    <span className="navy-card__thumb hm-thumb" aria-hidden="true"><SectionMark slug={c.mark ?? c.slug} /></span>
+                    <span className="navy-card__thumb hm-thumb">
+                      {c.ill && illustrationFor(c.ill) ? (
+                        <>
+                          <Image src={illustrationSrc(illustrationFor(c.ill)!)} alt="" width={144} height={96} sizes="96px" />
+                          <IllustrationLabel lang={lang} overlay small />
+                        </>
+                      ) : (
+                        <span aria-hidden="true"><SectionMark slug={c.mark ?? c.slug} /></span>
+                      )}
+                    </span>
                     <span className="navy-card__body">
                       <span className="navy-card__title">{c.title[lang]}</span>
                       <span className="navy-card__meta">{c.text[lang]}</span>
@@ -157,6 +168,11 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
                     <div className="media" style={{ "--ar": "16 / 10" } as React.CSSProperties}>
                       {f.photo ? (
                         <Image src={`/photos/${f.photo.file}`} alt={f.photo.alt[lang]} fill sizes="(max-width: 1023px) 100vw, 600px" className="object-cover" />
+                      ) : f.ill ? (
+                        <>
+                          <Image src={illustrationSrc(f.ill)} alt={f.ill.alt[lang]} fill sizes="(max-width: 1023px) 100vw, 600px" className="object-cover" />
+                          <IllustrationLabel lang={lang} overlay />
+                        </>
                       ) : (
                         <div className="hm-card__placeholder"><SectionMark slug={f.slug} /></div>
                       )}
@@ -222,6 +238,11 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
                     <div className="media hm-card__img" style={{ "--ar": "16 / 10" } as React.CSSProperties}>
                       {g.photo ? (
                         <Image src={`/photos/${g.photo.file}`} alt={g.photo.alt[lang]} fill sizes="(max-width: 767px) 100vw, 400px" className="object-cover" />
+                      ) : illustrationFor(g.slug) ? (
+                        <>
+                          <Image src={illustrationSrc(illustrationFor(g.slug)!)} alt={illustrationFor(g.slug)!.alt[lang]} fill sizes="(max-width: 767px) 100vw, 400px" className="object-cover" />
+                          <IllustrationLabel lang={lang} overlay />
+                        </>
                       ) : (
                         <div className="hm-card__placeholder"><SectionMark slug={g.slug} /></div>
                       )}

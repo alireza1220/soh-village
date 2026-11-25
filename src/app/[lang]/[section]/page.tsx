@@ -11,6 +11,8 @@ import { PostForm } from "@/components/post-form";
 import { SocialForSection } from "@/components/social-embeds";
 import { YoutubeForSection } from "@/components/youtube-list";
 import { Arrow } from "@/components/icons";
+import { illustrationFor } from "@/lib/illustrations";
+import { photos } from "@/lib/photos";
 import { hasLocale, locales } from "@/lib/i18n";
 import { sectionBySlug, sections } from "@/lib/site";
 
@@ -28,7 +30,10 @@ async function Content({ params }: { params: PageProps<"/[lang]/[section]">["par
   const next = index >= 0 && index < sections.length - 1 ? sections[index + 1] : undefined;
   const anchors = cardAnchors(s.blocks);
   const hasToc = anchors.length >= 4;
-  const photo = bannerPhoto(s.slug);
+  // A real photo of the section wins; else its illustration (labelled); else the region fallback photo.
+  const hasOwnPhoto = photos.some((p) => p.section === s.slug);
+  const illustration = hasOwnPhoto ? undefined : illustrationFor(s.slug);
+  const photo = illustration ? undefined : bannerPhoto(s.slug);
   // The banner uses the section's own first photo; PhotoStrip then skips it so it is not shown twice.
   const bannerIsSectionPhoto = !!photo && photo.section === s.slug;
   return (
@@ -38,6 +43,7 @@ async function Content({ params }: { params: PageProps<"/[lang]/[section]">["par
         title={s.title[lang]}
         intro={s.intro[lang]}
         photo={photo}
+        illustration={illustration}
         crumbs={[{ label: lang === "fa" ? "خانه" : "Home", href: `/${lang}` }, { label: s.title[lang] }]}
       />
       <PhotoStrip section={s.slug} lang={lang} skipFirst={bannerIsSectionPhoto} />
@@ -56,7 +62,7 @@ async function Content({ params }: { params: PageProps<"/[lang]/[section]">["par
             {s.slug === "market" && (
               <p>
                 <Link className="link-arrow" href={`/${lang}/manage`}>
-                  {lang === "fa" ? "مدیریت آگهی با کد" : "Manage a listing with your code"} <Arrow />
+                  {lang === "fa" ? "مدیریت آگهی" : "Manage your listing"} <Arrow />
                 </Link>
               </p>
             )}

@@ -23,8 +23,8 @@ export default async function MapPage({ params }: PageProps<"/[lang]/map">) {
         file="karkas-mountain.jpg"
         title={fa ? "نقشه" : "Map"}
         intro={fa
-          ? "جای روستا، شرح راه، دو سو از اصفهان و از تهران، و توضیح هر خدمت با یک کلیک."
-          : "Where the village is, the road written out, the two approaches from Isfahan and from Tehran, and a note on each service when you open it."}
+          ? "جای روستا، راه رسیدن و خدمات."
+          : "Where the village is, how to get there, and services."}
       />
       <div className="wrap ms-body">
         <VillageMap lang={lang} />
@@ -69,8 +69,8 @@ export default async function MapPage({ params }: PageProps<"/[lang]/map">) {
             <h2 id="services">{servicesLabel}</h2>
             <p>
               {fa
-                ? "هر خدمت را باز کنید تا همین‌جا شرحش را ببینید. نشان جداگانه‌ای روی نقشه ندارند، چون نشانی دقیق‌شان در منابع نیامده است."
-                : "Open any service to read what we know, here on this page. They have no separate pin, because the sources do not give an exact address."}
+                ? "نشانی دقیق خدمات در منابع نیامده؛ نشانی روی نقشه ندارند."
+                : "Sources give no exact addresses, so no map pins."}
             </p>
           </div>
           <div className="ms-list">

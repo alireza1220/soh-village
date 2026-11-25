@@ -12,9 +12,9 @@ const T = {
   need: { fa: "برای دیدن آگهی‌هایتان وارد شوید.", en: "Log in to see your listings." },
   login: { fa: "رفتن به صفحه‌ی ورود", en: "Go to login" },
   loading: { fa: "در حال بارگذاری...", en: "Loading..." },
-  empty: { fa: "هنوز آگهی‌ای با این حساب ندارید.", en: "You have no listings on this account yet." },
+  empty: { fa: "هنوز آگهی‌ای ندارید.", en: "No listings yet." },
   out: { fa: "خروج", en: "Sign out" },
-  deleted: { fa: "آگهی حذف شد.", en: "The listing was deleted." },
+  deleted: { fa: "آگهی حذف شد.", en: "Listing deleted." },
   retry: { fa: "تلاش دوباره", en: "Try again" },
 };
 

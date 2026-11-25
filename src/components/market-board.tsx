@@ -7,14 +7,14 @@ import { useLiveListings } from "@/lib/use-live-listings";
 
 const T = {
   all: { fa: "همه", en: "All" },
-  empty: { fa: "هنوز آگهی‌ای منتشر نشده است. اولین نفر باشید: فرم پایین را پر کنید.", en: "No listings published yet. Be the first: fill in the form below." },
-  noMatch: { fa: "آگهی‌ای با این فیلتر نیست.", en: "No listings match this filter." },
+  empty: { fa: "هنوز آگهی‌ای نیست. اولین نفر باشید.", en: "No listings yet. Be the first." },
+  noMatch: { fa: "آگهی‌ای پیدا نشد.", en: "No matching listings." },
   price: { fa: "قیمت", en: "Price" },
   qty: { fa: "مقدار", en: "Amount" },
   area: { fa: "منطقه", en: "Area" },
   avail: { fa: "زمان", en: "When" },
   contact: { fa: "تماس", en: "Contact" },
-  noContact: { fa: "راه تماس نوشته نشده؛ از طریق صفحه‌ی مشارکت بپرسید.", en: "No contact shown; ask through the Contribute page." },
+  noContact: { fa: "راه تماس نیست؛ از صفحه‌ی مشارکت بپرسید.", en: "No contact shown; ask via Contribute." },
   until: { fa: "تا", en: "Until" },
   showing: { fa: "نمایش", en: "Showing" },
   of: { fa: "از", en: "of" },

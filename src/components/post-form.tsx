@@ -61,14 +61,14 @@ const T = {
   area: { fa: "منطقه (سُه، میمه، اصفهان، از راه دور ...)", en: "Area (Soh, Meymeh, Isfahan, remote ...)" },
   name: { fa: "نام (اختیاری)", en: "Name (optional)" },
   contact: { fa: "راه تماس (اختیاری)", en: "How to reach you (optional)" },
-  consent: { fa: "اجازه می‌دهم راه تماسم در سایت نوشته شود", en: "I allow my contact to be shown on the site" },
-  consentNo: { fa: "راه تماس نوشته نمی‌شود؛ کسی که پاسخ می‌دهد از ما می‌خواهد شما را خبر کنیم.", en: "Your contact will not be shown; people who reply ask us to pass the message on." },
+  consent: { fa: "نمایش راه تماسم در سایت", en: "Show my contact on the site" },
+  consentNo: { fa: "راه تماس نمایش داده نمی‌شود؛ ما پیام را به شما می‌رسانیم.", en: "Your contact stays hidden; we pass messages on." },
   result: { fa: "متن آماده برای ارسال", en: "Your message, ready to send" },
   copy: { fa: "کپی متن", en: "Copy text" },
   copied: { fa: "کپی شد", en: "Copied" },
-  failed: { fa: "کپی نشد؛ متن را انتخاب و کپی کنید.", en: "Copy failed; select the text and copy it." },
-  intro: { fa: "این سایت هنوز جایی برای ذخیره‌ی آگهی ندارد. فرم را پر کنید، متن را کپی کنید و از راهی که در صفحه‌ی مشارکت آمده بفرستید.", en: "The site has no place to store posts yet. Fill in the form, copy the text and send it by the way shown on the Contribute page." },
-  required: { fa: "عنوان را بنویسید تا متن ساخته شود.", en: "Write a title and the message will appear." },
+  failed: { fa: "کپی نشد؛ متن را دستی کپی کنید.", en: "Copy failed; copy it by hand." },
+  intro: { fa: "فرم را پر کنید، متن را کپی کنید و از صفحه‌ی مشارکت بفرستید.", en: "Fill in the form, copy the text and send it via Contribute." },
+  required: { fa: "عنوان را بنویسید.", en: "Write a title first." },
 };
 
 function F({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {

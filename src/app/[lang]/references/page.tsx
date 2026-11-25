@@ -20,11 +20,11 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/references
 }
 
 const steps = [
-  { fa: "از صفحه‌ی اول، «کجاست» یا «چطور بروید» را باز کنید. راه رسیدن در بخش گردشگری است و نقشه صفحه‌ی خودش را دارد.", en: "From the home page, open “Where” or “How to get there”. The road is in Tourism, and the map has its own page." },
-  { fa: "هر مطلب یک منبع دارد. برچسب «گزارش‌شده» یعنی دست‌کم یک منبع آن را نوشته، «تأییدنشده» یعنی منبع کم است یا منبع‌ها با هم نمی‌خوانند، و «از خانواده» یعنی از خانواده‌ی گرداننده‌ی سایت شنیده شده.", en: "Every fact has a source. “Reported” means at least one source says it, “unverified” means the source is thin or the sources disagree, and “from family” means the family running the site said it." },
-  { fa: "عکس‌هایی که برچسب «عکس منطقه، نه سُه» دارند از خود روستا نیستند.", en: "Photos labelled “Region photo, not Soh” are not pictures of the village." },
-  { fa: "آگهی بازارچه، نیازمندی و کار را می‌توانید بدون حساب بفرستید. اگر ورود فعال باشد، اختیاری است و فقط آگهی‌های خودتان را یک‌جا نشان می‌دهد. خروج در صفحه‌ی آگهی‌های من و صفحه‌ی ورود است.", en: "You can send a market, request or job post without an account. If login is switched on, it is optional and only gathers your own listings. Sign out is on My listings and on the login page." },
-  { fa: "چیزی برای اضافه کردن دارید؟ از مشارکت بفرستید. پیش از انتشار بررسی می‌شود.", en: "Have something to add? Send it from Contribute. It is checked before it is published." },
+  { fa: "راه رسیدن در بخش گردشگری است؛ نقشه صفحه‌ی خودش را دارد.", en: "The road is in Tourism; the map has its own page." },
+  { fa: "هر مطلب منبع دارد. «گزارش‌شده»: دست‌کم یک منبع. «تأییدنشده»: منبع کم یا ناهمخوان. «از خانواده»: از خانواده‌ی گرداننده‌ی سایت.", en: "Every fact has a source. “Reported”: at least one. “Unverified”: thin or conflicting sources. “From family”: told by the site owner's family." },
+  { fa: "«عکس منطقه، نه سُه» یعنی عکس از خود روستا نیست.", en: "“Region photo, not Soh” means not the village itself." },
+  { fa: "آگهی را بدون حساب بفرستید. ورود، اگر فعال باشد، اختیاری است و فقط آگهی‌های خودتان را نشان می‌دهد.", en: "Post without an account. Login, if on, is optional and only shows your own listings." },
+  { fa: "چیزی دارید؟ از مشارکت بفرستید؛ پیش از انتشار بررسی می‌شود.", en: "Something to add? Send it via Contribute; it is checked first." },
 ];
 
 export default async function ReferencesPage({ params }: PageProps<"/[lang]/references">) {
@@ -48,7 +48,7 @@ export default async function ReferencesPage({ params }: PageProps<"/[lang]/refe
         lang={lang}
         file="opening.jpg"
         title={fa ? "راهنما و منابع" : "Guide and sources"}
-        intro={fa ? "بالا، روش خواندن این سایت است. پایین، همه‌ی پیوندهایی است که هنگام تحقیق پیدا شده، از جمله صفحه‌هایی که درباره‌ی سُه نیستند یا دیگر باز نمی‌شوند." : "The top is how to read this site. Below is every link found while researching, including pages that are not about Soh or that no longer open."}
+        intro={fa ? "روش خواندن سایت، و همه‌ی پیوندهای تحقیق." : "How to read this site, and every research link."}
       />
       <div className="wrap ms-body">
         <section className="ms-block" aria-labelledby="how">
@@ -63,22 +63,22 @@ export default async function ReferencesPage({ params }: PageProps<"/[lang]/refe
         {sec(
           "youtube", fa ? "ویدیو" : "Video", fa ? "یوتیوب" : "YouTube",
           fa
-            ? `جستجو در ${youtubeSearched.fa} برای «روستای سُه»، «گویش سُهی» و «نخل سُه». فقط فیلم‌هایی این‌جا آمده که عنوان یا کانالشان همین سُهِ میمه است. کانال SohiranTube همان نام صفحه‌ی فیسبوک روستاست. فیلم‌ها کامل دیده نشده‌اند، پس شرح هر کدام از روی عنوان است. ویدیوهای ابیانه، میمه، مورچه‌خورت و روستاهای دیگر را نیاورده‌ایم.`
-            : `Searched on ${youtubeSearched.en} for “Soh village”, “Sohi dialect” and “Soh nakhl”. Only films whose title or channel is this Soh, near Meymeh, are here. SohiranTube uses the same name as the village Facebook page. The films have not been watched through, so each note follows the title. Videos of Abyaneh, Meymeh, Murcheh Khvort and other villages are left out.`,
+            ? `جستجو در ${youtubeSearched.fa}. فقط فیلم‌های همین سُهِ میمه. SohiranTube همنام صفحه‌ی فیسبوک روستاست. شرح‌ها از روی عنوان است.`
+            : `Searched ${youtubeSearched.en}. Only this Soh, near Meymeh. SohiranTube shares the village Facebook page's name. Notes follow titles.`,
           <YoutubeList videos={youtubeVideos} lang={lang} />,
         )}
         {sec(
           "facebook", fa ? "شبکه‌های اجتماعی" : "Social", fa ? "فیسبوک" : "Facebook",
           fa
-            ? "صفحه‌ی «روستای تاریخی سُه» و ویدیوهایی که عنوان دارند. ویدیوهای بدون عنوان را نیاورده‌ایم. شرح‌ها از روی عنوان صفحه است."
-            : "The “historic village of Soh” page, and the videos that have a title. Videos with no title are left out. The notes follow the page title.",
+            ? "صفحه‌ی «روستای تاریخی سُه» و ویدیوهای عنوان‌دار. شرح‌ها از روی عنوان است."
+            : "The “historic village of Soh” page and its titled videos. Notes follow titles.",
           <SocialList posts={socialPosts.filter((p) => p.platform === "facebook")} lang={lang} />,
         )}
         {sec(
           "instagram", fa ? "شبکه‌های اجتماعی" : "Social", fa ? "اینستاگرام" : "Instagram",
           fa
-            ? "پست‌ها و ریل‌های \u2066@soh_village\u2069 که عنوانشان همین روستاست. اگر خود عنوان بگوید تصویر بازسازی یا ساخته‌ی هوش مصنوعی است، همان را نوشته‌ایم و آن را عکس تاریخی حساب نکرده‌ایم."
-            : "Posts and reels from @soh_village whose caption is about this village. Where the caption itself says the picture is a reconstruction or made with AI, that is stated, and it is not treated as a historical photograph.",
+            ? "پست‌ها و ریل‌های \u2066@soh_village\u2069 درباره‌ی همین روستا. تصویر بازسازی‌شده یا ساخته‌ی هوش مصنوعی عکس تاریخی حساب نشده."
+            : "Posts and reels from @soh_village about this village. Reconstructed or AI images are not treated as historical photos.",
           <SocialList posts={socialPosts.filter((p) => p.platform === "instagram")} lang={lang} />,
         )}
         <section className="ms-block" aria-labelledby="links-all">

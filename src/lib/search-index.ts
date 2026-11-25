@@ -143,16 +143,16 @@ const guidePages: { path: string; title: L; text: L }[] = [
     path: "references",
     title: { fa: "راهنما و منابع", en: "Guide and sources" },
     text: {
-      fa: "چطور از سایت استفاده کنید، برچسب‌های گزارش‌شده و تأییدنشده، یوتیوب، فیسبوک و همه‌ی پیوندهای پیدا‌شده هنگام تحقیق.",
-      en: "How to read this site, the reported and unverified labels, YouTube, Facebook and every link found while researching.",
+      fa: "راهنمای سایت، برچسب‌های گزارش‌شده و تأییدنشده، و پیوندهای تحقیق.",
+      en: "How to read this site, the labels, and research links.",
     },
   },
   {
     path: "credits",
-    title: { fa: "منبع عکس‌ها و مجوزها", en: "Photo credits and licences" },
+    title: { fa: "منبع عکس‌ها", en: "Photo credits" },
     text: {
-      fa: "نام عکاس، مجوز و پیوند منبع هر عکس. عکس‌های منطقه با برچسب «عکس منطقه، نه سُه» آمده‌اند.",
-      en: "Photographer, licence and source link for every photo. Region photos carry the label “Region photo, not Soh”.",
+      fa: "عکاس، مجوز و منبع هر عکس. عکس‌های منطقه برچسب «عکس منطقه، نه سُه» دارند.",
+      en: "Photographer, licence and source of each photo. Region photos say “Region photo, not Soh”.",
     },
   },
   {
@@ -162,10 +162,10 @@ const guidePages: { path: string; title: L; text: L }[] = [
   },
   {
     path: "manage",
-    title: { fa: "مدیریت آگهی با کد", en: "Manage a listing with your code" },
+    title: { fa: "مدیریت آگهی", en: "Manage a listing" },
     text: {
-      fa: "آگهی بازارچه‌ی خود را با کد مدیریت ویرایش یا حذف کنید.",
-      en: "Edit or remove your market listing with the manage code you were given.",
+      fa: "آگهی خود را با کد ویرایش یا حذف کنید.",
+      en: "Edit or remove your listing with your code.",
     },
   },
 ];

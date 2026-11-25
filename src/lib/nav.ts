@@ -12,9 +12,9 @@ const routeLabels: Record<string, L> = {
   photos: { fa: "عکس‌ها", en: "Photos" },
   map: { fa: "نقشه", en: "Map" },
   references: { fa: "راهنما و منابع", en: "Guide and sources" },
-  credits: { fa: "منبع عکس‌ها و مجوزها", en: "Photo credits and licences" },
+  credits: { fa: "منبع عکس‌ها", en: "Photo credits" },
   contribute: { fa: "مشارکت", en: "Contribute" },
-  manage: { fa: "مدیریت آگهی با کد", en: "Manage a listing" },
+  manage: { fa: "مدیریت آگهی", en: "Manage a listing" },
   login: { fa: "ورود", en: "Log in" },
 };
 
@@ -22,25 +22,25 @@ export const navGroups: NavGroupDef[] = [
   {
     id: "explore",
     label: { fa: "کاوش", en: "Explore" },
-    description: { fa: "تاریخ، مردم، آیین‌ها و عکس‌های سُه و اطراف آن.", en: "History, people, traditions and photos of Soh and its surroundings." },
+    description: { fa: "تاریخ، مردم، آیین‌ها و عکس‌ها.", en: "History, people, traditions, photos." },
     items: [{ slug: "history" }, { slug: "tourism" }, { slug: "people" }, { slug: "traditions" }, { slug: "photos" }, { slug: "map" }],
   },
   {
     id: "plan",
     label: { fa: "سفر به سُه", en: "Plan your visit" },
-    description: { fa: "آنچه پیش از سفر باید بدانید: دیدنی‌ها، اقامت، خرید، بانک و نقشه.", en: "What to know before you travel: sights, places to stay, shopping, banks and the map." },
+    description: { fa: "دیدنی‌ها، اقامت، خرید و بانک.", en: "Sights, stays, shopping, banks." },
     items: [{ slug: "tourism" }, { slug: "stay" }, { slug: "shop" }, { slug: "stores" }, { slug: "hospital" }, { slug: "banks" }, { slug: "map" }],
   },
   {
     id: "market",
     label: { fa: "بازارچه", en: "Market" },
-    description: { fa: "خرید و فروش، نیازمندی‌ها و فرصت‌های شغلی روستا. در سایت پرداختی انجام نمی‌شود.", en: "Village buying and selling, wanted ads and jobs. No payments happen on the site." },
+    description: { fa: "خرید و فروش، نیازمندی و کار. بدون پرداخت.", en: "Buy, sell, wanted, jobs. No payments." },
     items: [{ slug: "market" }, { slug: "needs" }, { slug: "careers" }, { slug: "property" }, { slug: "manage" }],
   },
   {
     id: "guide",
     label: { fa: "راهنما", en: "Guide" },
-    description: { fa: "واژه‌های گویش، منابع، منبع عکس‌ها و راه‌های مشارکت.", en: "Dialect words, sources, photo credits and how to contribute." },
+    description: { fa: "گویش، منابع و مشارکت.", en: "Dialect, sources, contributing." },
     items: [{ slug: "words" }, { slug: "resources" }, { slug: "references" }, { slug: "credits" }, { slug: "contribute" }],
   },
 ];
@@ -73,8 +73,8 @@ export const ui = {
   closeMenu: { fa: "بستن منو", en: "Close menu" },
   contribute: { fa: "مشارکت", en: "Contribute" },
   logo: { fa: "روستای سُه، صفحه‌ی اصلی", en: "Soh village, home page" },
-  footerAbout: { fa: "سایت جامعه‌ی روستای سُه در استان اصفهان، به دو زبان فارسی و انگلیسی.", en: "A bilingual community site for the village of Soh in Isfahan province." },
-  draft: { fa: "پیش‌نویس ساخته‌شده از منابع عمومی اینترنت. برچسب‌ها نشان می‌دهند هر مطلب چقدر پشتوانه دارد.", en: "A draft built from public web sources. Labels show how well each fact is backed." },
-  credits: { fa: "منبع عکس‌ها و مجوزها", en: "Photo credits and licences" },
-  manage: { fa: "مدیریت آگهی با کد", en: "Manage a listing with your code" },
+  footerAbout: { fa: "سایت جامعه‌ی روستای سُه، اصفهان.", en: "Community site for Soh village, Isfahan." },
+  draft: { fa: "پیش‌نویس از منابع عمومی؛ برچسب‌ها اعتبار هر مطلب را نشان می‌دهند.", en: "Draft from public sources; labels show how well each fact is backed." },
+  credits: { fa: "منبع عکس‌ها", en: "Photo credits" },
+  manage: { fa: "مدیریت آگهی", en: "Manage a listing" },
 } satisfies Record<string, L>;

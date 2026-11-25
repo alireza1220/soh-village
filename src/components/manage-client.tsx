@@ -6,11 +6,11 @@ import { ListingManager, type RunAction } from "@/components/listing-manager";
 import { errorText, postJson, type ManagedListing } from "@/components/listing-api";
 
 const T = {
-  intro: { fa: "کدی که هنگام ثبت آگهی گرفتید را وارد کنید (با خط تیره یا بدون آن). با آن می‌توانید آگهی را ویرایش، تمدید یا حذف کنید.", en: "Enter the code you received when you posted (with or without dashes). With it you can edit, renew or delete your listing." },
+  intro: { fa: "برای ویرایش، تمدید یا حذف آگهی، کد مدیریت را وارد کنید.", en: "Enter your manage code to edit, renew or delete a listing." },
   code: { fa: "کد مدیریت", en: "Manage code" },
   open: { fa: "نمایش آگهی", en: "Show listing" },
   opening: { fa: "در حال بررسی...", en: "Checking..." },
-  deleted: { fa: "آگهی حذف شد.", en: "The listing was deleted." },
+  deleted: { fa: "آگهی حذف شد.", en: "Listing deleted." },
   other: { fa: "کد دیگری وارد کنید", en: "Use another code" },
 };
 

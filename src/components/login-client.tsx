@@ -10,12 +10,12 @@ import { errorText } from "@/components/listing-api";
 
 const T = {
   title: { fa: "ورود", en: "Log in" },
-  optional: { fa: "ورود اختیاری است. بدون حساب هم می‌توانید آگهی بگذارید و با کد مدیریت آن را ویرایش کنید. با ورود، آگهی‌هایتان یک‌جا جمع می‌شود.", en: "Logging in is optional. You can post without an account and manage a listing with its code. Logging in keeps all your listings in one place." },
+  optional: { fa: "ورود اختیاری است. با ورود، آگهی‌هایتان یک‌جا جمع می‌شود.", en: "Logging in is optional. It keeps your listings in one place." },
   na: { fa: "ورود هنوز فعال نشده است.", en: "Login is not available yet." },
   email: { fa: "ایمیل", en: "Email" },
   send: { fa: "ارسال لینک ورود", en: "Send login link" },
   sending: { fa: "در حال ارسال...", en: "Sending..." },
-  sent: { fa: "لینک ورود به ایمیل شما فرستاده شد. ایمیل را باز کنید و روی لینک بزنید.", en: "A login link was sent to your email. Open it and tap the link." },
+  sent: { fa: "لینک ورود به ایمیل شما فرستاده شد.", en: "Login link sent. Check your email." },
   as: { fa: "وارد شده‌اید با", en: "Logged in as" },
   my: { fa: "آگهی‌های من", en: "My listings" },
   out: { fa: "خروج", en: "Sign out" },

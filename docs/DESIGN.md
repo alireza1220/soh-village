@@ -60,3 +60,6 @@ Legacy (restyled, still valid): `card item btn btn-primary btn-ghost chip tag li
 - Carousels: pause control, pause on keyboard focus, no autoplay under `prefers-reduced-motion`. Global reduced-motion rule disables transitions.
 - Every image has alt text from the data; region photos always show the "Region photo, not Soh" label via `Credit`.
 - Forms keep visible labels and `aria-live` status messages. `html lang` follows the route.
+
+## Illustrations (AI-made, not photos)
+`src/lib/illustrations.ts` holds 14 generated illustrations (`public/illustrations/<slug>.jpg`, 1536x1024, alt text fa/en); `illustrationFor(slug)` maps a section slug, plus the separate key `tasua`. They are not photographs and not real places or people. Labelling rule: every place that shows one carries `<IllustrationLabel lang />` (EN "Illustration, not a photo", FA «تصویرسازی، نه عکس»): `overlay` as a badge on the image corner (`small` for the 96px thumbnails), or inline in `.page-banner__credit` on banners. A real photo of a section always wins; the illustration is the fallback (see `[section]/page.tsx`). Never use one without the label.
