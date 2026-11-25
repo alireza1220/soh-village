@@ -13,8 +13,8 @@ export type Row = Record<string, unknown>;
 export const json = (body: object, status = 200) => Response.json(body, { status });
 const storeFailed = () => json({ error: "store_failed" }, 502);
 
-// Diagnostic 502: says which step failed and what Supabase answered (HTTP status plus its error code and message,
-// which never contain keys). Also written to the Vercel runtime log. Remove once the live setup is confirmed.
+// 502 for a failed Supabase call. The reason (step, HTTP status, Supabase's error code and message; never keys) goes to the
+// Vercel runtime log only, so the public response stays a plain store_failed.
 export async function failure(stage: string, res?: Response, err?: unknown): Promise<Response> {
   let detail = "";
   try {
@@ -32,7 +32,7 @@ export async function failure(stage: string, res?: Response, err?: unknown): Pro
   } catch {}
   const upstream = res?.status;
   console.error("store_failed", { stage, upstream, detail });
-  return json({ error: "store_failed", stage, upstream, detail }, 502);
+  return json({ error: "store_failed" }, 502);
 }
 
 export const MANAGE_PER_HOUR = 20;
